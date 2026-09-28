@@ -1,0 +1,561 @@
+<title>Mind Aim Fire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Share+Tech+Mono&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0a13;
+    --bg-alt:#15121f;
+    --bg-alt2:#1b1729;
+    --ink:#f4f0fb;
+    --muted:#a79fc0;
+    --muted-2:#726a8c;
+    --gold:#ffc845;
+    --cyan:#2af1df;
+    --red:#ff4b3e;
+    --line:rgba(244,240,251,0.14);
+    --line-strong:rgba(244,240,251,0.28);
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans', -apple-system, 'Segoe UI', sans-serif;
+    line-height:1.55;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  .noise{
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      repeating-linear-gradient(180deg, rgba(244,240,251,0.025) 0px, rgba(244,240,251,0.025) 1px, transparent 1px, transparent 3px);
+    mix-blend-mode:overlay;
+  }
+  .glow{
+    position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0; opacity:0.35;
+  }
+  .glow--gold{ width:38vmax; height:38vmax; background:var(--gold); top:-14vmax; left:-10vmax; animation:drift1 26s ease-in-out infinite; }
+  .glow--cyan{ width:34vmax; height:34vmax; background:var(--cyan); top:40vh; right:-14vmax; animation:drift2 30s ease-in-out infinite; }
+  .glow--red{ width:34vmax; height:34vmax; background:var(--red); bottom:-16vmax; left:10vw; animation:drift3 24s ease-in-out infinite; }
+  @keyframes drift1{ 0%,100%{transform:translate(0,0);} 50%{transform:translate(4vmax,3vmax);} }
+  @keyframes drift2{ 0%,100%{transform:translate(0,0);} 50%{transform:translate(-3vmax,4vmax);} }
+  @keyframes drift3{ 0%,100%{transform:translate(0,0);} 50%{transform:translate(3vmax,-3vmax);} }
+  @media (prefers-reduced-motion: reduce){
+    .glow--gold,.glow--cyan,.glow--red{ animation:none; }
+  }
+
+  .wrap{ position:relative; z-index:1; max-width:760px; margin:0 auto; padding-inline:20px; }
+
+  .eyebrow-row{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding-top:40px;
+  }
+  .chip{
+    font:600 11px/1 'Work Sans',sans-serif; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--muted); border:1px solid var(--line-strong); border-radius:999px; padding:7px 14px;
+  }
+
+  .hero{ text-align:center; padding-block:28px 10px; }
+  .hero h1{
+    font-family:'Bebas Neue', 'Work Sans', sans-serif;
+    font-size:clamp(2.6rem, 11vw, 5.4rem);
+    line-height:.98;
+    letter-spacing:.02em;
+    margin:0;
+    text-wrap:balance;
+  }
+  .hero h1 span{ display:inline-block; opacity:0; animation:flicker-in .9s ease-out forwards; }
+  .hero h1 .w-mind{ color:var(--gold); text-shadow:0 0 18px rgba(255,200,69,.55), 0 0 40px rgba(255,200,69,.25); animation-delay:.05s; }
+  .hero h1 .w-aim{ color:var(--cyan); text-shadow:0 0 18px rgba(42,241,223,.55), 0 0 40px rgba(42,241,223,.25); animation-delay:.35s; }
+  .hero h1 .w-fire{ color:var(--red); text-shadow:0 0 18px rgba(255,75,62,.6), 0 0 40px rgba(255,75,62,.25); animation-delay:.65s; }
+  .hero h1 .dot{ color:var(--muted-2); opacity:1; animation:none; padding-inline:.08em; font-size:.6em; vertical-align:middle; }
+
+  @keyframes flicker-in{
+    0%{ opacity:0; }
+    6%{ opacity:1; }
+    9%{ opacity:.2; }
+    12%{ opacity:1; }
+    16%{ opacity:.3; }
+    20%{ opacity:1; }
+    100%{ opacity:1; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hero h1 span{ animation:none; opacity:1; }
+  }
+
+  .hero p.sub{
+    max-width:44ch; margin:18px auto 0; color:var(--muted);
+    font-size:1.02rem;
+  }
+
+  .time-row{
+    display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:26px;
+  }
+  .pill{
+    display:flex; align-items:center; gap:8px;
+    font:600 13px/1 'Share Tech Mono', monospace; letter-spacing:.04em;
+    background:var(--bg-alt); border:1px solid var(--line-strong); border-radius:10px;
+    padding:11px 16px; color:var(--ink);
+  }
+  .pill b{ font-weight:400; color:var(--muted); font-family:'Work Sans',sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:.1em; }
+  .pill.tbd{ border-style:dashed; color:var(--muted); }
+
+  .countdown{ display:flex; align-items:flex-start; justify-content:center; gap:10px; margin-top:24px; flex-wrap:wrap; }
+  .countdown.is-live .cd-num{ color:var(--red); text-shadow:0 0 14px rgba(255,75,62,.5); }
+  .cd-block{ display:flex; flex-direction:column; align-items:center; min-width:54px; }
+  .cd-num{
+    font-family:'Share Tech Mono',monospace; font-size:clamp(1.5rem,6vw,2.3rem); color:var(--ink);
+    text-shadow:0 0 14px rgba(244,240,251,.25); font-variant-numeric:tabular-nums; line-height:1;
+  }
+  .cd-label{ font:700 10px/1 'Work Sans',sans-serif; letter-spacing:.14em; text-transform:uppercase; color:var(--muted-2); margin-top:6px; }
+  .cd-sep{ font-family:'Share Tech Mono',monospace; font-size:clamp(1.3rem,5vw,2rem); color:var(--muted-2); margin-top:1px; }
+
+  section{ position:relative; z-index:1; padding-block:56px; }
+  .section-head{ text-align:center; margin-bottom:30px; }
+  .section-head .kicker{
+    display:block; font:700 12px/1 'Work Sans',sans-serif; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--muted-2); margin-bottom:10px;
+  }
+  .section-head h2{
+    font-family:'Bebas Neue',sans-serif; font-size:clamp(1.8rem,6vw,2.6rem); margin:0; letter-spacing:.02em;
+  }
+  .section-head p{ color:var(--muted); max-width:52ch; margin:12px auto 0; font-size:.98rem; }
+  .section-head .circuit-disclaimer{
+    max-width:62ch; margin-top:9px; color:var(--muted-2);
+    font-size:.72rem; letter-spacing:.045em; line-height:1.45;
+  }
+
+  .intro{ text-align:center; }
+  .intro p{ max-width:56ch; margin:0 auto; font-size:1.08rem; color:var(--ink); }
+  .intro p strong{ color:var(--gold); font-weight:600; }
+
+  /* Scoreboard */
+  .board{
+    background:linear-gradient(180deg,var(--bg-alt),var(--bg-alt2));
+    border:1px solid var(--line-strong); border-radius:18px; padding:22px;
+    box-shadow:0 30px 60px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.03);
+  }
+  .board-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .live-dot{ display:inline-flex; align-items:center; gap:7px; font:700 11px/1 'Work Sans',sans-serif; letter-spacing:.14em; text-transform:uppercase; color:var(--red); }
+  .live-dot::before{ content:""; width:8px; height:8px; border-radius:50%; background:var(--red); box-shadow:0 0 10px var(--red); animation:pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+  .board-lock{ font:600 11px/1 'Work Sans',sans-serif; letter-spacing:.08em; color:var(--muted); text-transform:uppercase; }
+
+  .board-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+  .team{
+    background:rgba(0,0,0,.25); border:1px solid var(--line); border-radius:12px; padding:14px 8px; text-align:center;
+  }
+  .team .team-name{ font:600 11px/1 'Work Sans',sans-serif; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+  .team .team-score{
+    font-family:'Share Tech Mono',monospace; font-size:clamp(1.3rem,5vw,1.8rem); margin-top:8px; color:var(--ink);
+    text-shadow:0 0 10px rgba(244,240,251,.25);
+  }
+  .board-note{ text-align:center; color:var(--muted-2); font-size:.85rem; margin-top:16px; }
+
+  /* Circuit / map */
+  .circuit{ position:relative; padding-left:34px; }
+  .circuit::before{
+    content:""; position:absolute; left:11px; top:6px; bottom:6px; width:2px;
+    background:linear-gradient(180deg, var(--gold), var(--muted), var(--cyan), var(--red));
+    opacity:.5;
+  }
+  .stop{ position:relative; padding-bottom:34px; }
+  .stop:last-child{ padding-bottom:0; }
+  .stop-badge{
+    position:absolute; left:-34px; top:0; width:24px; height:24px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font:400 11px/1 'Share Tech Mono',monospace; border:2px solid var(--bg);
+    box-shadow:0 0 0 2px var(--stop-color, var(--muted)), 0 0 14px var(--stop-color, transparent);
+    background:var(--bg-alt); color:var(--stop-color, var(--ink));
+  }
+  .stop-card{
+    background:var(--bg-alt); border:1px solid var(--line); border-radius:14px; padding:16px 18px; overflow:hidden;
+  }
+  .stop-photo{
+    display:block; width:calc(100% + 36px); margin:-16px -18px 14px; max-width:none;
+    aspect-ratio:2/1; object-fit:cover; filter:saturate(1.05) contrast(1.03);
+  }
+  .stop-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .stop-area{
+    font:700 10px/1 'Work Sans',sans-serif; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--stop-color); border:1px solid currentColor; border-radius:999px; padding:4px 9px;
+  }
+  .stop-time{ font:400 13px/1 'Share Tech Mono',monospace; color:var(--muted); }
+  .stop-title{ font-family:'Bebas Neue',sans-serif; font-size:1.5rem; letter-spacing:.01em; margin:10px 0 2px; color:var(--ink); }
+  .stop-venue{ font-size:.9rem; color:var(--muted); }
+  .stop-location{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
+    margin-top:10px; padding-top:10px; border-top:1px solid var(--line);
+  }
+  .stop-address{ color:var(--muted-2); font-size:.82rem; line-height:1.45; }
+  .map-link{
+    flex:0 0 auto; display:inline-flex; align-items:center; gap:6px;
+    color:var(--stop-color); border:1px solid currentColor; border-radius:8px;
+    padding:7px 10px; font:700 10px/1 'Work Sans',sans-serif;
+    letter-spacing:.09em; text-transform:uppercase; text-decoration:none;
+    transition:background-color .18s ease, color .18s ease, transform .18s ease;
+  }
+  .map-link:hover,.map-link:focus-visible{ background:var(--stop-color); color:var(--bg); transform:translateY(-1px); outline:none; }
+  .map-link svg{ width:13px; height:13px; }
+  .stop-teaser{ font-size:.92rem; color:var(--muted); margin-top:8px; border-top:1px dashed var(--line); padding-top:8px; }
+  @media (max-width:480px){
+    .stop-location{ flex-direction:column; }
+  }
+
+  /* Rundown table */
+  .rundown{ display:flex; flex-direction:column; gap:10px; }
+  .run-row{
+    display:grid; grid-template-columns:96px 1fr; gap:16px; align-items:start;
+    background:var(--bg-alt); border:1px solid var(--line); border-radius:12px; padding:14px 16px;
+    border-left:3px solid var(--row-color, var(--muted));
+  }
+  .run-time{ font-family:'Share Tech Mono',monospace; color:var(--ink); font-size:.92rem; line-height:1.3; white-space:nowrap; }
+  .run-body .run-label{ font:700 11px/1 'Work Sans',sans-serif; letter-spacing:.12em; text-transform:uppercase; color:var(--row-color); margin-bottom:4px; }
+  .run-body .run-name{ font-weight:600; color:var(--ink); }
+  .run-body .run-desc{ color:var(--muted); font-size:.9rem; margin-top:3px; }
+  @media (max-width:480px){
+    .run-row{ grid-template-columns:1fr; }
+  }
+
+  /* Prize vault */
+  .vault-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  @media (min-width:560px){ .vault-grid{ grid-template-columns:repeat(4,1fr); } }
+  .vault-card{
+    background:radial-gradient(120% 120% at 50% 0%, rgba(255,255,255,.04), transparent 60%), var(--bg-alt);
+    border:1px solid var(--line-strong); border-radius:14px; padding:18px 10px; text-align:center;
+  }
+  .vault-lock{ color:var(--gold); margin-bottom:10px; }
+  .vault-label{ font:700 10px/1 'Work Sans',sans-serif; letter-spacing:.12em; text-transform:uppercase; color:var(--muted-2); }
+  .vault-mystery{ font-family:'Share Tech Mono',monospace; font-size:1.6rem; color:var(--muted); margin-top:8px; display:block; }
+  .vault-note{ text-align:center; color:var(--muted); max-width:52ch; margin:22px auto 0; font-size:.94rem; }
+  .vault-note b{ color:var(--ink); }
+
+  footer{ text-align:center; padding-block:50px 60px; position:relative; z-index:1; }
+  footer .fine{ color:var(--muted); max-width:48ch; margin:0 auto; font-size:.94rem; }
+  footer .wordmark{
+    margin-top:26px; font-family:'Bebas Neue',sans-serif; letter-spacing:.06em; color:var(--muted-2); font-size:.95rem;
+  }
+  footer .wordmark b{ color:var(--ink); }
+
+  .icon{ width:22px; height:22px; display:inline-block; vertical-align:middle; }
+</style>
+
+<div class="noise" aria-hidden="true"></div>
+<div class="glow glow--gold" aria-hidden="true"></div>
+<div class="glow glow--cyan" aria-hidden="true"></div>
+<div class="glow glow--red" aria-hidden="true"></div>
+
+<div class="wrap">
+
+  <div class="eyebrow-row">
+    <span class="chip">CX Offsite</span>
+    <span class="chip">Tokyo</span>
+    <span class="chip">One Day, One Champion</span>
+  </div>
+
+  <header class="hero">
+    <h1>
+      <span class="w-mind">MIND</span><span class="dot">·</span><span class="w-aim">AIM</span><span class="dot">·</span><span class="w-fire">FIRE</span>
+    </h1>
+    <p class="sub">A one-day team championship across Tokyo — three arenas, one live scoreboard, one champion team crowned at the final bell.</p>
+
+    <div class="countdown" id="countdown" aria-live="polite">
+      <div class="cd-block"><span class="cd-num" id="cd-d">00</span><span class="cd-label">Days</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-block"><span class="cd-num" id="cd-h">00</span><span class="cd-label">Hrs</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-block"><span class="cd-num" id="cd-m">00</span><span class="cd-label">Min</span></div>
+      <div class="cd-sep">:</div>
+      <div class="cd-block"><span class="cd-num" id="cd-s">00</span><span class="cd-label">Sec</span></div>
+    </div>
+
+    <div class="time-row">
+      <span class="pill"><b>Time</b> 09:00&ndash;19:00</span>
+      <span class="pill"><b>Date</b> Oct 1</span>
+      <span class="pill"><b>Where</b> Shibuya &rarr; Tsukiji</span>
+    </div>
+  </header>
+
+  <section class="intro">
+    <p>It starts in a conference room and ends at a dinner table you cooked yourselves. In between: a quiz round that rewards <strong>fast thinking</strong>, a bowling battle that rewards <strong>steady nerves</strong>, and a kitchen that only works if the whole team actually works together. Every round feeds the same scoreboard &mdash; and nobody sees the standings until the very last hour.</p>
+  </section>
+
+  <section aria-labelledby="board-head">
+    <div class="board">
+      <div class="board-top">
+        <span class="live-dot">Scoreboard live</span>
+        <span class="board-lock">Sealed until 19:00</span>
+      </div>
+      <div class="board-grid">
+        <div class="team"><div class="team-name">Team 01</div><div class="team-score" data-scramble>&mdash;&mdash;</div></div>
+        <div class="team"><div class="team-name">Team 02</div><div class="team-score" data-scramble>&mdash;&mdash;</div></div>
+        <div class="team"><div class="team-name">Team 03</div><div class="team-score" data-scramble>&mdash;&mdash;</div></div>
+        <div class="team"><div class="team-name">Team 04</div><div class="team-score" data-scramble>&mdash;&mdash;</div></div>
+      </div>
+      <p class="board-note">Rosters drop soon. Every workshop answer, every strike, every plated dish moves your number.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="circuit-head">
+    <div class="section-head" id="circuit-head">
+      <span class="kicker">The Route</span>
+      <h2>The Circuit</h2>
+      <p>One team, four stops, across town &mdash; from a Shibuya conference room to a Tsukiji kitchen.</p>
+      <p class="circuit-disclaimer">Disclaimer: Images are for reference only. Any resemblance is purely coincidental.</p>
+    </div>
+
+    <div class="circuit">
+      <div class="stop" style="--stop-color:var(--gold)">
+        <div class="stop-badge">01</div>
+        <div class="stop-card">
+          <img class="stop-photo" src="pictures/workshop-cyber-cel.png" alt="Cel-shaded cyberpunk workshop room at SLOTH JINNAN with tables facing a projection screen" loading="lazy">
+          <div class="stop-top">
+            <span class="stop-area">Shibuya</span>
+            <span class="stop-time">09:00</span>
+          </div>
+          <div class="stop-title">Strategy Workshop + Quiz</div>
+          <div class="stop-venue">SLOTH JINNAN &mdash; coworking salon</div>
+          <div class="stop-location">
+            <span class="stop-address">2F Wise Jinnan Bldg., 1-14-7 Jinnan,<br>Shibuya-ku, Tokyo 150-0041</span>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&amp;query=SLOTH%20JINNAN%2C%201-14-7%20Jinnan%2C%20Shibuya-ku%2C%20Tokyo" target="_blank" rel="noopener noreferrer" aria-label="Open SLOTH JINNAN in Google Maps">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s6-5.7 6-12A6 6 0 006 9c0 6.3 6 12 6 12z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9" r="2" fill="currentColor"/></svg>
+              Google Map
+            </a>
+          </div>
+          <div class="stop-teaser">Round one. The workshop doubles as the first scored round &mdash; every good idea could tip the board.</div>
+        </div>
+      </div>
+
+      <div class="stop" style="--stop-color:var(--muted)">
+        <div class="stop-badge">02</div>
+        <div class="stop-card">
+          <img class="stop-photo" src="pictures/tgi-fridays-uploaded-2x1.png" alt="Neon-lit dining area at TGI Fridays Shibuya Jinnan" loading="lazy">
+          <div class="stop-top">
+            <span class="stop-area">Shibuya</span>
+            <span class="stop-time">11:45</span>
+          </div>
+          <div class="stop-title">Refuel</div>
+          <div class="stop-venue">TGI Fridays Shibuya Jinnan</div>
+          <div class="stop-location">
+            <span class="stop-address">2F Haimanten Jinnan Bldg., 1-19-3 Jinnan,<br>Shibuya-ku, Tokyo 150-0041</span>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&amp;query=TGI%20Fridays%20Shibuya%20Jinnan%2C%201-19-3%20Jinnan%2C%20Shibuya-ku%2C%20Tokyo" target="_blank" rel="noopener noreferrer" aria-label="Open TGI Fridays Shibuya Jinnan in Google Maps">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s6-5.7 6-12A6 6 0 006 9c0 6.3 6 12 6 12z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9" r="2" fill="currentColor"/></svg>
+              Google Map
+            </a>
+          </div>
+          <div class="stop-teaser">Quick, casual lunch. Trash talk about round two is encouraged.</div>
+        </div>
+      </div>
+
+      <div class="stop" style="--stop-color:var(--cyan)">
+        <div class="stop-badge">03</div>
+        <div class="stop-card">
+          <img class="stop-photo" src="pictures/bowling-cyber-cel.png" alt="Cel-shaded cyberpunk bowling lanes at Shibuya EST" loading="lazy">
+          <div class="stop-top">
+            <span class="stop-area">Shibuya</span>
+            <span class="stop-time">13:00</span>
+          </div>
+          <div class="stop-title">Bowling Battle</div>
+          <div class="stop-venue">Shibuya EST Bowling</div>
+          <div class="stop-location">
+            <span class="stop-address">EST Shibuya East Exit Hall, 1-14-14 Shibuya,<br>Shibuya-ku, Tokyo 150-0002</span>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&amp;query=Shibuya%20EST%20Bowling%2C%201-14-14%20Shibuya%2C%20Tokyo" target="_blank" rel="noopener noreferrer" aria-label="Open Shibuya EST Bowling in Google Maps">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s6-5.7 6-12A6 6 0 006 9c0 6.3 6 12 6 12z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9" r="2" fill="currentColor"/></svg>
+              Google Map
+            </a>
+          </div>
+          <div class="stop-teaser">Round two. Steady hands under friendly pressure &mdash; the score stacks straight onto the board.</div>
+        </div>
+      </div>
+
+      <div class="stop" style="--stop-color:var(--red)">
+        <div class="stop-badge">04</div>
+        <div class="stop-card">
+          <img class="stop-photo" src="pictures/cooking-cyber-cel.png" alt="A multicultural team taking part in a cel-shaded cyberpunk potion-style cooking class" loading="lazy">
+          <div class="stop-top">
+            <span class="stop-area">Tsukiji</span>
+            <span class="stop-time">16:00</span>
+          </div>
+          <div class="stop-title">Cooking Championship + Dinner</div>
+          <div class="stop-venue">TSUKIJI COOKING Studio</div>
+          <div class="stop-location">
+            <span class="stop-address">5F Solasia Bldg. Tsukiji, 4-13-8 Tsukiji,<br>Chuo-ku, Tokyo 104-0045</span>
+            <a class="map-link" href="https://www.google.com/maps/search/?api=1&amp;query=TSUKIJI%20COOKING%2C%204-13-8%20Tsukiji%2C%20Chuo-ku%2C%20Tokyo" target="_blank" rel="noopener noreferrer" aria-label="Open TSUKIJI COOKING Studio in Google Maps">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s6-5.7 6-12A6 6 0 006 9c0 6.3 6 12 6 12z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9" r="2" fill="currentColor"/></svg>
+              Google Map
+            </a>
+          </div>
+          <div class="stop-teaser">The finale. One kitchen, one team, one potion-inspired dish to conjure &mdash; then the board unlocks over dinner.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="rundown-head">
+    <div class="section-head" id="rundown-head">
+      <span class="kicker">The Rundown</span>
+      <h2>Today's Schedule</h2>
+    </div>
+    <div class="rundown">
+      <div class="run-row" style="--row-color:var(--gold)">
+        <div class="run-time">09:00</div>
+        <div class="run-body">
+          <div class="run-label">Meet</div>
+          <div class="run-name">Assemble at SLOTH JINNAN</div>
+          <div class="run-desc">Check in and get ready for the day</div>
+        </div>
+      </div>
+      <div class="run-row" style="--row-color:var(--gold)">
+        <div class="run-time">09:15<br>&ndash;11:30</div>
+        <div class="run-body">
+          <div class="run-label">Mind</div>
+          <div class="run-name">Strategy Workshop &amp; Live Quiz</div>
+          <div class="run-desc">Sloth Shibuya &mdash; scored round one</div>
+        </div>
+      </div>
+      <div class="run-row" style="--row-color:var(--muted)">
+        <div class="run-time">11:30<br>&ndash;11:45</div>
+        <div class="run-body">
+          <div class="run-label">Transit</div>
+          <div class="run-name">Move to lunch</div>
+          <div class="run-desc">SLOTH JINNAN &rarr; TGI Fridays</div>
+        </div>
+      </div>
+      <div class="run-row" style="--row-color:var(--muted)">
+        <div class="run-time">11:45<br>&ndash;12:45</div>
+        <div class="run-body">
+          <div class="run-label">Refuel</div>
+          <div class="run-name">Lunch</div>
+          <div class="run-desc">TGI Friday's, Shibuya</div>
+        </div>
+      </div>
+      <div class="run-row" style="--row-color:var(--cyan)">
+        <div class="run-time">12:45<br>&ndash;13:00</div>
+        <div class="run-body">
+          <div class="run-label">Transit</div>
+          <div class="run-name">Move to the bowling alley</div>
+          <div class="run-desc">TGI Fridays &rarr; Shibuya EST Bowling</div>
+        </div>
+      </div>
+      <div class="run-row" style="--row-color:var(--cyan)">
+        <div class="run-time">13:00<br>&ndash;15:00</div>
+        <div class="run-body">
+          <div class="run-label">Aim</div>
+          <div class="run-name">Bowling Battle</div>
+          <div class="run-desc">Scored round two</div>
+        </div>
+      </div>
+      <div class="run-row" style="--row-color:var(--red)">
+        <div class="run-time">15:00<br>&ndash;15:50</div>
+        <div class="run-body">
+          <div class="run-label">Transit</div>
+          <div class="run-name">Move to the cooking venue</div>
+          <div class="run-desc">Shibuya EST Bowling &rarr; TSUKIJI COOKING Studio</div>
+        </div>
+      </div>
+      <div class="run-row" style="--row-color:var(--red)">
+        <div class="run-time">16:00<br>&ndash;19:00</div>
+        <div class="run-body">
+          <div class="run-label">Fire</div>
+          <div class="run-name">Cooking Championship + Dinner</div>
+          <div class="run-desc">Tsukiji Cooking &mdash; final round &amp; the reveal</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="vault-head">
+    <div class="section-head" id="vault-head">
+      <span class="kicker">Champion Rewards</span>
+      <h2>The Prize Vault</h2>
+      <p>Four prizes. One champion team. Nothing unlocks until the final scoreboard.</p>
+    </div>
+    <div class="vault-grid">
+      <div class="vault-card">
+        <svg class="icon vault-lock" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10V7a6 6 0 1112 0v3" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="10" width="16" height="11" rx="2.5" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/></svg>
+        <div class="vault-label">Prize 01</div>
+        <span class="vault-mystery" data-vault>?</span>
+      </div>
+      <div class="vault-card">
+        <svg class="icon vault-lock" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10V7a6 6 0 1112 0v3" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="10" width="16" height="11" rx="2.5" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/></svg>
+        <div class="vault-label">Prize 02</div>
+        <span class="vault-mystery" data-vault>?</span>
+      </div>
+      <div class="vault-card">
+        <svg class="icon vault-lock" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10V7a6 6 0 1112 0v3" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="10" width="16" height="11" rx="2.5" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/></svg>
+        <div class="vault-label">Prize 03</div>
+        <span class="vault-mystery" data-vault>?</span>
+      </div>
+      <div class="vault-card">
+        <svg class="icon vault-lock" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10V7a6 6 0 1112 0v3" stroke="currentColor" stroke-width="1.6"/><rect x="4" y="10" width="16" height="11" rx="2.5" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.6"/></svg>
+        <div class="vault-label">Prize 04</div>
+        <span class="vault-mystery" data-vault>?</span>
+      </div>
+    </div>
+    <p class="vault-note">We're not spoiling it here. Just know that whoever's on top of the board when the last plate goes down at 19:00 walks away with <b>four reasons to defend the title next time.</b></p>
+  </section>
+
+  <footer>
+    <p class="fine">Team rosters, what to wear, and the fine print are coming in a follow-up. For now: clear 09:00&ndash;19:00, bring your appetite, and start psyching out the team next to you.</p>
+    <div class="wordmark"><b>MIND · AIM · FIRE</b> &mdash; Team Championship Day</div>
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var target = new Date('2026-10-01T09:00:00');
+  var cdRoot = document.getElementById('countdown');
+  var elD = document.getElementById('cd-d');
+  var elH = document.getElementById('cd-h');
+  var elM = document.getElementById('cd-m');
+  var elS = document.getElementById('cd-s');
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function tickCountdown(){
+    var diff = target.getTime() - Date.now();
+    if(diff <= 0){
+      cdRoot.classList.add('is-live');
+      elD.textContent = '00'; elH.textContent = '00'; elM.textContent = '00'; elS.textContent = '00';
+      return;
+    }
+    var s = Math.floor(diff/1000);
+    var days = Math.floor(s/86400); s -= days*86400;
+    var hours = Math.floor(s/3600); s -= hours*3600;
+    var mins = Math.floor(s/60); s -= mins*60;
+    var secs = s;
+    elD.textContent = pad(days);
+    elH.textContent = pad(hours);
+    elM.textContent = pad(mins);
+    elS.textContent = pad(secs);
+  }
+  tickCountdown();
+  setInterval(tickCountdown, 1000);
+})();
+
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce) return;
+
+  var scores = document.querySelectorAll('[data-scramble]');
+  setInterval(function(){
+    scores.forEach(function(el){
+      var n = Math.floor(Math.random()*100);
+      el.textContent = String(n).padStart(2,'0');
+    });
+  }, 220);
+
+  var symbols = ['?','#','%','¥','&','$','?','?'];
+  var vaults = document.querySelectorAll('[data-vault]');
+  setInterval(function(){
+    vaults.forEach(function(el){
+      if(Math.random() < 0.7){
+        el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+      } else {
+        el.textContent = '?';
+      }
+    });
+  }, 260);
+})();
+</script>
