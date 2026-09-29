@@ -36,7 +36,7 @@ function cloneDefault() {
 }
 
 async function readState() {
-  const result = await get(STATE_PATH, { access: 'private' });
+  const result = await get(STATE_PATH, { access: 'private', useCache: false });
   if (!result || result.statusCode !== 200) return { state: cloneDefault(), etag: null };
   const state = await new Response(result.stream).json();
   return { state: { ...cloneDefault(), ...state }, etag: result.blob.etag };
