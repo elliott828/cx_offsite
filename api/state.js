@@ -70,6 +70,11 @@ function setPath(target, path, value) {
   cursor[finalKey] = value;
 }
 
+function isConflictError(error) {
+  return error instanceof BlobPreconditionFailedError
+    || /precondition failed|etag mismatch/i.test(error?.message || '');
+}
+
 export default async function handler(request, response) {
   if (request.method === 'GET') {
     try {
@@ -113,16 +118,10 @@ export default async function handler(request, response) {
       await put(STATE_PATH, JSON.stringify(state), options);
       return json(response, { ok: true, state });
     } catch (error) {
-      if (error instanceof BlobPreconditionFailedError && attempt < 5) continue;
+      if (isConflictError(error) && attempt < 5) continue;
       if (error?.message === 'Unsupported state path' || error?.message === 'Invalid state path') {
         return json(response, { error: error.message }, 400);
       }
-      console.error('Shared state update failed', {
-        name: error?.name,
-        message: error?.message,
-        status: error?.status,
-        statusCode: error?.statusCode,
-      });
       return json(response, { error: 'The update could not be saved. Please try again.' }, 503);
     }
   }
