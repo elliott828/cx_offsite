@@ -166,7 +166,7 @@
   <dialog id="adminDialog">
     <form class="dialog-body" id="adminForm" method="dialog">
       <div class="dialog-head"><div><div class="eyebrow">Organizer controls</div><h2>UNLOCK EDITING</h2></div><button class="dialog-close" type="button" id="closeAdmin" aria-label="Close">×</button></div>
-      <div class="form-stack"><div class="field"><label for="adminName">Organizer</label><select id="adminName" class="table-input" style="max-width:none;padding:11px;width:100%;background:#090810;border:1px solid var(--line-strong);border-radius:8px;color:var(--ink)"><option>Organizer 1</option><option>Organizer 2</option><option>Organizer 3</option></select></div><div class="field"><label for="adminCode">Access code</label><input id="adminCode" type="password" inputmode="text" autocomplete="off" placeholder="Enter access code"></div><p class="form-help">First-version access code: <strong>CX2026</strong>. Change the organizer names and code in the page configuration before the event.</p><div class="error" id="adminError" aria-live="polite"></div></div>
+      <div class="form-stack"><div class="field"><label for="adminName">Organizer</label><select id="adminName" class="table-input" style="max-width:none;padding:11px;width:100%;background:#090810;border:1px solid var(--line-strong);border-radius:8px;color:var(--ink)"><option>Organizer 1</option><option>Organizer 2</option><option>Organizer 3</option></select></div><div class="field"><label for="adminCode">Access code</label><input id="adminCode" type="password" inputmode="text" autocomplete="off" placeholder="Enter access code"></div><p class="form-help">Choose your organizer name and enter the shared event access code.</p><div class="error" id="adminError" aria-live="polite"></div></div>
       <div class="dialog-actions"><button class="ghost" type="button" id="cancelAdmin">Cancel</button><button class="primary" id="unlockButton" value="default">Unlock controls</button></div>
     </form>
   </dialog>
@@ -178,7 +178,6 @@
   (function(){
     'use strict';
     var STORAGE_KEY='cxOffsiteLiveV1';
-    var ADMIN_CODE='CX2026';
     var colors=['var(--team-1)','var(--team-2)','var(--team-3)','var(--team-4)'];
     var prizeImages=['postcards/01-gilded-office.png','postcards/02-durian-ice-cream.png','postcards/03-nanyang-white-coffee.png','postcards/04-suspicious-cheesecake.png','postcards/05-starbucks-gift-card.png','postcards/06-homemade-indian-meal.png','postcards/07-suspicious-steak-feast.png','postcards/08-suspicious-sushi-feast.png','postcards/09-suspicious-mcdonalds.png','postcards/10-iqos-cafe-food.png'];
     var defaultState={
@@ -193,13 +192,38 @@
     };
     function clone(v){return JSON.parse(JSON.stringify(v))}
     function load(){try{var saved=JSON.parse(localStorage.getItem(STORAGE_KEY));return Object.assign(clone(defaultState),saved||{})}catch(e){return clone(defaultState)}}
-    var state=load(); var isAdmin=false;
+    var state=load(); var isAdmin=false, organizerName='', organizerCode='', writeBusy=0, lastRemoteUpdate='';
     if(!Array.isArray(state.revealedPrizes))state.revealedPrizes=Number.isInteger(state.revealedPrize)?[state.revealedPrize]:[];
     var $=function(s,r){return (r||document).querySelector(s)}; var $$=function(s,r){return Array.from((r||document).querySelectorAll(s))};
     function esc(v){return String(v==null?'':v).replace(/[&<>'"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]})}
     function num(v){var n=parseFloat(v);return isFinite(n)?n:0}
     function fmt(v){var n=Math.round(num(v)*10)/10;return Number.isInteger(n)?String(n):n.toFixed(1)}
-    function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));$('#lastSaved').textContent='Saved '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});toast('Scores saved on this device')}
+    function isLocalPreview(){return location.protocol==='file:'||location.hostname==='127.0.0.1'||location.hostname==='localhost'}
+    function organizerHeaders(){return {'Content-Type':'application/json','X-Organizer-Name':organizerName,'X-Organizer-Code':organizerCode}}
+    function updateLiveLabel(){
+      if(state.updatedAt){var at=new Date(state.updatedAt);$('#lastSaved').textContent='Live · '+(state.updatedBy||'Organizer')+' '+at.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}
+      else $('#lastSaved').textContent=isLocalPreview()?'Local preview':'Cloud ready'
+    }
+    async function save(path,value){
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(state));updateLiveLabel();
+      if(isLocalPreview()){toast('Saved in local preview');return}
+      writeBusy+=1;
+      try{
+        var response=await fetch('/api/state',{method:'POST',headers:organizerHeaders(),body:JSON.stringify({path:path,value:value})});
+        var data=await response.json();if(!response.ok)throw new Error(data.error||'Save failed');
+        state=Object.assign(clone(defaultState),data.state||{});lastRemoteUpdate=state.updatedAt||'';localStorage.setItem(STORAGE_KEY,JSON.stringify(state));renderAll();toast('Shared scorecard updated')
+      }catch(error){toast(error.message||'Update failed')}
+      finally{writeBusy-=1}
+    }
+    async function syncFromServer(firstLoad){
+      if(isLocalPreview()||writeBusy>0)return;
+      try{
+        var response=await fetch('/api/state',{cache:'no-store'});if(!response.ok)return;
+        var data=await response.json(),incoming=data.state||{};
+        if(firstLoad||incoming.updatedAt!==lastRemoteUpdate){state=Object.assign(clone(defaultState),incoming);lastRemoteUpdate=state.updatedAt||'';localStorage.setItem(STORAGE_KEY,JSON.stringify(state));renderAll()}
+        updateLiveLabel()
+      }catch(error){if(firstLoad)$('#lastSaved').textContent='Connecting…'}
+    }
     var toastTimer; function toast(msg){var el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(function(){el.classList.remove('show')},1500)}
     function rankSpecialPlayers(){
       var sorted=state.specialScores.map(function(v,i){return {i:i,v:num(v)}}).sort(function(a,b){return b.v-a.v});
@@ -241,19 +265,26 @@
     function renderAll(){renderScoreStrip();renderRosters();renderBowling();renderCooking();renderTotals();renderPrizes();bindDynamic()}
     function setPath(path,value){var parts=path.split('.'),target=state;for(var i=0;i<parts.length-1;i++)target=target[parts[i]];var key=parts[parts.length-1];target[key]=value}
     function bindDynamic(){
-      $$('[data-path]').forEach(function(input){input.addEventListener('change',function(){var path=this.dataset.path;var value=this.type==='number'?num(this.value):this.value.trim();setPath(path,value);if(path.indexOf('multipliers.')===0){var idx=Number(path.split('.')[1]);state.manualMultiplier[idx]=true}save();renderAll()})});
-      $$('[data-add-member]').forEach(function(btn){btn.onclick=function(){state.teams[Number(this.dataset.addMember)].members.push('');save();renderAll()}});
-      $$('[data-remove-member]').forEach(function(btn){btn.onclick=function(){var p=this.dataset.removeMember.split(',').map(Number);state.teams[p[0]].members.splice(p[1],1);save();renderAll()}});
-      $$('[data-prize]').forEach(function(btn){btn.onclick=function(){if(!isAdmin)return;var i=Number(this.dataset.prize),at=state.revealedPrizes.indexOf(i);if(at>-1)state.revealedPrizes.splice(at,1);else state.revealedPrizes.push(i);save();renderAll();toast(at>-1?'Card returned to the vault':'Prize revealed!')}})
+      $$('[data-path]').forEach(function(input){input.addEventListener('change',function(){var path=this.dataset.path;var value=this.type==='number'?num(this.value):this.value.trim();setPath(path,value);if(path.indexOf('multipliers.')===0){var idx=Number(path.split('.')[1]);state.manualMultiplier[idx]=true}renderAll();save(path,value)})});
+      $$('[data-add-member]').forEach(function(btn){btn.onclick=function(){var i=Number(this.dataset.addMember);state.teams[i].members.push('');renderAll();save('teams.'+i+'.members',state.teams[i].members)}});
+      $$('[data-remove-member]').forEach(function(btn){btn.onclick=function(){var p=this.dataset.removeMember.split(',').map(Number);state.teams[p[0]].members.splice(p[1],1);renderAll();save('teams.'+p[0]+'.members',state.teams[p[0]].members)}});
+      $$('[data-prize]').forEach(function(btn){btn.onclick=function(){if(!isAdmin)return;var i=Number(this.dataset.prize),at=state.revealedPrizes.indexOf(i);if(at>-1)state.revealedPrizes.splice(at,1);else state.revealedPrizes.push(i);renderAll();save('revealedPrizes',state.revealedPrizes);toast(at>-1?'Card returned to the vault':'Prize revealed!')}})
     }
     $$('.tab').forEach(function(tab){tab.addEventListener('click',function(){var name=this.dataset.tab;$$('.tab').forEach(function(t){t.classList.toggle('is-active',t.dataset.tab===name);t.setAttribute('aria-selected',t.dataset.tab===name?'true':'false')});$$('.tab-panel').forEach(function(p){p.classList.toggle('is-active',p.dataset.panel===name)})})});
     $('#adminButton').onclick=function(){if(isAdmin){isAdmin=false;document.body.classList.remove('admin');this.classList.remove('is-on');this.textContent='Organizer access';renderAll();toast('Organizer controls locked')}else{$('#adminError').textContent='';$('#adminCode').value='';$('#adminDialog').showModal();setTimeout(function(){$('#adminCode').focus()},50)}};
     $('#cancelAdmin').onclick=$('#closeAdmin').onclick=function(){$('#adminDialog').close()};
-    $('#adminForm').addEventListener('submit',function(e){e.preventDefault();if($('#adminCode').value!==ADMIN_CODE){$('#adminError').textContent='That access code does not match.';return}isAdmin=true;document.body.classList.add('admin');$('#adminButton').classList.add('is-on');$('#adminButton').textContent=$('#adminName').value+' · Lock';$('#adminDialog').close();renderAll();toast('Organizer controls unlocked')});
+    $('#adminForm').addEventListener('submit',async function(e){
+      e.preventDefault();var name=$('#adminName').value,code=$('#adminCode').value;$('#adminError').textContent='Checking access…';
+      try{
+        if(isLocalPreview()){if(code!=='CX2026')throw new Error('That access code does not match.')}
+        else{var response=await fetch('/api/state',{method:'POST',headers:{'Content-Type':'application/json','X-Organizer-Name':name,'X-Organizer-Code':code},body:JSON.stringify({action:'auth'})});var data=await response.json();if(!response.ok)throw new Error(data.error||'Access denied')}
+        organizerName=name;organizerCode=code;isAdmin=true;document.body.classList.add('admin');$('#adminButton').classList.add('is-on');$('#adminButton').textContent=name+' · Lock';$('#adminDialog').close();renderAll();toast('Shared organizer controls unlocked')
+      }catch(error){$('#adminError').textContent=error.message||'Access denied'}
+    });
     function buildConfetti(){var html='',palette=['#ffc845','#2af1df','#ff4b3e','#f4f0fb','#bca8ff'];for(var i=0;i<70;i++)html+='<i class="confetti" style="--x:'+Math.random()*100+'%;--d:'+(3+Math.random()*4)+'s;--delay:'+(-Math.random()*7)+'s;--r:'+Math.random()*180+'deg;--c:'+palette[i%palette.length]+'"></i>';$('#confetti').innerHTML=html}
     $('#celebrateButton').onclick=function(){var lead=ranking()[0],team=state.teams[lead.i],members=team.members.filter(Boolean);$('#celebrationTitle').textContent=team.name;$('#celebrationScore').textContent=fmt(lead.total)+' points. One very loud victory.';$('#celebrationMembers').innerHTML=members.length?members.map(function(name){return '<span class="celebration-member">'+esc(name)+'</span>'}).join(''):'<span class="celebration-member">The whole team</span>';buildConfetti();$('#celebration').classList.add('is-open');$('#closeCelebration').focus()};
     $('#closeCelebration').onclick=function(){$('#celebration').classList.remove('is-open')};
-    renderAll();
+    renderAll();updateLiveLabel();syncFromServer(true);setInterval(function(){syncFromServer(false)},2000);
   })();
   </script>
 </body>
