@@ -24,14 +24,11 @@ const DEFAULT_STATE = {
   updatedBy: null,
 };
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'no-store, max-age=0',
-    },
-  });
+function json(response, data, status = 200) {
+  response.statusCode = status;
+  response.setHeader('Content-Type', 'application/json; charset=utf-8');
+  response.setHeader('Cache-Control', 'no-store, max-age=0');
+  response.end(JSON.stringify(data));
 }
 
 function cloneDefault() {
@@ -46,9 +43,16 @@ async function readState() {
 }
 
 function isAuthorized(request) {
-  const name = request.headers.get('x-organizer-name') || '';
-  const code = request.headers.get('x-organizer-code') || '';
+  const name = request.headers['x-organizer-name'] || '';
+  const code = request.headers['x-organizer-code'] || '';
   return ORGANIZERS.has(name) && code.length > 0 && code === process.env.ORGANIZER_CODE;
+}
+
+async function readBody(request) {
+  if (request.body && typeof request.body === 'object') return request.body;
+  let raw = '';
+  for await (const chunk of request) raw += chunk;
+  return JSON.parse(raw);
 }
 
 function setPath(target, path, value) {
@@ -66,28 +70,28 @@ function setPath(target, path, value) {
   cursor[finalKey] = value;
 }
 
-export default async function handler(request) {
+export default async function handler(request, response) {
   if (request.method === 'GET') {
     try {
       const { state } = await readState();
-      return json({ state });
+      return json(response, { state });
     } catch (error) {
-      return json({ error: 'Shared scorecard is temporarily unavailable.' }, 503);
+      return json(response, { error: 'Shared scorecard is temporarily unavailable.' }, 503);
     }
   }
 
-  if (request.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
-  if (!isAuthorized(request)) return json({ error: 'Organizer access denied.' }, 401);
+  if (request.method !== 'POST') return json(response, { error: 'Method not allowed' }, 405);
+  if (!isAuthorized(request)) return json(response, { error: 'Organizer access denied.' }, 401);
 
   let body;
   try {
-    body = await request.json();
+    body = await readBody(request);
   } catch {
-    return json({ error: 'Invalid request body.' }, 400);
+    return json(response, { error: 'Invalid request body.' }, 400);
   }
-  if (body.action === 'auth') return json({ ok: true });
+  if (body.action === 'auth') return json(response, { ok: true });
   if (typeof body.path !== 'string' || JSON.stringify(body.value).length > 20000) {
-    return json({ error: 'Invalid update.' }, 400);
+    return json(response, { error: 'Invalid update.' }, 400);
   }
 
   for (let attempt = 0; attempt < 6; attempt += 1) {
@@ -98,7 +102,7 @@ export default async function handler(request) {
         state.manualMultiplier[Number(body.path.split('.')[1])] = true;
       }
       state.updatedAt = new Date().toISOString();
-      state.updatedBy = request.headers.get('x-organizer-name');
+      state.updatedBy = request.headers['x-organizer-name'];
       const options = {
         access: 'private',
         allowOverwrite: true,
@@ -107,14 +111,14 @@ export default async function handler(request) {
       };
       if (etag) options.ifMatch = etag;
       await put(STATE_PATH, JSON.stringify(state), options);
-      return json({ ok: true, state });
+      return json(response, { ok: true, state });
     } catch (error) {
       if (error instanceof BlobPreconditionFailedError && attempt < 5) continue;
       if (error?.message === 'Unsupported state path' || error?.message === 'Invalid state path') {
-        return json({ error: error.message }, 400);
+        return json(response, { error: error.message }, 400);
       }
-      return json({ error: 'The update could not be saved. Please try again.' }, 503);
+      return json(response, { error: 'The update could not be saved. Please try again.' }, 503);
     }
   }
-  return json({ error: 'The scorecard changed at the same time. Please try again.' }, 409);
+  return json(response, { error: 'The scorecard changed at the same time. Please try again.' }, 409);
 }
