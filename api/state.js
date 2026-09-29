@@ -117,6 +117,12 @@ export default async function handler(request, response) {
       if (error?.message === 'Unsupported state path' || error?.message === 'Invalid state path') {
         return json(response, { error: error.message }, 400);
       }
+      console.error('Shared state update failed', {
+        name: error?.name,
+        message: error?.message,
+        status: error?.status,
+        statusCode: error?.statusCode,
+      });
       return json(response, { error: 'The update could not be saved. Please try again.' }, 503);
     }
   }
