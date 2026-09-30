@@ -10,10 +10,10 @@ const WRITABLE_ROOTS = new Set([
 
 const DEFAULT_STATE = {
   teams: [
-    { name: 'Team 01', members: ['Yuji', 'Yu', 'Eunice', 'Nagendra', 'Vitor'], leaderIndexes: [0] },
-    { name: 'Team 02', members: ['Kenta', 'Marco', 'James', 'Saori', 'Julia', 'Karen'], leaderIndexes: [0, 1] },
-    { name: 'Team 03', members: ['Chun Thing', 'Rebecca', 'Luke', 'Mari', 'Leon', 'Mingmin'], leaderIndexes: [0, 1] },
-    { name: 'Team 04', members: ['Naeem', 'Sushim', 'Ruolei', 'Natsuno', 'Angela', 'Matsatso'], leaderIndexes: [0, 1] },
+    { name: 'Team 01', members: ['Yuji', 'Yu', 'Eunice', 'Nagendra', 'Vitor'], leaderIndexes: [] },
+    { name: 'Team 02', members: ['Kenta', 'Marco', 'James', 'Saori', 'Julia', 'Karen'], leaderIndexes: [] },
+    { name: 'Team 03', members: ['Chun Thing', 'Rebecca', 'Luke', 'Mari', 'Leon', 'Mingmin'], leaderIndexes: [] },
+    { name: 'Team 04', members: ['Naeem', 'Sushim', 'Ruolei', 'Natsuno', 'Angela', 'Matsatso'], leaderIndexes: [] },
   ],
   bowling: [0, 0, 0, 0],
   specialNames: ['Team 01', 'Team 02', 'Team 03', 'Team 04'],
@@ -81,6 +81,10 @@ function isConflictError(error) {
     || /precondition failed|etag mismatch/i.test(error?.message || '');
 }
 
+function resetState() {
+  return cloneDefault();
+}
+
 export default async function handler(request, response) {
   if (request.method === 'GET') {
     try {
@@ -92,7 +96,7 @@ export default async function handler(request, response) {
   }
 
   if (request.method !== 'POST') return json(response, { error: 'Method not allowed' }, 405);
-  if (!isAuthorized(request)) return json(response, { error: 'Organizer access denied.' }, 401);
+  if (!isAuthorized(request)) return json(response, { error: 'Superman mode access denied.' }, 401);
 
   let body;
   try {
@@ -101,15 +105,18 @@ export default async function handler(request, response) {
     return json(response, { error: 'Invalid request body.' }, 400);
   }
   if (body.action === 'auth') return json(response, { ok: true });
-  if (typeof body.path !== 'string' || JSON.stringify(body.value).length > 20000) {
+  const isReset = body.action === 'reset';
+  const serializedValue = JSON.stringify(body.value);
+  if (!isReset && (typeof body.path !== 'string' || typeof serializedValue !== 'string' || serializedValue.length > 20000)) {
     return json(response, { error: 'Invalid update.' }, 400);
   }
 
   for (let attempt = 0; attempt < 6; attempt += 1) {
     try {
-      const { state, etag } = await readState();
-      setPath(state, body.path, body.value);
-      if (/^multipliers\.\d+$/.test(body.path)) {
+      const { state: currentState, etag } = await readState();
+      const state = isReset ? resetState() : currentState;
+      if (!isReset) setPath(state, body.path, body.value);
+      if (!isReset && /^multipliers\.\d+$/.test(body.path)) {
         state.manualMultiplier[Number(body.path.split('.')[1])] = true;
       }
       state.updatedAt = new Date().toISOString();
