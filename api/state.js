@@ -5,6 +5,7 @@ const ORGANIZERS = new Set(['Organizer 1', 'Organizer 2', 'Organizer 3']);
 const WRITABLE_ROOTS = new Set([
   'teams', 'bowling', 'specialNames', 'specialScores', 'multipliers',
   'manualMultiplier', 'cookingFixed', 'cookingSpecial', 'revealedPrizes',
+  'cookingPresentation', 'crown',
 ]);
 
 const DEFAULT_STATE = {
@@ -13,13 +14,15 @@ const DEFAULT_STATE = {
     members: [1, 2, 3, 4, 5, 6].map((member) => `Member 0${member}`),
   })),
   bowling: [0, 0, 0, 0],
-  specialNames: ['Wildcard 01', 'Wildcard 02', 'Wildcard 03', 'Wildcard 04'],
+  specialNames: ['Team 01', 'Team 02', 'Team 03', 'Team 04'],
   specialScores: [0, 0, 0, 0],
-  multipliers: [1.5, 1.2, 1.1, 1.0],
+  multipliers: [1.0, 1.0, 1.0, 1.0],
   manualMultiplier: [false, false, false, false],
   cookingFixed: [0, 0, 0, 0],
   cookingSpecial: [0, 0, 0, 0],
+  cookingPresentation: [0, 0, 0, 0],
   revealedPrizes: [],
+  crown: null,
   updatedAt: null,
   updatedBy: null,
 };
