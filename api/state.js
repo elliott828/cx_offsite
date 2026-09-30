@@ -5,14 +5,16 @@ const ORGANIZERS = new Set(['Organizer 1', 'Organizer 2', 'Organizer 3']);
 const WRITABLE_ROOTS = new Set([
   'teams', 'bowling', 'specialNames', 'specialScores', 'multipliers',
   'manualMultiplier', 'cookingFixed', 'cookingSpecial', 'revealedPrizes',
-  'cookingPresentation', 'crown',
+  'cookingPresentation', 'crown', 'rostersOpen',
 ]);
 
 const DEFAULT_STATE = {
-  teams: [1, 2, 3, 4].map((number) => ({
-    name: `Team 0${number}`,
-    members: [1, 2, 3, 4, 5, 6].map((member) => `Member 0${member}`),
-  })),
+  teams: [
+    { name: 'Team 01', members: ['Yuji', 'Yu', 'Eunice', 'Nagendra', 'Vitor'], leaderIndexes: [0] },
+    { name: 'Team 02', members: ['Kenta', 'Marco', 'James', 'Saori', 'Julia', 'Karen'], leaderIndexes: [0, 1] },
+    { name: 'Team 03', members: ['Chun Thing', 'Rebecca', 'Luke', 'Mari', 'Leon', 'Mingmin'], leaderIndexes: [0, 1] },
+    { name: 'Team 04', members: ['Naeem', 'Sushim', 'Ruolei', 'Natsuno', 'Angela', 'Matsatso'], leaderIndexes: [0, 1] },
+  ],
   bowling: [0, 0, 0, 0],
   specialNames: ['Team 01', 'Team 02', 'Team 03', 'Team 04'],
   specialScores: [0, 0, 0, 0],
@@ -23,6 +25,7 @@ const DEFAULT_STATE = {
   cookingPresentation: [0, 0, 0, 0],
   revealedPrizes: [],
   crown: null,
+  rostersOpen: false,
   updatedAt: null,
   updatedBy: null,
 };
