@@ -1,0 +1,18 @@
+{
+  "type": "design",
+  "designSystems": [],
+  "primaryDesignSystem": null,
+  "assets": {
+    "Team Building Playbook": {
+      "versions": [
+        {
+          "path": "Team Building Playbook.html",
+          "createdAt": "2026-10-27T23:18:19.870Z",
+          "status": "needs-review"
+        }
+      ]
+    }
+  },
+  "createdAt": "2026-10-27T23:18:19.874Z",
+  "updatedAt": "2026-10-27T23:18:19.874Z"
+}

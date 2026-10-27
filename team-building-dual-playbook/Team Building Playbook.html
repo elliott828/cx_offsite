@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>60分钟团队活动双方案｜解谜游戏 × 公司大富翁</title>
+  <style>
+    :root {
+      --ink: #182522;
+      --paper: #f5f0e6;
+      --paper-deep: #e9dfcc;
+      --green: #174f3c;
+      --green-2: #236a51;
+      --coral: #e85d3f;
+      --mustard: #e4b13c;
+      --sky: #8abfd0;
+      --plum: #75475b;
+      --white: #fffdf8;
+      --muted: #65716c;
+      --line: rgba(24, 37, 34, .18);
+      --shadow: 0 18px 50px rgba(45, 42, 31, .14);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 20% 0%, rgba(228,177,60,.14), transparent 28rem),
+        linear-gradient(90deg, rgba(23,79,60,.035) 1px, transparent 1px),
+        linear-gradient(rgba(23,79,60,.035) 1px, transparent 1px),
+        var(--paper);
+      background-size: auto, 28px 28px, 28px 28px, auto;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+      line-height: 1.75;
+    }
+
+    button, input { font: inherit; }
+    a { color: inherit; }
+    .shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; }
+    .eyebrow { letter-spacing: .14em; text-transform: uppercase; font-size: 12px; font-weight: 800; color: var(--coral); }
+    .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace; }
+    .serif { font-family: Georgia, "Songti SC", "Noto Serif SC", serif; }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 30;
+      background: rgba(245,240,230,.92); backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner { min-height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 900; }
+    .brand-mark { width: 30px; height: 30px; border: 2px solid var(--ink); background: var(--mustard); transform: rotate(-4deg); display: grid; place-items: center; }
+    .brand-mark::after { content: "25"; font-size: 11px; font-weight: 900; }
+    nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    nav a, .print-button { text-decoration: none; border: 1px solid transparent; padding: 7px 11px; border-radius: 999px; font-size: 13px; font-weight: 700; background: transparent; cursor: pointer; }
+    nav a:hover, .print-button:hover { border-color: var(--ink); background: var(--white); }
+
+    .hero { padding: 82px 0 64px; position: relative; overflow: hidden; }
+    .hero-grid { display: grid; grid-template-columns: 1.12fr .88fr; gap: 64px; align-items: center; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: clamp(48px, 7.3vw, 96px); line-height: .95; letter-spacing: -.055em; margin-bottom: 28px; max-width: 880px; }
+    h1 span { display: block; color: var(--green); }
+    .hero-lede { font-size: clamp(18px, 2vw, 24px); max-width: 680px; color: #3f4d48; }
+    .hero-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px; }
+    .pill { border: 1.5px solid var(--ink); padding: 7px 12px; border-radius: 999px; background: var(--white); font-size: 13px; font-weight: 800; box-shadow: 3px 3px 0 var(--ink); }
+
+    .case-file { position: relative; min-height: 440px; transform: rotate(2deg); }
+    .folder { position: absolute; inset: 22px 8px 0 22px; background: #d9a93d; border: 2px solid var(--ink); border-radius: 8px 14px 14px 14px; box-shadow: var(--shadow); }
+    .folder::before { content: ""; position: absolute; width: 145px; height: 32px; top: -28px; left: 28px; border: 2px solid var(--ink); border-bottom: 0; border-radius: 10px 10px 0 0; background: #d9a93d; }
+    .folder-paper { position: absolute; inset: 62px 46px 34px 42px; background: var(--white); border: 1.5px solid var(--ink); padding: 34px; transform: rotate(-4deg); box-shadow: 10px 10px 0 rgba(24,37,34,.13); }
+    .stamp { display: inline-block; border: 3px solid var(--coral); color: var(--coral); padding: 4px 10px; font-weight: 1000; letter-spacing: .16em; transform: rotate(-7deg); }
+    .folder-paper h2 { font-size: 32px; line-height: 1.05; margin: 26px 0 14px; }
+    .evidence-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-top: 30px; }
+    .evidence-strip i { height: 68px; border: 1.5px solid var(--ink); display: block; }
+    .evidence-strip i:nth-child(1) { background: var(--coral); }
+    .evidence-strip i:nth-child(2) { background: var(--mustard); }
+    .evidence-strip i:nth-child(3) { background: var(--sky); }
+    .evidence-strip i:nth-child(4) { background: var(--green-2); }
+    .evidence-strip i:nth-child(5) { background: var(--plum); }
+
+    section { padding: 72px 0; }
+    .section-head { display: grid; grid-template-columns: .4fr 1fr; gap: 48px; align-items: end; margin-bottom: 40px; }
+    .section-no { font: 900 78px/1 Georgia, serif; color: transparent; -webkit-text-stroke: 1.5px var(--ink); opacity: .45; }
+    .section-head h2 { font-size: clamp(36px, 5vw, 64px); line-height: 1.02; letter-spacing: -.04em; margin-bottom: 12px; }
+    .section-head p { max-width: 760px; color: var(--muted); font-size: 17px; margin-bottom: 0; }
+
+    .snapshot { background: var(--green); color: var(--white); }
+    .snapshot .section-no { -webkit-text-stroke-color: rgba(255,255,255,.6); }
+    .snapshot .section-head p, .snapshot .eyebrow { color: #dfe9e2; }
+    .compare { display: grid; grid-template-columns: repeat(2, 1fr); border: 1px solid rgba(255,255,255,.32); }
+    .compare-card { padding: 36px; position: relative; overflow: hidden; min-height: 300px; }
+    .compare-card + .compare-card { border-left: 1px solid rgba(255,255,255,.32); }
+    .compare-card .big-letter { position: absolute; right: -10px; bottom: -46px; font: 900 220px/1 Georgia, serif; opacity: .07; }
+    .compare-card h3 { font-size: 32px; line-height: 1.1; }
+    .compare-card ul { padding-left: 20px; }
+    .scoreline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 26px; }
+    .scoreline div { border-top: 1px solid rgba(255,255,255,.35); padding-top: 10px; }
+    .scoreline b { display: block; font-size: 22px; }
+    .scoreline span { font-size: 12px; color: #c9d8cf; }
+
+    .plan-a { background: #fbf8f0; }
+    .story-card { display: grid; grid-template-columns: 1fr .72fr; gap: 34px; align-items: stretch; margin-bottom: 44px; }
+    .story-copy { border: 1.5px solid var(--ink); padding: 38px; background: var(--white); box-shadow: 9px 9px 0 var(--mustard); }
+    .story-copy blockquote { font: 700 25px/1.45 Georgia, "Songti SC", serif; margin: 18px 0 0; }
+    .story-visual { background: var(--coral); border: 1.5px solid var(--ink); min-height: 320px; position: relative; display: grid; place-items: center; overflow: hidden; }
+    .ticket { width: 72%; padding: 34px 24px; background: var(--paper); border: 2px dashed var(--ink); transform: rotate(-6deg); text-align: center; box-shadow: 12px 12px 0 rgba(24,37,34,.2); }
+    .ticket::before, .ticket::after { content: ""; position: absolute; width: 38px; height: 38px; border-radius: 50%; background: var(--coral); top: calc(50% - 19px); }
+    .ticket::before { left: -20px; }
+    .ticket::after { right: -20px; }
+    .ticket strong { font: 900 36px/1 Georgia, serif; display: block; }
+    .ticket small { font-weight: 800; letter-spacing: .12em; }
+
+    .timeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0; margin: 30px 0 50px; }
+    .time-step { position: relative; border-top: 3px solid var(--ink); padding: 24px 12px 0 0; }
+    .time-step::before { content: ""; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--mustard); border: 2px solid var(--ink); left: 0; top: -10px; }
+    .time-step b { display: block; font-size: 22px; }
+    .time-step span { font-size: 13px; color: var(--muted); line-height: 1.45; display: block; max-width: 140px; }
+
+    .evidence-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .evidence-card { border: 1.5px solid var(--ink); background: var(--white); min-height: 350px; display: flex; flex-direction: column; }
+    .evidence-card header { padding: 18px; border-bottom: 1.5px solid var(--ink); min-height: 100px; }
+    .evidence-card:nth-child(1) header { background: #f8b0a1; }
+    .evidence-card:nth-child(2) header { background: #f2d07d; }
+    .evidence-card:nth-child(3) header { background: #b9dce5; }
+    .evidence-card:nth-child(4) header { background: #8dc2a8; }
+    .evidence-card:nth-child(5) header { background: #c4a2b1; }
+    .evidence-card .team-id { font: 900 12px/1 monospace; letter-spacing: .1em; }
+    .evidence-card h3 { margin: 7px 0 0; line-height: 1.15; font-size: 21px; }
+    .evidence-card .body { padding: 18px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
+    .evidence-card p { font-size: 14px; line-height: 1.6; margin-bottom: 0; }
+    .reveal { margin-top: auto; border-top: 1px dashed var(--line); padding-top: 12px; }
+    .reveal summary { cursor: pointer; font-weight: 900; color: var(--green); }
+    .reveal p { margin-top: 8px; background: var(--paper); padding: 10px; }
+
+    .roles, .kit-grid, .award-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .role, .kit, .award { border-top: 3px solid var(--ink); padding: 18px 0; }
+    .role b, .kit b, .award b { display: block; font-size: 17px; }
+    .role span, .kit span, .award span { font-size: 13px; color: var(--muted); }
+
+    .twist { margin-top: 46px; background: var(--ink); color: var(--white); padding: 38px; display: grid; grid-template-columns: 1fr .9fr; gap: 30px; align-items: center; }
+    .twist h3 { font-size: 36px; line-height: 1.1; margin-bottom: 12px; }
+    .answer-key { border: 1px solid rgba(255,255,255,.32); padding: 24px; background: rgba(255,255,255,.05); }
+    .answer-key ol { margin: 0; padding-left: 20px; }
+
+    .plan-b { background: var(--paper-deep); }
+    .board-wrap { display: grid; grid-template-columns: 1fr .82fr; gap: 38px; align-items: center; }
+    .board {
+      display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr);
+      aspect-ratio: 1; border: 3px solid var(--ink); background: var(--white); box-shadow: 14px 14px 0 var(--green); transform: rotate(-1deg);
+    }
+    .sq { border: 1px solid var(--ink); padding: 8px; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
+    .sq b { font-size: clamp(9px, 1vw, 13px); line-height: 1.25; }
+    .sq small { font-size: 9px; line-height: 1.2; }
+    .sq.coral { background: #f8b0a1; } .sq.gold { background: #f2d07d; } .sq.blue { background: #b9dce5; } .sq.green { background: #8dc2a8; } .sq.plum { background: #c4a2b1; }
+    .board-center { grid-column: 2 / 5; grid-row: 2 / 5; padding: 26px; display: grid; place-items: center; text-align: center; background: var(--paper); }
+    .board-center strong { font: 900 clamp(26px, 4vw, 54px)/.95 Georgia, serif; transform: rotate(-7deg); }
+    .board-center span { display: block; font: 900 12px/1.3 monospace; letter-spacing: .12em; margin-top: 12px; }
+    .s1{grid-area:1/1}.s2{grid-area:1/2}.s3{grid-area:1/3}.s4{grid-area:1/4}.s5{grid-area:1/5}.s6{grid-area:2/5}.s7{grid-area:3/5}.s8{grid-area:4/5}.s9{grid-area:5/5}.s10{grid-area:5/4}.s11{grid-area:5/3}.s12{grid-area:5/2}.s13{grid-area:5/1}.s14{grid-area:4/1}.s15{grid-area:3/1}.s16{grid-area:2/1}
+
+    .rules-panel { display: flex; flex-direction: column; gap: 14px; }
+    .rule { background: var(--white); border: 1.5px solid var(--ink); padding: 20px; display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: start; }
+    .rule-no { width: 46px; height: 46px; background: var(--mustard); border: 1.5px solid var(--ink); display: grid; place-items: center; font-weight: 1000; box-shadow: 4px 4px 0 var(--ink); }
+    .rule h3 { font-size: 17px; margin-bottom: 4px; }
+    .rule p { font-size: 13px; color: var(--muted); margin-bottom: 0; }
+
+    .economy { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 54px; }
+    .currency { padding: 28px; border: 1.5px solid var(--ink); background: var(--white); position: relative; }
+    .currency::after { content: attr(data-symbol); position: absolute; right: 18px; top: 6px; font: 900 72px/1 Georgia, serif; opacity: .09; }
+    .currency h3 { font-size: 23px; }
+    .currency strong { font-size: 34px; color: var(--green); }
+
+    .cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 34px; }
+    .game-card { min-height: 260px; border: 1.5px solid var(--ink); padding: 24px; background: var(--white); box-shadow: 7px 7px 0 rgba(24,37,34,.14); transition: transform .2s ease; }
+    .game-card:hover { transform: translateY(-5px) rotate(-.5deg); }
+    .game-card .tag { display: inline-flex; padding: 4px 9px; border: 1px solid var(--ink); border-radius: 999px; font: 800 11px/1.4 monospace; background: var(--sky); }
+    .game-card h3 { margin-top: 20px; font-size: 23px; line-height: 1.15; }
+    .game-card p { font-size: 14px; color: var(--muted); }
+    .game-card .effect { border-top: 1px dashed var(--line); padding-top: 12px; font-weight: 800; color: var(--green); }
+
+    .boss-battle { margin-top: 44px; background: var(--coral); border: 2px solid var(--ink); padding: 38px; display: grid; grid-template-columns: .65fr 1fr; gap: 32px; align-items: center; box-shadow: 10px 10px 0 var(--ink); }
+    .boss-title { font: 900 48px/.95 Georgia, serif; }
+    .meter { height: 30px; border: 2px solid var(--ink); background: var(--white); padding: 4px; margin: 14px 0; }
+    .meter-fill { width: 76%; height: 100%; background: repeating-linear-gradient(90deg, var(--mustard) 0 24px, #f7cc69 24px 48px); }
+
+    .setup { background: var(--white); }
+    .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .setup-card { border-top: 6px solid var(--green); padding: 30px; background: var(--paper); }
+    .setup-card h3 { font-size: 28px; }
+    .checklist { display: grid; gap: 10px; }
+    .check { display: grid; grid-template-columns: 24px 1fr; gap: 10px; align-items: start; cursor: pointer; }
+    .check input { width: 18px; height: 18px; accent-color: var(--green); margin-top: 5px; }
+    .check span { transition: opacity .2s ease; }
+    .check input:checked + span { text-decoration: line-through; opacity: .48; }
+
+    .custom-table { width: 100%; border-collapse: collapse; margin-top: 36px; font-size: 14px; }
+    .custom-table th, .custom-table td { padding: 13px 15px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .custom-table th { background: var(--green); color: white; }
+    .custom-table tr:nth-child(even) td { background: #fbf8f0; }
+
+    .host-script { background: var(--ink); color: var(--white); }
+    .host-script .section-no { -webkit-text-stroke-color: rgba(255,255,255,.55); }
+    .host-script .section-head p { color: #bdc8c3; }
+    .script-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .script { border: 1px solid rgba(255,255,255,.28); padding: 26px; }
+    .script time { display: inline-block; color: var(--mustard); font: 900 13px/1 monospace; margin-bottom: 14px; }
+    .script blockquote { font: 700 20px/1.55 Georgia, "Songti SC", serif; margin: 0; }
+
+    footer { padding: 40px 0; background: var(--mustard); border-top: 2px solid var(--ink); }
+    .footer-grid { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+    .footer-grid b { font-size: 24px; }
+    .footer-grid p { margin-bottom: 0; font-size: 13px; }
+
+    .backtop { position: fixed; right: 22px; bottom: 22px; width: 48px; height: 48px; border: 1.5px solid var(--ink); background: var(--white); box-shadow: 4px 4px 0 var(--ink); cursor: pointer; font-weight: 1000; z-index: 25; }
+
+    @media (max-width: 920px) {
+      .hero-grid, .story-card, .board-wrap, .twist, .boss-battle, .setup-grid { grid-template-columns: 1fr; }
+      .hero { padding-top: 56px; }
+      .case-file { min-height: 400px; }
+      .evidence-grid { grid-template-columns: repeat(2, 1fr); }
+      .evidence-card:last-child { grid-column: 1 / -1; }
+      .timeline { grid-template-columns: repeat(3, 1fr); row-gap: 28px; }
+      .roles, .kit-grid, .award-grid { grid-template-columns: repeat(3, 1fr); }
+      .cards-grid { grid-template-columns: 1fr 1fr; }
+      .section-head { grid-template-columns: 120px 1fr; gap: 24px; }
+    }
+    @media (max-width: 640px) {
+      .shell { width: min(100% - 22px, 1180px); }
+      .topbar-inner { align-items: flex-start; padding: 10px 0; }
+      .brand span { display: none; }
+      nav { justify-content: flex-end; }
+      nav a { padding: 5px 8px; font-size: 11px; }
+      .print-button { display: none; }
+      .hero-grid { gap: 34px; }
+      .folder-paper { inset: 54px 24px 26px 28px; padding: 24px; }
+      .compare, .scoreline, .economy, .cards-grid, .script-grid { grid-template-columns: 1fr; }
+      .compare-card + .compare-card { border-left: 0; border-top: 1px solid rgba(255,255,255,.32); }
+      .section-head { grid-template-columns: 1fr; }
+      .section-no { font-size: 54px; }
+      .evidence-grid, .roles, .kit-grid, .award-grid { grid-template-columns: 1fr; }
+      .evidence-card:last-child { grid-column: auto; }
+      .timeline { grid-template-columns: repeat(2, 1fr); }
+      .board-center { padding: 10px; }
+      .sq { padding: 3px; }
+      .sq small { display: none; }
+      .footer-grid { align-items: flex-start; flex-direction: column; }
+    }
+
+    @media print {
+      body { background: white; }
+      .topbar, .backtop, .print-button { display: none !important; }
+      section { padding: 36px 0; break-inside: avoid; }
+      .hero { padding: 30px 0; }
+      .shell { width: 94%; }
+      .case-file { min-height: 360px; }
+      details { display: block; }
+      details > summary { list-style: none; }
+      details > * { display: block !important; }
+      .game-card, .evidence-card, .rule { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <template id="__bundler_thumbnail" data-bg-color="#f5f0e6">
+    <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+      <rect width="1200" height="800" fill="#f5f0e6"></rect>
+      <rect x="160" y="130" width="880" height="540" rx="30" fill="#174f3c"></rect>
+      <rect x="240" y="220" width="330" height="360" fill="#e4b13c" stroke="#182522" stroke-width="12"></rect>
+      <circle cx="790" cy="400" r="165" fill="#e85d3f" stroke="#182522" stroke-width="12"></circle>
+      <text x="405" y="430" text-anchor="middle" font-family="Georgia" font-size="150" font-weight="900" fill="#182522">A</text>
+      <text x="790" y="455" text-anchor="middle" font-family="Georgia" font-size="150" font-weight="900" fill="#fffdf8">B</text>
+    </svg>
+  </template>
+
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand"><span class="brand-mark"></span><span>TEAM PLAYBOOK / 60 MIN</span></div>
+      <nav aria-label="页面导航">
+        <a href="#overview">总览</a>
+        <a href="#plan-a">解谜</a>
+        <a href="#plan-b">大富翁</a>
+        <a href="#setup">准备</a>
+        <button class="print-button" type="button" onclick="window.print()">打印 / PDF</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" data-screen-label="封面">
+      <div class="shell hero-grid">
+        <div>
+          <div class="eyebrow">25 PEOPLE · 5 TEAMS · 60 MINUTES</div>
+          <h1 class="serif">晚餐前，<span>玩一局大的。</span></h1>
+          <p class="hero-lede">两套可以直接落地的欢乐团队活动：一场需要五组交换情报的搞笑悬疑案；一局删掉破产焦虑、加入公司梗与全员合作的轻量大富翁。</p>
+          <div class="hero-meta">
+            <span class="pill">室内 / 室外</span><span class="pill">5人一组</span><span class="pill">低门槛</span><span class="pill">主持人可照读</span>
+          </div>
+        </div>
+        <div class="case-file" aria-label="案件档案视觉">
+          <div class="folder"></div>
+          <div class="folder-paper">
+            <span class="stamp">CONFIDENTIAL</span>
+            <h2 class="serif">The Great<br />Dinner Heist</h2>
+            <p>案号：DINNER–25<br />嫌疑：有人太想吃甜点</p>
+            <div class="evidence-strip"><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="snapshot" id="overview" data-screen-label="方案总览">
+      <div class="shell">
+        <div class="section-head">
+          <div class="section-no">00</div>
+          <div><div class="eyebrow">QUICK DECISION</div><h2 class="serif">先选气氛，再开局</h2><p>两个方案都控制在一小时内、每组五人、无需复杂规则。A 更像沉浸式侦探综艺；B 更像公司内部梗做成的派对桌游。</p></div>
+        </div>
+        <div class="compare">
+          <article class="compare-card"><span class="big-letter">A</span><div class="eyebrow">搞笑悬疑</div><h3>The Great Dinner Heist</h3><ul><li>五组拿到不同证据，必须跨组交换</li><li>谜题、表演、推理与最后反转</li><li>适合愿意进入剧情、喜欢解谜的团队</li></ul><div class="scoreline"><div><b>高</b><span>沉浸感</span></div><div><b>中</b><span>准备量</span></div><div><b>高</b><span>合作度</span></div><div><b>高</b><span>戏剧效果</span></div></div></article>
+          <article class="compare-card"><span class="big-letter">B</span><div class="eyebrow">欢乐经营</div><h3>Quarterly Chaos Monopoly</h3><ul><li>全组共用资金，不淘汰、不破产</li><li>公司地标、黑话、突发事件全都能换</li><li>适合想轻松聊天、快速笑起来的团队</li></ul><div class="scoreline"><div><b>中</b><span>沉浸感</span></div><div><b>低</b><span>准备量</span></div><div><b>高</b><span>合作度</span></div><div><b>爆表</b><span>公司梗</span></div></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="plan-a" id="plan-a" data-screen-label="方案A">
+      <div class="shell">
+        <div class="section-head">
+          <div class="section-no">01</div>
+          <div><div class="eyebrow">PLAN A · MYSTERY COMEDY</div><h2 class="serif">消失的黄金餐券</h2><p>原始设定延展版：25人分成五支侦探小队，在60分钟内找回决定晚餐甜点命运的“黄金餐券”。每组只掌握真相的五分之一。</p></div>
+        </div>
+
+        <div class="story-card">
+          <article class="story-copy"><div class="eyebrow">OPENING STORY</div><blockquote>“距离晚餐开始还有60分钟。价值并不高、但荣誉极高的黄金餐券不见了。餐厅说没有它，今晚的甜点将统一改成——无糖苏打饼。请各位立刻破案。”</blockquote></article>
+          <div class="story-visual"><div class="ticket"><small>ONE NIGHT ONLY</small><strong>GOLDEN<br />DINNER PASS</strong><small>甜点自由 · 不可报销</small></div></div>
+        </div>
+
+        <h3 class="serif" style="font-size:32px">60分钟节奏</h3>
+        <div class="timeline" aria-label="游戏时间线">
+          <div class="time-step"><b>00–05</b><span>主持人开场、展示空盒与嫌疑人海报</span></div>
+          <div class="time-step"><b>05–10</b><span>分组、分角色、发密封证据包</span></div>
+          <div class="time-step"><b>10–28</b><span>各组独立解开本组核心谜题</span></div>
+          <div class="time-step"><b>28–40</b><span>情报交易所开放，跨组交换结论</span></div>
+          <div class="time-step"><b>40–52</b><span>拼出时间、人物、地点与动机</span></div>
+          <div class="time-step"><b>52–60</b><span>陈述、反转、颁奖与合影</span></div>
+        </div>
+
+        <h3 class="serif" style="font-size:32px">五组拿到的不同证据</h3>
+        <p style="color:var(--muted);max-width:760px">每组先独立完成，再用一句“可交易结论”与其他组交换。主持人不要让大家直接把整张题卡拍照群发，保留面对面协作。</p>
+        <div class="evidence-grid">
+          <article class="evidence-card"><header><span class="team-id">TEAM 01 / MENU</span><h3>菜单里的藏头句</h3></header><div class="body"><p>给一张八道菜的“今日特供菜单”。每道菜旁有一个奇怪的加粗字。按前菜→主菜→甜点的正常上菜顺序读取。</p><p><b>互动：</b>全队必须用最夸张的美食节目语气念一遍菜单，才可向主持人索取顺序提示。</p><details class="reveal"><summary>查看标准答案</summary><p>得到“甜点车下层”。可交易结论：藏匿地点与甜点车有关。</p></details></div></article>
+          <article class="evidence-card"><header><span class="team-id">TEAM 02 / RECEIPT</span><h3>无法报销的收据</h3></header><div class="body"><p>三张收据写着 17:36、17:42、17:49；金额尾数与办公室楼层图对应。只有一张同时符合“离开会场七分钟”和“回程经过餐厅”。</p><p><b>互动：</b>指定“财务侦探”用30秒解释为什么这笔消费“原则上不建议，但这次可以理解”。</p><details class="reveal"><summary>查看标准答案</summary><p>关键时间为17:42。可交易结论：餐券在17:42被移动。</p></details></div></article>
+          <article class="evidence-card"><header><span class="team-id">TEAM 03 / CALENDAR</span><h3>可疑的共享日历</h3></header><div class="body"><p>五名嫌疑人的17:35–17:50日程互相重叠。把会议室、通话与“专注时间（其实在找咖啡）”排进时间轴。</p><p><b>互动：</b>两名队员现场演出一段15秒“这会本来可以是一封邮件”的会议。</p><details class="reveal"><summary>查看标准答案</summary><p>17:42只有行政小满没有不在场证明；厨师、销售、财务与主持人均可排除。</p></details></div></article>
+          <article class="evidence-card"><header><span class="team-id">TEAM 04 / MARKER</span><h3>紫色笔迹鉴定</h3></header><div class="body"><p>五张嫌疑人便签，只有一张与餐券盒上的紫色左斜笔迹一致。把透明“笔迹窗”覆盖到样本上比对三个笔画。</p><p><b>互动：</b>全队用非惯用手写“我没有偷甜点”，选出最像嫌疑人的字。</p><details class="reveal"><summary>查看标准答案</summary><p>笔迹来自左撇子的行政小满。可交易结论：移动餐券的人惯用紫笔且左撇子。</p></details></div></article>
+          <article class="evidence-card"><header><span class="team-id">TEAM 05 / CHAT</span><h3>群聊截图的删除线</h3></header><div class="body"><p>一页“晚餐筹备群”记录里有四条被涂黑的信息。通过每句剩余字数对应字母表，解出真正动机。</p><p><b>互动：</b>队员轮流模仿五种公司群聊人格：秒回、潜水、只发表情、深夜长文、永远@所有人。</p><details class="reveal"><summary>查看标准答案</summary><p>得到“测试合作，不是偷窃”。可交易结论：整件事是预先设计的团队测试。</p></details></div></article>
+        </div>
+
+        <h3 class="serif" style="font-size:32px;margin-top:54px">每组五个角色</h3>
+        <div class="roles">
+          <div class="role"><b>首席侦探</b><span>控节奏，最后提交答案</span></div><div class="role"><b>证据官</b><span>保管题卡，不让线索失踪两次</span></div><div class="role"><b>密码师</b><span>负责文字、数字与排列</span></div><div class="role"><b>交涉官</b><span>进入情报交易所与别组交换</span></div><div class="role"><b>戏剧担当</b><span>完成表演任务，赢取提示</span></div>
+        </div>
+
+        <div class="twist">
+          <div><div class="eyebrow">FINAL TWIST</div><h3 class="serif">“凶手”没有偷东西。</h3><p>行政小满受主持人委托，把餐券藏在甜点车下层。目的不是抓出最聪明的一组，而是证明五组如果不共享信息，谁都无法获得甜点自由。</p></div>
+          <div class="answer-key"><b>主持人标准答案</b><ol><li>人物：行政小满</li><li>时间：17:42</li><li>地点：甜点车下层</li><li>动机：测试跨组合作</li><li>找回方式：五组同时说出口令“先共享，再开饭”</li></ol></div>
+        </div>
+
+        <h3 class="serif" style="font-size:32px;margin-top:54px">计分与奖项</h3>
+        <div class="award-grid"><div class="award"><b>破案准确 40</b><span>人物、时间、地点、动机各10分</span></div><div class="award"><b>证据链 25</b><span>说清楚“为什么”，不是只猜中</span></div><div class="award"><b>跨组合作 20</b><span>至少与三组完成有效交换</span></div><div class="award"><b>陈述喜剧值 10</b><span>不尴尬也算一种高级幽默</span></div><div class="award"><b>时间管理 5</b><span>52分钟前提交完整答案</span></div></div>
+      </div>
+    </section>
+
+    <section class="plan-b" id="plan-b" data-screen-label="方案B">
+      <div class="shell">
+        <div class="section-head"><div class="section-no">02</div><div><div class="eyebrow">PLAN B · CO-OP MONOPOLY</div><h2 class="serif">季度混乱大富翁</h2><p>保留掷骰子、走格子、买资产的爽感，删除个人破产、复杂租金和漫长交易。每组共用一枚棋子、一笔钱和一个目标；最后还有25人共同面对的“老板战”。</p></div></div>
+
+        <div class="board-wrap">
+          <div class="board" aria-label="16格公司大富翁示意棋盘">
+            <div class="sq green s1"><b>准时下班</b><small>START +20</small></div><div class="sq gold s2"><b>茶水间绿洲</b><small>资产</small></div><div class="sq blue s3"><b>临时会议</b><small>事件</small></div><div class="sq coral s4"><b>需求又改了</b><small>挑战</small></div><div class="sq plum s5"><b>传奇客户</b><small>资产</small></div><div class="sq gold s6"><b>报销奇遇</b><small>事件</small></div><div class="sq green s7"><b>自动化脚本</b><small>资产</small></div><div class="sq coral s8"><b>电梯偶遇</b><small>即兴</small></div><div class="sq blue s9"><b>团建补给站</b><small>REST</small></div><div class="sq plum s10"><b>会议室百慕大</b><small>资产</small></div><div class="sq gold s11"><b>热搜预警</b><small>事件</small></div><div class="sq green s12"><b>最佳点子</b><small>挑战</small></div><div class="sq coral s13"><b>年终复盘</b><small>BONUS</small></div><div class="sq blue s14"><b>Bug 养殖场</b><small>资产</small></div><div class="sq plum s15"><b>神秘培训</b><small>事件</small></div><div class="sq gold s16"><b>咖啡机罢工</b><small>挑战</small></div>
+            <div class="board-center"><div><strong>QUARTERLY<br />CHAOS</strong><span>[COMPANY NAME] EDITION</span></div></div>
+          </div>
+          <div class="rules-panel">
+            <article class="rule"><span class="rule-no">1</span><div><h3>全队只有一枚棋子</h3><p>大家一起走、一起花钱、一起得分。没有谁被淘汰，也没有“你欠我800块”的饭前恩怨。</p></div></article>
+            <article class="rule"><span class="rule-no">2</span><div><h3>每回合最多90秒</h3><p>掷骰→移动→读格子→30秒讨论→执行。主持人用铃声结束无限讨论。</p></div></article>
+            <article class="rule"><span class="rule-no">3</span><div><h3>资产只有一种价格</h3><p>花20团队币购买；以后每经过一次就获得5团队币＋1文化星。免查租金表。</p></div></article>
+            <article class="rule"><span class="rule-no">4</span><div><h3>每两回合轮换角色</h3><p>掷骰官、CEO、CFO、创意总监、快乐监察员轮换，确保不被一位“桌游董事长”垄断。</p></div></article>
+          </div>
+        </div>
+
+        <div class="economy">
+          <article class="currency" data-symbol="$"><div class="eyebrow">TEAM COINS</div><h3>团队币</h3><strong>起始 100</strong><p>用于买资产、化解事件。钱不是唯一胜负标准。</p></article>
+          <article class="currency" data-symbol="★"><div class="eyebrow">CULTURE STARS</div><h3>文化星</h3><strong>目标 15</strong><p>通过协作挑战与公司价值观任务获得。</p></article>
+          <article class="currency" data-symbol="!"><div class="eyebrow">LAUGH TOKENS</div><h3>笑点章</h3><strong>上限 5</strong><p>让其他队真笑即可获得；同一个梗只算一次。</p></article>
+        </div>
+
+        <h3 class="serif" style="font-size:32px;margin-top:54px">示例事件与挑战卡</h3>
+        <div class="cards-grid">
+          <article class="game-card"><span class="tag">EVENT / 群聊风暴</span><h3>“收到”接龙失控</h3><p>项目群出现17条“收到”。全队在20秒内创造一个不用“收到”也能表示确认的新手势。</p><div class="effect">成功：+2文化星；失败：全队齐声说“已阅”。</div></article>
+          <article class="game-card"><span class="tag">CHALLENGE / 电梯提案</span><h3>卖出一件没用的东西</h3><p>随机拿一件桌上物品，30秒把它包装成公司下季度的战略级产品。</p><div class="effect">其他队鼓掌：+10团队币；笑出声：再+1笑点章。</div></article>
+          <article class="game-card"><span class="tag">CRISIS / 需求漂移</span><h3>客户只说“再高级一点”</h3><p>CEO只能问三个是非题，团队要猜出主持人手中的隐藏需求词。</p><div class="effect">猜中：+2文化星；没中：支付10团队币“返工费”。</div></article>
+          <article class="game-card"><span class="tag">ASSET / 茶水间绿洲</span><h3>买下最重要的基础设施</h3><p>花20团队币。购买前，全队必须一致决定本公司茶水间最不能缺少什么。</p><div class="effect">购入后每次经过：+5团队币、+1文化星。</div></article>
+          <article class="game-card"><span class="tag">COLLAB / 借人五分钟</span><h3>跨部门救火</h3><p>向另一队借一位队员完成“人体LOGO”或“三人定格广告”。双方共同参与。</p><div class="effect">两队各+2文化星；出借方另收5团队币。</div></article>
+          <article class="game-card"><span class="tag">WILDCARD / 老板路过</span><h3>所有人突然显得很忙</h3><p>主持人喊“三、二、一”，全队定格成正在进行高价值工作的样子，维持五秒。</p><div class="effect">最有说服力的队获得1笑点章。</div></article>
+        </div>
+
+        <h3 class="serif" style="font-size:32px;margin-top:54px">建议流程</h3>
+        <div class="timeline"><div class="time-step"><b>00–06</b><span>规则、队名与角色分配</span></div><div class="time-step"><b>06–12</b><span>两回合教学试玩</span></div><div class="time-step"><b>12–37</b><span>正式经营，90秒一回合</span></div><div class="time-step"><b>37–44</b><span>公司交易会：跨组交换资源</span></div><div class="time-step"><b>44–52</b><span>最后冲刺，完成团队目标</span></div><div class="time-step"><b>52–60</b><span>全员Boss战、计分与颁奖</span></div></div>
+
+        <div class="boss-battle"><div><div class="eyebrow" style="color:var(--ink)">FINAL CO-OP</div><div class="boss-title">老板战：<br />晚餐预算危机</div></div><div><p><b>剧情：</b>系统突然通知晚餐预算被削减30%。五队须在4分钟内凑齐 <b>60文化星</b>，并各派一人用一句话说明“为什么这顿饭值得保留”。</p><div class="meter"><div class="meter-fill"></div></div><p><b>全员成功：</b>解锁甜点与合影。若不足60星，允许用每2枚笑点章兑换1颗文化星——快乐本身也是生产力。</p></div></div>
+
+        <h3 class="serif" style="font-size:32px;margin-top:54px">胜负不只看钱</h3>
+        <div class="award-grid"><div class="award"><b>团队币 × 1</b><span>现金余额与资产价值</span></div><div class="award"><b>文化星 × 5</b><span>让合作成为主要得分项</span></div><div class="award"><b>笑点章 × 8</b><span>鼓励欢乐但不逼人表演</span></div><div class="award"><b>完成项目 +20</b><span>集齐任意三类资产算一个项目</span></div><div class="award"><b>全员Boss成功 +25</b><span>所有队共同获得，不影响排名</span></div></div>
+      </div>
+    </section>
+
+    <section class="setup" id="setup" data-screen-label="落地准备">
+      <div class="shell">
+        <div class="section-head"><div class="section-no">03</div><div><div class="eyebrow">PRODUCTION CHECKLIST</div><h2 class="serif">一位主持人，也能控场</h2><p>建议再安排一名计分助手；若只有一人，优先使用方案B。点击清单可现场勾选，打印时也能作为备忘。</p></div></div>
+        <div class="setup-grid">
+          <article class="setup-card"><h3>方案A 道具</h3><div class="checklist"><label class="check"><input type="checkbox" /><span>5个颜色不同的证据袋，每袋含题卡、角色卡、草稿纸、笔</span></label><label class="check"><input type="checkbox" /><span>黄金餐券或金色信封、空展示盒、甜点车/替代箱</span></label><label class="check"><input type="checkbox" /><span>嫌疑人海报5张、时间轴表、最终答题纸5张</span></label><label class="check"><input type="checkbox" /><span>透明笔迹比对窗、三档提示卡（每组最多3次）</span></label><label class="check"><input type="checkbox" /><span>计时器、铃铛、奖状或小零食</span></label></div></article>
+          <article class="setup-card"><h3>方案B 道具</h3><div class="checklist"><label class="check"><input type="checkbox" /><span>棋盘5张、骰子5枚、棋子5枚</span></label><label class="check"><input type="checkbox" /><span>团队币每组100、文化星20、笑点章5</span></label><label class="check"><input type="checkbox" /><span>事件卡、挑战卡、资产卡各15–20张</span></label><label class="check"><input type="checkbox" /><span>角色卡每组5张、计分表、笔</span></label><label class="check"><input type="checkbox" /><span>90秒回合计时器、Boss战总分板</span></label></div></article>
+        </div>
+
+        <h3 class="serif" style="font-size:32px;margin-top:52px">把模板换成你们公司的梗</h3>
+        <table class="custom-table"><thead><tr><th>通用占位</th><th>替换成什么</th><th>示例</th><th>安全边界</th></tr></thead><tbody><tr><td>[COMPANY NAME]</td><td>公司或团队简称</td><td>“ACME Quarterly Chaos”</td><td>不使用未公开客户名</td></tr><tr><td>资产格</td><td>办公室地标、产品、内部工具</td><td>“三楼永远订不到的会议室”</td><td>不影射具体个人失误</td></tr><tr><td>事件卡</td><td>大家都经历过的轻度职场情境</td><td>“需求再高级一点”</td><td>避开裁员、薪资、绩效敏感梗</td></tr><tr><td>嫌疑人</td><td>虚构职位或自愿出演的同事</td><td>“神秘行政小满”</td><td>不要把真实同事设为负面角色</td></tr><tr><td>价值观题</td><td>公司真实文化关键词</td><td>客户第一、快速试错、坦诚</td><td>题目要能行动化，不背口号</td></tr><tr><td>奖励</td><td>轻量且立刻兑现</td><td>先选甜点、最佳合影位</td><td>避免和真实奖金、晋升挂钩</td></tr></tbody></table>
+      </div>
+    </section>
+
+    <section class="host-script" data-screen-label="主持人口播">
+      <div class="shell">
+        <div class="section-head"><div class="section-no">04</div><div><div class="eyebrow">HOST SCRIPTS</div><h2 class="serif">关键时刻，照着说</h2><p>不需要“综艺主持人”人格。语速稍慢、规则只讲一遍、倒计时明确，现场就会很稳。</p></div></div>
+        <div class="script-grid">
+          <article class="script"><time>方案A / 00:00</time><blockquote>“各位，今晚最重要的东西失踪了。不是预算，也不是老板的耐心，是黄金餐券。你们每组只会拿到五分之一的真相——如果不合作，今晚的甜点就是无糖苏打饼。”</blockquote></article>
+          <article class="script"><time>方案A / 28:00</time><blockquote>“情报交易所开放12分钟。你可以分享结论，但不能交出原题卡。真正的侦探不会转发整份附件，他们会开一个十五分钟的会。”</blockquote></article>
+          <article class="script"><time>方案B / 00:00</time><blockquote>“这不是你小时候那局会玩到凌晨的大富翁。全组只有一笔钱、一枚棋子和一个共同目标。没有人破产，但你们的咖啡机可能会。”</blockquote></article>
+          <article class="script"><time>方案B / 52:00</time><blockquote>“暂停竞争。真正的危机来了：晚餐预算被削减30%。五队现在是一家公司。你们有四分钟证明，这顿饭——以及彼此——值得保留。”</blockquote></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell footer-grid"><div><b class="serif">先共享，再开饭。</b><p>Team Building Dual Playbook · 25人 / 5组 / 60分钟</p></div><p class="mono">VERSION 1.0 · SELF-CONTAINED HTML</p></div></footer>
+  <button class="backtop" type="button" aria-label="回到顶部" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+  <script>
+    document.querySelectorAll('.check input').forEach(function (box, index) {
+      var key = 'team-playbook-check-' + index;
+      box.checked = localStorage.getItem(key) === '1';
+      box.addEventListener('change', function () { localStorage.setItem(key, box.checked ? '1' : '0'); });
+    });
+  </script>
+</body>
+</html>
