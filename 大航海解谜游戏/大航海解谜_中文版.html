@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大航海解谜手册</title>
+<style>
+:root{
+  --bg:#f4eee2;--paper:#fffdf8;--ink:#2a2118;--muted:#6b5d4f;--line:#e2d6c2;
+  --accent:#9c3d1f;--navy:#1f3a5f;--gold:#a8781f;
+  --intra:#2f6b4f;--cross:#1f4f8f;--final:#9c3d1f;--soft:#f7f1e6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15120e;--paper:#1f1b16;--ink:#efe6d8;--muted:#b3a691;--line:#3a3228;
+    --accent:#e07a52;--navy:#9dbde6;--gold:#d9a94a;
+    --intra:#4f9e7a;--cross:#4f86c9;--final:#c9643f;--soft:#262019;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15120e;--paper:#1f1b16;--ink:#efe6d8;--muted:#b3a691;--line:#3a3228;
+  --accent:#e07a52;--navy:#9dbde6;--gold:#d9a94a;
+  --intra:#4f9e7a;--cross:#4f86c9;--final:#c9643f;--soft:#262019;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 "PingFang SC","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px 80px}
+header{padding:48px 0 24px;border-bottom:1px solid var(--line)}
+header .kicker{color:var(--gold);letter-spacing:.2em;font-size:13px;font-weight:600}
+h1{font-family:"Songti SC","Noto Serif SC","SimSun",Georgia,serif;font-size:clamp(28px,5vw,42px);line-height:1.25;margin:8px 0 12px}
+h2{font-family:"Songti SC","Noto Serif SC","SimSun",Georgia,serif;font-size:clamp(22px,3.6vw,30px);margin:40px 0 8px;line-height:1.3}
+h3{font-size:19px;margin:32px 0 10px;color:var(--navy)}
+h4{font-size:17px;margin:0}
+p{margin:8px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:2px 12px;font-size:13px;color:var(--muted)}
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:12px 0;border-bottom:1px solid var(--line)}
+nav.tabs button{flex:0 0 auto;font:inherit;font-size:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:6px 14px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+section.tab{display:none}
+section.tab.active{display:block}
+.story{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:16px 20px;margin:16px 0}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0;background:var(--paper)}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--soft);font-weight:600}
+.tw{overflow-x:auto}
+.tw td:first-child{min-width:4.5em}
+.puzzle{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+.ph{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:8px}
+.tag{font-size:12px;font-weight:700;border-radius:6px;padding:1px 8px;color:#fff}
+.tag.intra{background:var(--intra)}.tag.cross{background:var(--cross)}.tag.final{background:var(--final)}
+.time{font-size:13px;color:var(--muted);margin-left:auto}
+.label{font-weight:700;color:var(--muted);font-size:13px;margin-top:10px;letter-spacing:.05em}
+.prop{background:var(--soft);border:1px dashed var(--line);border-radius:8px;padding:10px 14px;margin:6px 0;font-family:"Songti SC","Noto Serif SC",Georgia,serif}
+.prop .mono,.mono{font-family:ui-monospace,Consolas,monospace;letter-spacing:.08em}
+details{border:1px solid var(--line);border-radius:8px;margin:8px 0;background:var(--soft)}
+details summary{cursor:pointer;padding:6px 12px;font-weight:600;color:var(--accent)}
+details > div{padding:4px 14px 10px}
+ul,ol{padding-left:22px;margin:6px 0}
+.note{font-size:14px;color:var(--muted)}
+.grid-map td{width:16.6%;text-align:center;height:44px;font-size:13px}
+.reef{background:repeating-linear-gradient(45deg,var(--soft),var(--soft) 6px,var(--line) 6px,var(--line) 12px)}
+.isle{font-weight:700;color:var(--intra)}
+.ship{font-weight:700;color:var(--accent)}
+.mirror{display:inline-block;transform:scaleX(-1)}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px;margin:8px 0}
+.flow span{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:2px 10px}
+.flow b{color:var(--muted)}
+.pick{border:2px solid var(--accent)}
+footer{color:var(--muted);font-size:13px;margin-top:48px;border-top:1px solid var(--line);padding-top:16px}
+.theme-toggle{float:right;font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:4px 10px;cursor:pointer}
+@media print{
+  nav.tabs,.theme-toggle{display:none}
+  section.tab{display:block!important;page-break-before:always}
+  section.tab:first-of-type{page-break-before:auto}
+  .puzzle{break-inside:avoid}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <button class="theme-toggle" id="themeBtn" type="button">深 / 浅</button>
+  <div class="kicker">AGE OF DISCOVERY · 团建解谜手册</div>
+  <h1>大航海解谜游戏：三套方案谜题设计</h1>
+  <p>主持人和策划用。三套故事线各自配好完整谜题、答案、提示、时间线和道具清单，选一套就能开始做物料。</p>
+  <div class="chips"><span class="chip">25 人</span><span class="chip">5 队 × 5 人</span><span class="chip">≤ 60 分钟</span><span class="chip">餐厅场地</span><span class="chip">视频开场</span><span class="chip">游戏结束 → 开饭</span></div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-t="ov" aria-selected="true">总览与通用规则</button>
+  <button role="tab" data-t="a" aria-selected="false">A · 五片航海图</button>
+  <button role="tab" data-t="b" aria-selected="false">B · 塞维利亚香料交易所</button>
+  <button role="tab" data-t="c" aria-selected="false">C · 最后一次航行</button>
+</nav>
+
+<!-- ============ OVERVIEW ============ -->
+<section class="tab active" id="ov">
+<h2>三套方案对比</h2>
+<div class="tw"><table>
+<tr><th></th><th>A 五片航海图</th><th>B 塞维利亚香料交易所</th><th>C 最后一次航行</th></tr>
+<tr><td>队伍关系</td><td>纯合作，5 艘船拼一张图</td><td>先竞争后合作，5 家商行抢香料</td><td>完全互相依赖，同一艘船的 5 个部门</td></tr>
+<tr><td>跨队机制</td><td>钥匙环：每队的解码钥匙在下一队的箱子里</td><td>自由交易 + 双锁宝箱 + 海盗情报 + 随机事件</td><td>依赖链：每个部门既要给别人线索，也要等别人的线索</td></tr>
+<tr><td>谜题数量</td><td>3 队内 + 5 跨队 + 1 终局</td><td>3 队内 + 3 跨队合约 + 1 终局</td><td>5 队内 + 6 次跨队交接 + 1 终局</td></tr>
+<tr><td>终局密码</td><td class="mono">FEAST</td><td class="mono">SPICE</td><td class="mono">TABLE</td></tr>
+<tr><td>接晚餐</td><td>5 个港口 = 5 道菜</td><td>皇家配方 = 主菜</td><td>船长现身，宣布开饭</td></tr>
+<tr><td>工作人员</td><td>1 主持 + 1 助手</td><td>1 主持 + 2 交易所书记员</td><td>1 主持 + 1 助手 + 1 位"船长"（建议老板/领导）</td></tr>
+<tr><td>制作难度</td><td>低</td><td>中</td><td>中高</td></tr>
+</table></div>
+
+<h2>通用规则（三套都适用）</h2>
+<h3>分组</h3>
+<ul>
+  <li>5 队 × 5 人。把平时不常一起工作的人混编在一队，跨队交流的效果会更好。</li>
+  <li>每队一张餐桌，作为"船"或"商行"的大本营。桌上贴队名牌，所有道具装在一个托盘或箱子里，开场前盖好。</li>
+  <li>每队选一名"船长"负责领提示、交答案，其他人自由分工。</li>
+</ul>
+<h3>提示规则</h3>
+<ul>
+  <li>每队 3 次免费提示（发 3 枚"漂流瓶"卡片），用完后每次提示罚时 2 分钟（方案 B 改为每次扣 2 枚金币）。</li>
+  <li>每道谜都写了 3 级提示：<b>①方向</b> → <b>②方法</b> → <b>③几乎是答案</b>。主持人从①开始给。</li>
+  <li>主持人看到某队卡住超过 5 分钟，可以主动给一个①级提示，不扣次数。</li>
+</ul>
+<h3>计时节奏</h3>
+<div class="tw"><table>
+<tr><th>时间</th><th>环节</th><th>主持人动作</th></tr>
+<tr><td>0–5'</td><td>开场视频</td><td>播放视频，宣读规则（1 分钟），宣布"起航"</td></tr>
+<tr><td>5–25'</td><td>第一幕：队内解谜</td><td>巡场、给提示；20' 时广播"距离第二幕还有 5 分钟"</td></tr>
+<tr><td>25–45'</td><td>第二幕：跨队互动</td><td>推动交流，随机事件（方案 B）</td></tr>
+<tr><td>45–55'</td><td>第三幕：终局</td><td>全场聚到中央，开最后的箱子</td></tr>
+<tr><td>55–60'</td><td>颁奖 + 开饭</td><td>与厨房提前约好上菜信号</td></tr>
+</table></div>
+<p class="note">各方案的具体时间会在自己的页面里微调。实际节奏以"第三幕在 50' 前开始"为底线，来不及就加大提示力度。</p>
+<h3>餐厅协调清单</h3>
+<ul>
+  <li>提前 1 天确认：可用的桌子数、能否藏道具（厨房门口、吧台、主桌下）、上菜所需时间。</li>
+  <li>与厨房约好上菜信号（如主持人摇铃），游戏结束后 2–3 分钟内出第一道菜。</li>
+  <li>所有道具远离餐具和食物，开场前不要摆餐具，或用桌布盖住。</li>
+  <li>方案 B 用到真香料：只闻不尝，装在有孔的不透明小罐里，提前询问过敏情况。</li>
+</ul>
+<h3>开场视频需要交代的信息</h3>
+<ul>
+  <li>时代与地点（大航海时代，1500 年前后）</li>
+  <li>你们是谁（船队 / 商行 / 船员）</li>
+  <li>目标与时限（"天亮之前""国王宴会开始之前""淡水耗尽之前"）</li>
+  <li>一句暗示合作的台词，为终局反转埋伏笔</li>
+</ul>
+</section>
+
+<!-- ============ OPTION A ============ -->
+<section class="tab" id="a">
+<h2>A · 五片航海图</h2>
+<div class="story">
+<p><b>故事：</b>1519 年，一支由 5 艘船组成的船队从里斯本出发，寻找传说中的香料群岛。老船长在启航前夜病逝，临终前把唯一的航海图撕成 5 片，锁进 5 艘船的船长箱，因为他怀疑船队里有人想独吞航线。</p>
+<p>今晚，5 艘船在一个港口（就是这家餐厅）重新集结。天亮之前必须拼出完整航线，否则补给耗尽，船队只能解散。</p>
+<p><b>视频结尾台词建议：</b>"每一片地图都不完整。每一把钥匙，都不在它自己的船上。"</p>
+</div>
+
+<h3>队伍设置</h3>
+<div class="tw"><table>
+<tr><th>队号</th><th>船名</th><th>手里的残图</th><th>船长箱里额外放的东西</th></tr>
+<tr><td>1</td><td>海鹰号</td><td>残图 1（里斯本段）</td><td>残图 5 的钥匙卡 + 印章 <b>T</b></td></tr>
+<tr><td>2</td><td>北极星号</td><td>残图 2（好望角段）</td><td>残图 1 的钥匙卡 + 印章 <b>F</b></td></tr>
+<tr><td>3</td><td>信风号</td><td>残图 3（果阿段）</td><td>残图 2 的钥匙卡 + 印章 <b>E</b></td></tr>
+<tr><td>4</td><td>珊瑚号</td><td>残图 4（马六甲段）</td><td>残图 3 的钥匙卡 + 印章 <b>A</b></td></tr>
+<tr><td>5</td><td>晨星号</td><td>残图 5（摩鹿加段）</td><td>残图 4 的钥匙卡 + 印章 <b>S</b></td></tr>
+</table></div>
+<p class="note">规律：第 n 队的残图要靠第 n+1 队箱子里的钥匙来解（第 5 队靠第 1 队）。印章字母跟着钥匙走。</p>
+
+<h3>时间线</h3>
+<div class="flow"><span>0–5' 视频</span><b>→</b><span>5–25' 第一幕：打开船长箱</span><b>→</b><span>25–45' 第二幕：舰队会合，交换钥匙</span><b>→</b><span>45–55' 第三幕：拼图 + 最终宝箱</span><b>→</b><span>55' 靠岸开饭</span></div>
+
+<h3>第一幕 · 队内：打开船长箱（5–25'）</h3>
+<p>每队的船长箱挂一把 <b>3 位数字锁</b>。三道谜各给出一位数字，顺序为 A1-A2-A3。</p>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">队内</span><h4>A1 · 信号旗</h4><span class="time">约 6 分钟 · 锁的第 1 位</span></div>
+<p>船长在桌上留下一串彩色小旗，旁边是一张国际海事信号旗对照表。</p>
+<div class="label">道具</div>
+<ul><li>印好的信号旗卡片（每队一串，3–4 面旗）</li><li>国际信号旗对照表（A–Z 各一面旗，可直接打印维基百科上的公有领域图表）</li></ul>
+<div class="label">玩家看到的文字</div>
+<div class="prop">"桅杆上升起的旗，就是你的第一个数字。"</div>
+<div class="label">每队的旗帜内容</div>
+<div class="tw"><table><tr><th>队</th><th>旗帜拼出</th><th>数字</th></tr>
+<tr><td>1 海鹰号</td><td class="mono">S-I-X</td><td>6</td></tr>
+<tr><td>2 北极星号</td><td class="mono">O-N-E</td><td>1</td></tr>
+<tr><td>3 信风号</td><td class="mono">N-I-N-E</td><td>9</td></tr>
+<tr><td>4 珊瑚号</td><td class="mono">T-W-O</td><td>2</td></tr>
+<tr><td>5 晨星号</td><td class="mono">F-I-V-E</td><td>5</td></tr></table></div>
+<details><summary>提示</summary><div><ol><li>每一面旗代表一个字母。</li><li>对照表逐面查，拼出来是一个英文单词。</li><li>这个单词是一个数字的英文。</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">队内</span><h4>A2 · 船员名册（逻辑推理）</h4><span class="time">约 8 分钟 · 锁的第 2 位</span></div>
+<p>五队拿到的题目相同，适合 2–3 人一起画表格推理。</p>
+<div class="label">玩家看到的文字</div>
+<div class="prop">
+船舱里有 1–4 号四个铺位，住着 Pedro、Juan、Diego、Luis 四名水手。他们分别是领航员、厨师、木匠、炮手（每人一个职位）。<br>
+① 领航员睡在 1 号铺。<br>
+② 厨师的铺号正好比 Juan 大 1。<br>
+③ Luis 睡在最后一个铺位。<br>
+④ Diego 既不是木匠，也不是厨师。<br>
+⑤ 炮手和木匠的铺位不相邻。<br>
+<b>问：厨师睡在几号铺？</b>
+</div>
+<details><summary>答案：3</summary><div>
+<p>推理：Luis = 4 号（③）。若 Diego 是领航员，则 Diego = 1 号，Juan 与 Pedro 分占 2、3 号。若 Juan = 3，则厨师 = 4 号 = Luis，剩下的 Juan(3)、Pedro(2) 分当木匠和炮手，但相邻，违反⑤。所以 Juan = 2，Pedro = 3 号且是厨师。若 Diego 是炮手，所有排法都会让炮手和木匠相邻，排除。</p>
+<p><b>厨师 = Pedro，3 号铺。</b>（Juan 和 Luis 谁是木匠、谁是炮手无法确定，不影响答案。）</p>
+</div></details>
+<details><summary>提示</summary><div><ol><li>先画一张 4×4 表格，把确定的信息填进去。</li><li>先从 ③ 和 ① 入手，再分情况讨论 Diego 的职位。</li><li>Diego 是领航员；Juan 在 2 号铺。</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">队内</span><h4>A3 · 罗盘转向</h4><span class="time">约 5 分钟 · 锁的第 3 位</span></div>
+<div class="label">道具</div>
+<ul><li>罗盘卡：8 个方向各标一个数字。北=1，东北=2，东=3，东南=4，南=5，西南=6，西=7，西北=8</li><li>每队一张"航海日志"，写着三次转向</li></ul>
+<div class="label">玩家看到的文字</div>
+<div class="prop">"船头朝北出发。按日志转舵三次，最终船头所指的方向，就是最后一个数字。"</div>
+<div class="tw"><table><tr><th>队</th><th>日志内容</th><th>朝向</th><th>数字</th></tr>
+<tr><td>1</td><td>右转 90° → 右转 45° → 左转 180°</td><td>西北</td><td>8</td></tr>
+<tr><td>2</td><td>左转 45° → 左转 90° → 右转 45°</td><td>西</td><td>7</td></tr>
+<tr><td>3</td><td>右转 135° → 左转 45° → 右转 90°</td><td>南</td><td>5</td></tr>
+<tr><td>4</td><td>右转 180° → 左转 45° → 左转 90°</td><td>东北</td><td>2</td></tr>
+<tr><td>5</td><td>右转 90° → 右转 90° → 左转 45°</td><td>东南</td><td>4</td></tr></table></div>
+<details><summary>提示</summary><div><ol><li>让一个人站起来真的转一转。</li><li>右转 = 顺时针。45° 是罗盘上相邻的一格。</li><li>直接告诉他们第一次转向后朝哪里。</li></ol></div></details>
+</article>
+
+<div class="tw"><table><tr><th>队</th><th>船长箱密码</th></tr>
+<tr><td>1 海鹰号</td><td class="mono">6 3 8</td></tr><tr><td>2 北极星号</td><td class="mono">1 3 7</td></tr><tr><td>3 信风号</td><td class="mono">9 3 5</td></tr><tr><td>4 珊瑚号</td><td class="mono">2 3 2</td></tr><tr><td>5 晨星号</td><td class="mono">5 3 4</td></tr></table></div>
+
+<h3>第二幕 · 跨队：舰队会合（25–45'）</h3>
+<p>打开船长箱后，每队会发现两件事：自己的残图上，港口名字是加密的；箱子里还有一张钥匙卡和一枚印章，但都不是自己的。主持人广播：<b>"每张钥匙卡背面都写着它属于哪艘船。派出你们的信使！"</b></p>
+<p class="note">信使规则（可选，用来增加走动）：每队同一时间只能派 1 名信使离桌；钥匙卡只能拿给对方看，不能交出去，需要对方的人来抄写或现场解码。</p>
+
+<article class="puzzle">
+<div class="ph"><span class="tag cross">跨队</span><h4>A4 · 五张残图的五种密码</h4><span class="time">约 12 分钟</span></div>
+<div class="tw"><table>
+<tr><th>残图</th><th>图上的加密港口名</th><th>钥匙卡（在谁那里）</th><th>解出</th></tr>
+<tr><td>1 海鹰号</td><td class="mono">OLVERQ</td><td>凯撒密码轮，指针固定在"+3"（北极星号）</td><td class="mono">LISBON 里斯本</td></tr>
+<tr><td>2 北极星号</td><td class="mono">3 · 1 · 16 · 5</td><td>字母数字对照表 A=1…Z=26（信风号）</td><td class="mono">CAPE 好望角</td></tr>
+<tr><td>3 信风号</td><td><span class="mono mirror">GOA</span>（镜像书写）</td><td>一张镜面卡 + 字条"真相藏在倒影里"（珊瑚号）</td><td class="mono">GOA 果阿</td></tr>
+<tr><td>4 珊瑚号</td><td class="mono">-- .- .-.. .- -.-. -.-. .-</td><td>摩尔斯电码表（晨星号）</td><td class="mono">MALACCA 马六甲</td></tr>
+<tr><td>5 晨星号</td><td class="mono">NLOFXXZH</td><td>埃特巴什码表 A↔Z, B↔Y…（海鹰号）</td><td class="mono">MOLUCCAS 摩鹿加群岛</td></tr>
+</table></div>
+<p>每张残图上还有一句半截句子和一段航线。解出港口名后交给主持人核对，核对通过即领一枚"港口徽章"。</p>
+<details><summary>提示</summary><div><ol><li>钥匙卡背面写着船名，去找那艘船。</li><li>（凯撒）每个字母往回数 3 位；（埃特巴什）字母表首尾对折。</li><li>直接告诉他们第一个字母。</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag cross">跨队</span><h4>A5 · 航线顺序</h4><span class="time">约 5 分钟</span></div>
+<p>5 个港口解出来以后，全场需要一起决定航线顺序。残图边缘的海岸线可以拼合，也可以靠地理常识推断：从里斯本出发，绕过非洲南端，经印度，穿过马六甲海峡，抵达香料群岛。</p>
+<div class="prop">正确顺序：里斯本 → 好望角 → 果阿 → 马六甲 → 摩鹿加</div>
+<p>5 段半截句子按顺序连起来：<b>"跟着香料的味道 / 穿过风暴之角 / 越过季风之海 / 走过狭窄的海峡 / 宴席就在终点"</b>。最后一张残图的终点画着一个"X"，标注"厨房门口"（或你们选定的藏宝点）。</p>
+</article>
+
+<h3>第三幕 · 终局：香料群岛（45–55'）</h3>
+<article class="puzzle">
+<div class="ph"><span class="tag final">终局</span><h4>A6 · 船长的最后宝箱</h4><span class="time">约 6 分钟</span></div>
+<p>最终宝箱放在 X 标记处，挂一把 <b>5 位字母锁</b>。宝箱上刻着：<span class="prop" style="display:inline-block">"按航线顺序，盖上每一个港口的印章。"</span></p>
+<p>每枚印章背面印着它对应的港口（印章跟钥匙一起放，所以印章字母属于"上一艘船"的港口）：</p>
+<div class="tw"><table><tr><th>港口</th><th>里斯本</th><th>好望角</th><th>果阿</th><th>马六甲</th><th>摩鹿加</th></tr>
+<tr><td>印章</td><td>F</td><td>E</td><td>A</td><td>S</td><td>T</td></tr></table></div>
+<details><summary>答案：FEAST（盛宴）</summary><div>
+<p>宝箱里放：老船长的信 + "香料群岛登陆证书"。信的内容建议：</p>
+<div class="prop">"我把地图撕成五片，不是因为我不信任你们，而是我知道，只有五艘船一起，才到得了这里。欢迎来到香料群岛。今晚的盛宴，属于整支船队。"</div>
+<p>主持人摇铃 → 厨房上菜。</p>
+</div></details>
+</article>
+
+<h3>接晚餐：5 个港口 = 5 道菜</h3>
+<div class="tw"><table><tr><th>港口</th><th>菜品建议</th></tr>
+<tr><td>里斯本</td><td>葡式蛋挞 / 烤沙丁鱼 / 海鲜饭</td></tr>
+<tr><td>好望角</td><td>烤肉拼盘</td></tr>
+<tr><td>果阿</td><td>咖喱</td></tr>
+<tr><td>马六甲</td><td>叻沙 / 娘惹菜</td></tr>
+<tr><td>摩鹿加</td><td>肉豆蔻或丁香风味的甜点</td></tr></table></div>
+<p class="note">菜单卡可以印成航海日志的样式，每上一道菜，主持人念一句"船队抵达 XX"。</p>
+
+<h3>道具清单</h3>
+<ul>
+<li>5 个带 3 位密码锁的盒子（船长箱）+ 1 个带 5 位字母锁的盒子（最终宝箱）</li>
+<li>信号旗卡片 ×5 套、信号旗对照表 ×5</li>
+<li>船员名册题卡 ×5、罗盘卡 ×5、航海日志卡 ×5</li>
+<li>航海图 1 张，打印到 A3 后竖切成 5 片（每片写加密港口名 + 半截句子）</li>
+<li>钥匙卡：凯撒轮（可用纸做）、A1Z26 表、镜面卡（镜面贴纸即可）、摩尔斯表、埃特巴什表</li>
+<li>印章字母卡 F/E/A/S/T（可做成火漆印样式）、港口徽章 ×5</li>
+<li>漂流瓶提示卡 每队 3 张</li>
+</ul>
+<h3>主持人要点</h3>
+<ul>
+<li>最容易卡住的是 A4 的埃特巴什码和镜像字。埃特巴什可以在 35' 时主动给②级提示。</li>
+<li>第一幕快的队伍会闲着：提前告诉他们"去看看别的船需不需要帮忙"，让他们提前进入跨队状态。</li>
+<li>终局让 5 个船长一起把印章按顺序拍到宝箱上，制造仪式感。</li>
+</ul>
+</section>
+
+<!-- ============ OPTION B ============ -->
+<section class="tab" id="b">
+<h2>B · 塞维利亚香料交易所</h2>
+<div class="story">
+<p><b>故事：</b>1520 年代的塞维利亚，香料比黄金还贵。国王宣布：今晚第一个献上"皇家宴会配方"所需全部香料的商行，将获得下一次远航的皇家特许状。</p>
+<p>五家商行涌进交易所。每家只控制一种香料的产地，谁都凑不齐配方。交易、结盟、背叛……还有海盗。</p>
+<p><b>反转：</b>最后大家会发现，国王的配方需要全部五家商行的印章。<br><b>视频结尾台词建议：</b>"在这个交易所里，没有永远的对手，只有还没谈妥的生意。"</p>
+</div>
+
+<h3>商行与经济设定</h3>
+<div class="tw"><table>
+<tr><th>队</th><th>商行</th><th>本土香料（产地）</th><th>自己的配方需要</th><th>开局之后会拿到的货</th></tr>
+<tr><td>1</td><td>狮子商行</td><td>黑胡椒（印度马拉巴尔）</td><td>胡椒 · 肉桂 · 丁香 · 肉豆蔻</td><td>胡椒 ×2 + 八角 ×1</td></tr>
+<tr><td>2</td><td>雄鹰商行</td><td>肉桂（锡兰）</td><td>肉桂 · 丁香 · 肉豆蔻 · 八角</td><td>肉桂 ×2 + 胡椒 ×1</td></tr>
+<tr><td>3</td><td>海豚商行</td><td>丁香（摩鹿加群岛）</td><td>丁香 · 肉豆蔻 · 八角 · 胡椒</td><td>丁香 ×2 + 肉桂 ×1</td></tr>
+<tr><td>4</td><td>玫瑰商行</td><td>肉豆蔻（班达群岛）</td><td>肉豆蔻 · 八角 · 胡椒 · 肉桂</td><td>肉豆蔻 ×2 + 丁香 ×1</td></tr>
+<tr><td>5</td><td>星辰商行</td><td>八角（中国广州）</td><td>八角 · 胡椒 · 肉桂 · 丁香</td><td>八角 ×2 + 肉豆蔻 ×1</td></tr>
+</table></div>
+<ul>
+<li>每家开局有 <b>10 枚金币</b>（可用扑克筹码），以及一张"商行配方卡"。</li>
+<li>每家拿到的那 1 箱外来香料，恰好是自己配方<b>不需要</b>的，所以必须拿去交易。</li>
+<li>供需故意设计成不平衡：每种香料全场只有 3 箱可流通，却有 4 家需要。缺口靠双锁宝箱里的"藏红花"（万能香料，可以当任意一种用）和交易所银行补。所以竞争是真实的。</li>
+<li><b>交易所银行</b>（由书记员管理）：卖香料 4 金币/箱（全场限 3 箱），收香料 2 金币/箱。<b>只有持"港口通行证"的商行才能跟银行交易。</b></li>
+</ul>
+
+<h3>时间线</h3>
+<div class="flow"><span>0–5' 视频</span><b>→</b><span>5–20' 第一幕：远航取货</span><b>→</b><span>20–42' 第二幕：交易所开市</span><b>→</b><span>42–52' 第三幕：皇家配方</span><b>→</b><span>52' 颁奖开饭</span></div>
+
+<h3>第一幕 · 队内：远航取货（5–20'）</h3>
+<p>三道谜不上锁，答案交给书记员核对，答对就当场发奖励。</p>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">队内</span><h4>B1 · 闻香辨货</h4><span class="time">约 6 分钟 · 奖励：本土香料 ×2</span></div>
+<div class="label">道具</div>
+<ul><li>每队 5 个不透明小罐（盖子扎孔），编号 1–5，分别装磨好的黑胡椒、肉桂、丁香、肉豆蔻、八角</li><li>一张"货物描述卡"</li></ul>
+<div class="label">货物描述卡</div>
+<div class="prop">
+· <b>黑胡椒</b>：来自印度马拉巴尔海岸的"黑色黄金"，闻一下就想打喷嚏。<br>
+· <b>肉桂</b>：锡兰树木的内皮，甜而温暖。<br>
+· <b>丁香</b>：摩鹿加群岛的花蕾，形状像一颗小钉子，闻久了舌头会发麻。<br>
+· <b>肉豆蔻</b>：班达群岛的果核。据说为了它，荷兰人把曼哈顿岛换给了英国人。<br>
+· <b>八角</b>：来自中国南方的八角星，有一股甘草味。<br>
+"请写出每个罐子装的是什么。"
+</div>
+<div class="label">每队罐子编号（打乱，防止抄答案）</div>
+<div class="tw"><table><tr><th>队</th><th>胡椒</th><th>肉桂</th><th>丁香</th><th>肉豆蔻</th><th>八角</th></tr>
+<tr><td>1</td><td>3</td><td>1</td><td>5</td><td>2</td><td>4</td></tr>
+<tr><td>2</td><td>2</td><td>4</td><td>1</td><td>5</td><td>3</td></tr>
+<tr><td>3</td><td>5</td><td>3</td><td>2</td><td>4</td><td>1</td></tr>
+<tr><td>4</td><td>1</td><td>5</td><td>4</td><td>3</td><td>2</td></tr>
+<tr><td>5</td><td>4</td><td>2</td><td>3</td><td>1</td><td>5</td></tr></table></div>
+<p class="note">全部答对：发本土香料 ×2。错 1 个：书记员只说"有错"，不说错在哪，让他们再闻。</p>
+<details><summary>提示</summary><div><ol><li>先找最好认的：八角（甘草味）和肉桂（甜味）。</li><li>丁香会让鼻子和舌头发麻；肉豆蔻的味道最"闷"。</li><li>直接告诉他们其中两个罐子是什么。</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">队内</span><h4>B2 · 罗马数字账簿</h4><span class="time">约 5 分钟 · 奖励：5 金币</span></div>
+<div class="label">玩家看到的文字（以第 1 队为例）</div>
+<div class="prop">
+"司库偷了钱，还在账本上做了手脚。找出哪一行被改过，以及他偷了多少。"<br>
+<span class="mono">I. 胡椒　XII 袋 × III 金币 = XXXVI<br>
+II. 肉桂　VIII 袋 × V 金币 = XL<br>
+III. 丁香　XV 袋 × IV 金币 = LX<br>
+IV. 肉豆蔻 VI 袋 × IX 金币 = LIV<br>
+V. 八角　X 袋 × VII 金币 = <b>LXXX</b><br>
+总计　CCLXX</span>
+</div>
+<div class="label">每队被改的行（其他行与上面相同，总计都写 CCLXX = 270）</div>
+<div class="tw"><table><tr><th>队</th><th>被改的行</th><th>账本上写的</th><th>正确值</th><th>偷了</th></tr>
+<tr><td>1</td><td>V 八角</td><td>LXXX (80)</td><td>LXX (70)</td><td>X = 10</td></tr>
+<tr><td>2</td><td>II 肉桂</td><td>L (50)</td><td>XL (40)</td><td>10</td></tr>
+<tr><td>3</td><td>III 丁香</td><td>LXX (70)</td><td>LX (60)</td><td>10</td></tr>
+<tr><td>4</td><td>IV 肉豆蔻</td><td>LXIV (64)</td><td>LIV (54)</td><td>10</td></tr>
+<tr><td>5</td><td>I 胡椒</td><td>XLVI (46)</td><td>XXXVI (36)</td><td>10</td></tr></table></div>
+<details><summary>提示</summary><div><ol><li>先把罗马数字换成阿拉伯数字。</li><li>I=1, V=5, X=10, L=50, C=100；小数字在左边表示相减。</li><li>逐行算乘法，看哪一行对不上。</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">队内</span><h4>B3 · 四国货币</h4><span class="time">约 5 分钟 · 奖励：外来香料 ×1 + 港口通行证</span></div>
+<div class="label">玩家看到的文字（以第 1 队为例）</div>
+<div class="prop">
+"汇率：1 杜卡特 = 2 克鲁扎多；1 克鲁扎多 = 3 弗罗林；1 弗罗林 = 4 雷亚尔。<br>
+同一袋货在四个港口的报价如下。去哪里买最便宜？"<br>
+里斯本：3 克鲁扎多　·　安特卫普：8 弗罗林　·　塞维利亚：1 杜卡特 + 10 雷亚尔　·　威尼斯：35 雷亚尔
+</div>
+<p class="note">全部换算成雷亚尔：1 杜卡特 = 24，1 克鲁扎多 = 12，1 弗罗林 = 4。</p>
+<div class="tw"><table><tr><th>队</th><th>里斯本</th><th>安特卫普</th><th>塞维利亚</th><th>威尼斯</th><th>答案</th></tr>
+<tr><td>1</td><td>3 克 (36)</td><td>8 弗 (32)</td><td>1 杜+10 雷 (34)</td><td>35 雷</td><td>安特卫普</td></tr>
+<tr><td>2</td><td>3 克 (36)</td><td>10 弗 (40)</td><td>1 杜+14 雷 (38)</td><td>37 雷</td><td>里斯本</td></tr>
+<tr><td>3</td><td>4 克 (48)</td><td>11 弗 (44)</td><td>1 杜+18 雷 (42)</td><td>45 雷</td><td>塞维利亚</td></tr>
+<tr><td>4</td><td>4 克 (48)</td><td>11 弗 (44)</td><td>1 杜+22 雷 (46)</td><td>43 雷</td><td>威尼斯</td></tr>
+<tr><td>5</td><td>2 克 (24)</td><td>5 弗 (20)</td><td>1 杜 (24)</td><td>22 雷</td><td>安特卫普</td></tr></table></div>
+<details><summary>提示</summary><div><ol><li>把所有价格换成同一种货币。</li><li>换成最小的雷亚尔最方便。</li><li>1 杜卡特 = 24 雷亚尔。</li></ol></div></details>
+</article>
+
+<h3>第二幕 · 跨队：交易所开市（20–42'）</h3>
+<p>主持人敲钟宣布开市。场地中央设"交易所"桌，由书记员坐镇，墙上（或白板上）贴出三份<b>合约</b>和当前价格。商行之间可以自由交易：香料换香料、香料换金币、结盟、赊账都允许。</p>
+
+<article class="puzzle">
+<div class="ph"><span class="tag cross">跨队合约</span><h4>B4 · 双锁宝箱（两只）</h4><span class="time">约 8 分钟 · 奖励：每家藏红花 ×1</span></div>
+<p>交易所桌上放着两只宝箱，每只挂 3 位数字锁，里面各有 2 箱藏红花（万能香料）。解开宝箱的两半线索分在两家商行手里。</p>
+<div class="tw"><table>
+<tr><th>宝箱</th><th>"事件卡"在</th><th>"年代图"在</th><th>事件卡上的顺序</th><th>密码</th></tr>
+<tr><td>α</td><td>狮子商行</td><td>雄鹰商行</td><td>达伽马抵达印度 → 迪亚士绕过好望角 → 麦哲伦船队出发</td><td class="mono">889</td></tr>
+<tr><td>β</td><td>海豚商行</td><td>玫瑰商行</td><td>哥伦布抵达美洲 → 郑和首次下西洋 → 卡布拉尔抵达巴西</td><td class="mono">250</td></tr>
+</table></div>
+<div class="label">事件卡上写的</div>
+<div class="prop">"按下面事件的顺序，取每个事件发生年份的最后一位。"（接着列出 3 个事件名）</div>
+<div class="label">年代图（不写事件名，只有年份和图画提示）</div>
+<div class="prop">
+1405 · 巨大的宝船，明朝的旗帜<br>
+1488 · 非洲最南端的"风暴之角"<br>
+1492 · 三艘船，西班牙国旗，"西印度"<br>
+1498 · 卡利卡特港，印度的胡椒<br>
+1500 · 意外漂到的南美海岸<br>
+1519 · 五艘船出发，目标是绕地球一圈
+</div>
+<details><summary>提示</summary><div><ol><li>你们手里只有一半信息，去找另一家商行。</li><li>把事件和年代图上的图画一一对应。</li><li>达伽马 = 1498。</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag cross">跨队合约</span><h4>B5 · 海盗的藏身处</h4><span class="time">38' 之前完成 · 奖励：每家参与商行 2 金币，并取消海盗事件</span></div>
+<p>情报分在三家商行手里，合起来才能定位海盗。38' 前把正确格子报给交易所，海盗事件就取消。</p>
+<div class="tw"><table><tr><th>持有者</th><th>情报</th></tr>
+<tr><td>星辰商行</td><td>一张 4×4 海图（列 A–D，行 1–4），岛屿在 A2、B4、C1、C3、D2。"海盗一定藏在岛上。"</td></tr>
+<tr><td>雄鹰商行</td><td>"海盗不在 C 列，也不在 D 列。"</td></tr>
+<tr><td>海豚商行</td><td>"海盗藏身的行号大于 2。"</td></tr></table></div>
+<details><summary>答案：B4</summary><div>A、B 列的岛：A2、B4 → 行号 > 2 → B4。</div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag cross">随机事件</span><h4>B6 · 交易所广播（主持人念）</h4><span class="time">25' / 32' / 38'</span></div>
+<div class="tw"><table><tr><th>时间</th><th>事件</th><th>效果</th></tr>
+<tr><td>25'</td><td>季风到来</td><td>银行卖价降到 3 金币/箱，持续 5 分钟</td></tr>
+<tr><td>32'</td><td>荷兰封锁班达群岛</td><td>银行停售肉豆蔻，玫瑰商行趁机涨价，场面会变热闹</td></tr>
+<tr><td>38'</td><td>海盗来袭</td><td>如果 B5 没完成：每家商行交出 1 箱香料（自己选）给交易所；完成了就宣布"海盗被皇家舰队击退"</td></tr></table></div>
+</article>
+
+<h3>第三幕 · 终局：皇家配方（42–52'）</h3>
+<article class="puzzle">
+<div class="ph"><span class="tag final">终局</span><h4>B7 · 国王的宴席</h4><span class="time">约 8 分钟</span></div>
+<p>42' 主持人宣布"交易所闭市"，各家先结算，得分 = 完成配方 +10 分，剩余金币每枚 1 分。</p>
+<p>然后国王的使者（主持人）登场，宣读诏书：</p>
+<div class="prop">"国王只接受一份配方。它被分成五段，写在五张商行配方卡的底部。"</div>
+<p>每张配方卡底部都有一段用罗马数字编号的句子，以及一枚印章字母：</p>
+<div class="tw"><table><tr><th>商行</th><th>句段</th><th>印章</th></tr>
+<tr><td>玫瑰</td><td>I · 国王的宴席</td><td>S</td></tr>
+<tr><td>狮子</td><td>II · 不属于</td><td>P</td></tr>
+<tr><td>星辰</td><td>III · 任何一家商行</td><td>I</td></tr>
+<tr><td>海豚</td><td>IV · 而属于</td><td>C</td></tr>
+<tr><td>雄鹰</td><td>V · 所有远航归来的人</td><td>E</td></tr></table></div>
+<p>五张卡按 I–V 排好，读出"<b>国王的宴席不属于任何一家商行，而属于所有远航归来的人</b>"，印章拼出 <b class="mono">SPICE</b>，打开皇家宝箱（5 位字母锁）。</p>
+<details><summary>皇家宝箱里放什么</summary><div>
+<ul><li>皇家特许状：颁给"全体五家商行"</li><li>一张卡："请把你们所有的香料送进御厨。"五家船长把香料箱一起送到厨房门口，厨师接过，端出主菜</li><li>个人奖项：<b>最佳船长</b>（42' 结算分最高的商行）、<b>最慷慨商人</b>（由其他商行投票）</li></ul>
+</div></details>
+</article>
+
+<h3>接晚餐</h3>
+<p>和厨房约一道"皇家香料菜"作为主菜，比如香料烤鸡、咖喱、印度香饭或五香牛肉，最好真的用到这五种香料。菜单上写"皇家宴会配方：胡椒、肉桂、丁香、肉豆蔻、八角"。</p>
+
+<h3>道具清单</h3>
+<ul>
+<li>香料小罐 25 个（5 队 × 5 种）+ 5 种磨好的香料</li>
+<li>香料"货箱"卡：每种 3 张流通 + 银行储备 3 张 + 藏红花 4 张（可用彩色卡片或小火柴盒）</li>
+<li>金币（扑克筹码）约 100 枚</li>
+<li>账簿卡 ×5（每队改动的行不同）、货币题卡 ×5、货物描述卡 ×5</li>
+<li>商行配方卡 ×5（底部印句段和印章字母）、港口通行证 ×5</li>
+<li>双锁宝箱 ×2（3 位数字锁）、皇家宝箱 ×1（5 位字母锁）</li>
+<li>事件卡 ×6、年代图 ×2、海盗海图 ×1 + 情报卡 ×2</li>
+<li>小铃铛（开市 / 闭市 / 事件广播）、白板写实时价格</li>
+</ul>
+<h3>主持人要点</h3>
+<ul>
+<li>书记员是这个方案的关键：一人管银行、核对答案，一人发奖励、记分。</li>
+<li>交易阶段可能出现一家囤货不卖。不用阻止，32' 的封锁事件会刺激流通。如果太冷场，提前播 38' 的海盗事件。</li>
+<li>反转之前不要剧透"合作"，让大家真的拼一次。反转的效果来自前面的竞争。</li>
+</ul>
+</section>
+
+<!-- ============ OPTION C ============ -->
+<section class="tab" id="c">
+<h2>C · 最后一次航行</h2>
+<div class="story">
+<p><b>故事：</b>远洋帆船"希望号"在一夜风暴后醒来：船长失踪了，船偏离了航线，淡水只够撑一个小时。</p>
+<p>全场 25 人是同一艘船上的船员，分属 5 个部门。每个部门掌握的线索都只有一部分。要找到船长、找到回家的航线，每个部门都离不开其他部门。</p>
+<p><b>真相：</b>船长的失踪是他自己设计的一场考验。<br><b>视频结尾台词建议：</b>"船长留下了一句话：'当你们找到彼此的时候，就会找到我。'"</p>
+</div>
+
+<h3>部门设置</h3>
+<div class="tw"><table>
+<tr><th>队</th><th>部门</th><th>开局手里有什么</th><th>要给别人的</th><th>要等别人的</th></tr>
+<tr><td>1</td><td>领航组</td><td>经线题、六分仪记录（日期被水洇湿）</td><td>坐标 → 制图组</td><td>日期 ← 船医组；赤纬 ← 厨房组</td></tr>
+<tr><td>2</td><td>制图组</td><td>撕碎的海图（6 块）</td><td>航线方向 → 厨房组</td><td>坐标 ← 领航组</td></tr>
+<tr><td>3</td><td>军需组</td><td>货舱清单、9 个编号信封</td><td>解码结果 → 厨房组</td><td>密码 ECHO ← 船医组</td></tr>
+<tr><td>4</td><td>船医组</td><td>5 页船员日记（第 5 页是餐具符号）</td><td>日期 → 领航组；ECHO → 军需组</td><td>餐具密码表 ← 厨房组</td></tr>
+<tr><td>5</td><td>厨房组</td><td>调料架谜题、厨房日历（航海年鉴）、餐具密码表、船长的炖菜食谱</td><td>赤纬 → 领航组；餐具表 → 船医组</td><td>解码 ← 军需组；方向 ← 制图组</td></tr>
+</table></div>
+<p class="note">设计原则：每个部门至少给出一条线索、等待一条线索，没有人能置身事外。厨房组和船医组手里的东西一开始就能给，保证依赖链不会死锁。</p>
+
+<h3>依赖链总图</h3>
+<div class="flow"><span>厨房 → 船医：餐具密码表</span><b>→</b><span>船医 → 军需：ECHO</span><b>→</b><span>军需 ⇄ 厨房：解码食谱</span></div>
+<div class="flow"><span>船医 → 领航：日期 6/21</span><b>+</b><span>厨房 → 领航：赤纬 +23°</span><b>→</b><span>领航 → 制图：30°N 60°W</span><b>→</b><span>制图 → 厨房：→→↑↑</span><b>→</b><span>红盒子打开</span></div>
+
+<h3>时间线</h3>
+<div class="flow"><span>0–5' 视频</span><b>→</b><span>5–20' 第一幕：各部门自查</span><b>→</b><span>20–45' 第二幕：依赖链</span><b>→</b><span>45–52' 第三幕：船长的真相</span><b>→</b><span>52' 船长现身开饭</span></div>
+
+<h3>第一幕 · 队内：各部门自查（5–20'）</h3>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">领航组</span><h4>C1 · 时钟里的经度</h4><span class="time">约 6 分钟</span></div>
+<div class="prop">
+"母港位于 0° 经线。船上的时钟一直保持母港时间。<br>
+今天，太阳升到最高点（当地正午）时，时钟显示 <b>16:00</b>。<br>
+地球每小时自转 15°，太阳从东往西走。我们在母港以东还是以西？多少度？"
+</div>
+<details><summary>答案：西经 60°（60°W）</summary><div>当地正午比母港晚 4 小时 → 4 × 15° = 60°，在母港以西。</div></details>
+<div class="label">同时拿到（暂时解不了）</div>
+<div class="prop">六分仪记录："____ 日正午，太阳高度角 83°。"（日期被海水洇湿）<br>公式卡：纬度 = 90° − 太阳高度角 + 当日太阳赤纬</div>
+<details><summary>提示</summary><div><ol><li>太阳正午时，母港已经是下午了，说明母港在东边。</li><li>差几个小时，就乘以 15°。</li><li>16 − 12 = 4 小时。</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">制图组</span><h4>C2 · 拼合海图</h4><span class="time">约 8 分钟</span></div>
+<p>把下面的海图打印到 A4，剪成 6 块不规则碎片。经纬度刻度只印在边缘，拼好才看得出完整网格。</p>
+<div class="tw"><table class="grid-map">
+<tr><th></th><th>90°W</th><th>80°W</th><th>70°W</th><th>60°W</th><th>50°W</th><th>40°W</th></tr>
+<tr><th>50°N</th><td></td><td></td><td></td><td></td><td class="isle">风岛</td><td></td></tr>
+<tr><th>40°N</th><td></td><td class="isle">雾岛</td><td></td><td></td><td></td><td></td></tr>
+<tr><th>30°N</th><td></td><td></td><td></td><td class="isle">回声岛</td><td></td><td class="isle">鲸岛</td></tr>
+<tr><th>20°N</th><td></td><td class="reef">礁</td><td class="reef">礁</td><td></td><td></td><td></td></tr>
+<tr><th>10°N</th><td></td><td class="ship">⛵ 希望号</td><td></td><td></td><td></td><td></td></tr>
+<tr><th>0°</th><td></td><td></td><td></td><td></td><td class="isle">龟岛</td><td></td></tr>
+</table></div>
+<div class="label">海图角落的说明</div>
+<div class="prop">"船每次只能横向或纵向移动一格，不能进入礁石，必须走最短的航线。"</div>
+<p class="note">制图组拼完后，知道自己在哪、有哪些岛，但不知道该去哪个岛，要等领航组的坐标。</p>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">军需组</span><h4>C3 · 超重的木桶</h4><span class="time">约 6 分钟</span></div>
+<div class="prop">
+"清点货舱时，有一个桶的重量不对劲。"<br>
+单位重量卡：淡水 1 kg/升 · 饼干 0.5 kg/包 · 腌肉 2.5 kg/块 · 葡萄酒 1 kg/升 · 火药 1.5 kg/包 · 绳索 3 kg/卷 · 大米、豆子、盐按 kg 计
+</div>
+<div class="tw"><table><tr><th>桶</th><th>清单</th><th>实测</th></tr>
+<tr><td>1</td><td>淡水 40 升</td><td>40 kg</td></tr><tr><td>2</td><td>饼干 20 包</td><td>10 kg</td></tr><tr><td>3</td><td>腌肉 8 块</td><td>20 kg</td></tr>
+<tr><td>4</td><td>葡萄酒 30 升</td><td>30 kg</td></tr><tr><td>5</td><td>火药 12 包</td><td>18 kg</td></tr><tr><td>6</td><td>绳索 6 卷</td><td>18 kg</td></tr>
+<tr><td>7</td><td>大米 25 kg</td><td><b>37 kg</b></td></tr><tr><td>8</td><td>豆子 16 kg</td><td>16 kg</td></tr><tr><td>9</td><td>盐 10 kg</td><td>10 kg</td></tr></table></div>
+<details><summary>答案：7 号桶</summary><div>
+<p>7 号桶多出 12 kg。打开 7 号信封（其余 8 个信封里写着"就是普通的豆子""别翻了，这是盐"之类的玩笑话），里面是一本挂着 <b>4 位字母锁</b>的密码本。</p>
+<p>密码本的锁码是 <b class="mono">ECHO</b>，要等船医组。</p>
+</div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">船医组</span><h4>C4 · 船员日记</h4><span class="time">约 7 分钟</span></div>
+<div class="prop">
+<b>水手长</b>："6 月 21 日。22:00 船长还在掌舵。22:30 我回舱睡觉。"<br>
+<b>炮手</b>："23:00 船长来火药舱检查，十分钟就走了，说要去'找点吃的'。"<br>
+<b>见习水手</b>："23:20 我在楼梯上和船长擦肩而过。他往下走，怀里抱着一个红色的盒子。"<br>
+<b>领航员助手</b>："23:30 我在船尾值班，一个人都没看见。"<br>
+<b>厨师</b>（第 5 页，全部用餐具符号写成）："<span class="mono">🥄🍴🔪☕</span>"
+</div>
+<p>队内任务：按时间排序，推断船长最后去了哪里，答案是<b>厨房</b>（找吃的 + 往下走 + 厨师有日记）。第 5 页看不懂，要找厨房组要"餐具密码表"。</p>
+<details><summary>第 5 页的完整内容和答案</summary><div>
+<p>完整内容（用符号书写）："23:40 船长来到厨房，把红盒子藏在调料架后面，低声说了一个词：🥄🍴🔪☕"</p>
+<p>餐具密码表（在厨房组）：🥄=E 🍴=C 🔪=H ☕=O 🍷=A 🧂=S 🍞=R 🫖=T……（再加几个干扰符号）</p>
+<p>解出 <b class="mono">ECHO</b> → 交给军需组开密码本。日记里的"6 月 21 日" → 交给领航组。</p>
+</div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">厨房组</span><h4>C5 · 调料架后面的红盒子</h4><span class="time">约 4 分钟</span></div>
+<p>厨房组桌上放一个真实的调料架（向餐厅借），有 8 个调料罐。</p>
+<div class="prop">船长的字条："我把最重要的东西，藏在了一个既不咸也不甜、来自东方、长着八个角的东西后面。"</div>
+<details><summary>答案：八角罐后面</summary><div>
+<p>八角罐后面是<b>红盒子</b>，挂着方向锁（上/下/左/右），要等制图组给出航线。</p>
+<p>厨房组桌上还摊着三样"看起来没用"的东西，等别人来要：</p>
+<ul>
+<li><b>厨房日历（航海年鉴）</b>：3/21 赤纬 0° · 5/21 +20° · <b>6/21 +23°</b> · 8/21 +12° · 9/21 0°</li>
+<li><b>餐具密码表</b></li>
+<li><b>船长的秘制炖菜</b>：面粉 21 克 · 黄油 33 克 · 盐 5 撮 · 鸡蛋 12 个 · 糖 50 勺。分量离谱，本身就是线索</li>
+</ul>
+</div></details>
+</article>
+
+<h3>第二幕 · 跨队：依赖链（20–45'）</h3>
+<p>主持人广播："淡水还剩 40 分钟。各部门派出传令兵！"</p>
+
+<article class="puzzle">
+<div class="ph"><span class="tag cross">跨队</span><h4>C6 · 六次交接</h4><span class="time">约 20 分钟</span></div>
+<div class="tw"><table>
+<tr><th>#</th><th>从 → 到</th><th>交接内容</th><th>收到后能做什么</th></tr>
+<tr><td>①</td><td>厨房 → 船医</td><td>餐具密码表</td><td>解出日记第 5 页 = ECHO</td></tr>
+<tr><td>②</td><td>船医 → 军需</td><td>ECHO</td><td>打开密码本</td></tr>
+<tr><td>③</td><td>军需 ⇄ 厨房</td><td>密码本 × 炖菜食谱</td><td>21 红盒子 · 33 锁 · 05 等于 · 12 回声岛 · 50 航线 → <b>"红盒子的锁 = 去回声岛的航线"</b></td></tr>
+<tr><td>④</td><td>船医 + 厨房 → 领航</td><td>日期 6/21 + 年鉴赤纬 +23°</td><td>纬度 = 90 − 83 + 23 = <b>30°N</b>，加上经度得到 <b>30°N 60°W</b></td></tr>
+<tr><td>⑤</td><td>领航 → 制图</td><td>30°N 60°W</td><td>定位回声岛，在海图上找最短航线</td></tr>
+<tr><td>⑥</td><td>制图 → 厨房</td><td>航线方向</td><td>打开红盒子</td></tr>
+</table></div>
+<div class="label">密码本内容（含干扰项）</div>
+<div class="prop mono">03 风暴 · 05 等于 · 09 船长 · 12 回声岛 · 17 厨房 · 21 红盒子 · 26 淡水 · 33 锁 · 41 星星 · 50 航线</div>
+<details><summary>航线答案：→ → ↑ ↑</summary><div>
+<p>从希望号 (10°N, 80°W) 到回声岛 (30°N, 60°W)，需要向北 2 格、向东 2 格。如果先往北，会撞上 20°N 80°W 的礁石；如果先东一格再北，会撞上 20°N 70°W 的礁石。唯一的最短航线：<b>东、东、北、北</b>，也就是方向锁上的"右右上上"。</p>
+</div></details>
+<details><summary>提示（按卡点）</summary><div>
+<ul>
+<li>船医卡在第 5 页 → "餐具……这艘船上谁天天跟餐具打交道？"</li>
+<li>领航组算不出纬度 → "日期是谁写的日记？赤纬写在哪种日历上？"</li>
+<li>军需组打开密码本却不知道干嘛 → "哪个部门手里有一堆奇怪的数字？"</li>
+<li>厨房组拿着红盒子干着急 → "方向锁要方向。谁手里有海图？"</li>
+</ul>
+</div></details>
+</article>
+
+<h3>第三幕 · 终局：船长的真相（45–52'）</h3>
+<article class="puzzle">
+<div class="ph"><span class="tag final">终局</span><h4>C7 · 红盒子里的信</h4><span class="time">约 6 分钟</span></div>
+<p>红盒子里有船长的信，以及 5 个写着部门名字的小信封，每个信封里装一个字母。厨房组当众念信：</p>
+<div class="prop">
+"致希望号的全体船员：<br>
+没有哪场暴风雨能让我离开这艘船。我只是想看看，当船长不在的时候，你们能不能找到彼此。<br>
+领航员读懂了天空，制图师读懂了大地，军需官守住了船舱，船医读懂了人心，厨师留住了家的味道。<br>
+单靠任何一个部门，谁也到不了回声岛。<br>
+最后一把锁，请按船上的岗位顺序打开：<b>掌舵、看图、清点、疗伤、开饭</b>。<br>
+——你们的船长"
+</div>
+<div class="tw"><table><tr><th>顺序</th><th>掌舵</th><th>看图</th><th>清点</th><th>疗伤</th><th>开饭</th></tr>
+<tr><td>部门</td><td>领航组</td><td>制图组</td><td>军需组</td><td>船医组</td><td>厨房组</td></tr>
+<tr><td>字母</td><td>T</td><td>A</td><td>B</td><td>L</td><td>E</td></tr></table></div>
+<details><summary>答案：TABLE（餐桌）</summary><div>
+<p>船长舱宝箱（5 位字母锁）里放一张卡："新大陆不在海图上，它就在这张餐桌上。开饭！"</p>
+<p>这时<b>"船长"</b>（建议由老板或领导扮演，戴三角帽）从厨房门口走出来，致一句祝酒词，宣布开饭。</p>
+</div></details>
+</article>
+
+<h3>接晚餐</h3>
+<p>厨房是终点，故事里的船长"为船员准备了一顿晚宴"。第一道菜可以叫"船长的秘制炖菜"，和食谱卡呼应。</p>
+
+<h3>道具清单</h3>
+<ul>
+<li>经度题卡、六分仪记录、公式卡（领航组）</li>
+<li>海图 A4 打印剪成 6 块（制图组）</li>
+<li>货舱清单、单位重量卡、9 个编号信封、4 位字母锁密码本（军需组）</li>
+<li>5 页日记，第 5 页用餐具符号书写（船医组）</li>
+<li>调料架 + 8 个调料罐（向餐厅借）、厨房日历、餐具密码表、炖菜食谱卡（厨房组）</li>
+<li>红盒子 + 方向锁、船长舱宝箱 + 5 位字母锁、船长的信 + 5 个部门小信封</li>
+<li>三角帽 / 船长外套（给"船长"）</li>
+</ul>
+<h3>主持人要点</h3>
+<ul>
+<li>依赖链最怕某一环卡太久：25' 和 35' 各巡一次，按上面的卡点提示主动推一把。</li>
+<li>真实的关键路径：① → ② → ③ 和 ④ → ⑤ → ⑥ 两条线并行。只要 40' 前两条线都通了，终局就来得及。</li>
+<li>"船长"要提前藏在厨房，听到主持人念出 TABLE 后再登场。</li>
+<li>方向锁可以换成 4 位字母锁 RRUU（Right Right Up Up），效果一样，更便宜。</li>
+</ul>
+</section>
+
+<footer>大航海解谜手册 · 中文版 · 三套方案的密码分别是 FEAST / SPICE / TABLE，做物料前请再核对一遍锁码。</footer>
+</div>
+<script>
+(function(){
+  var btns=document.querySelectorAll('nav.tabs button');
+  function show(id){
+    document.querySelectorAll('section.tab').forEach(function(s){s.classList.toggle('active',s.id===id)});
+    btns.forEach(function(b){b.setAttribute('aria-selected',b.dataset.t===id?'true':'false')});
+    try{history.replaceState(null,'','#'+id)}catch(e){}
+  }
+  btns.forEach(function(b){b.addEventListener('click',function(){show(b.dataset.t);window.scrollTo({top:0})})});
+  var h=(location.hash||'').slice(1); if(document.getElementById(h)&&h) show(h);
+  var root=document.documentElement;
+  document.getElementById('themeBtn').addEventListener('click',function(){
+    var dark=root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme=dark?'light':'dark';
+  });
+  window.addEventListener('beforeprint',function(){document.querySelectorAll('details').forEach(function(d){d.open=true})});
+})();
+</script>
+</body>
+</html>

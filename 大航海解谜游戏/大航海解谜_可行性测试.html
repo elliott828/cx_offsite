@@ -1,0 +1,954 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>大航海解谜 Playtest</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Young+Serif&display=swap">
+<style>
+/* Layout: a chart-room console. One reading column, sticky bridge bar on top, puzzle cards grouped by act. */
+:root{
+  --paper:#edf1ee; --panel:#f9fbf8; --ink:#13233a; --muted:#56657a; --line:#d0d8d3; --chip:#e1e8e4;
+  --brass:#9a6b17; --sea:#1d5b6a; --ok:#2b7a4b; --warn:#a8660f; --bad:#ad3528; --okbg:#e2f1e7; --warnbg:#f8ecd6; --badbg:#f6e1dd;
+  --f-display:"Young Serif", Georgia, "Songti SC", "Noto Serif SC", serif;
+  --f-body:"IBM Plex Sans", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --flagR:#c8102e; --flagB:#0b3d91; --flagY:#ffcd00; --flagW:#ffffff; --flagK:#111111;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0e1620; --panel:#152130; --ink:#e4ebf1; --muted:#9aa9b9; --line:#25364a; --chip:#1c2b3c;
+  --brass:#d7a64a; --sea:#6ab7c7; --ok:#62c48d; --warn:#e3a54c; --bad:#ec7f71; --okbg:#173326; --warnbg:#3a2c14; --badbg:#3c1f1b; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0e1620; --panel:#152130; --ink:#e4ebf1; --muted:#9aa9b9; --line:#25364a; --chip:#1c2b3c;
+  --brass:#d7a64a; --sea:#6ab7c7; --ok:#62c48d; --warn:#e3a54c; --bad:#ec7f71; --okbg:#173326; --warnbg:#3a2c14; --badbg:#3c1f1b; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:15px/1.65 var(--f-body);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--panel);border-bottom:1px solid var(--line)}
+.bar-in,.wrap{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar-in{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding-block:10px}
+.brand{font-family:var(--f-display);font-size:18px;margin-right:auto;line-height:1.2}
+.brand small{display:block;font:500 11px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--brass)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--ink);padding:5px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.sync{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--warn);display:inline-block}
+.sync.on i{background:var(--ok)}
+.wrap{padding-block:20px 80px}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(24px,4vw,32px);line-height:1.2}
+h2{font-size:22px;margin:28px 0 10px}
+h3{font-size:17px}
+h4{margin:14px 0 6px;font-size:15px}
+p{margin:6px 0}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:14px}
+.btn.primary{background:var(--sea);border-color:var(--sea);color:var(--panel)}
+.btn.warn{border-color:var(--warn);color:var(--warn)}
+.btn.small{padding:3px 9px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-width:0}
+textarea{width:100%;min-height:70px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.muted,.note{color:var(--muted);font-size:13px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);font-weight:600;margin:0 0 4px}
+.mono{font-family:var(--f-mono)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+th{background:var(--chip);font-weight:600}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.stack{display:grid;gap:12px}
+.gametabs{display:flex;gap:8px;overflow-x:auto;margin:6px 0 14px}
+.gametab{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:8px 14px;text-align:left;min-width:150px}
+.gametab b{display:block;font-family:var(--f-display);font-weight:400;font-size:16px}
+.gametab span{font-size:12px;color:var(--muted)}
+.gametab[aria-pressed="true"]{border-color:var(--sea);box-shadow:inset 0 -3px 0 var(--sea)}
+.live{color:var(--ok);font-weight:600}
+.clock{font-family:var(--f-mono);font-size:22px}
+.clock.over{color:var(--bad)}
+.story{border-left:3px solid var(--brass);padding-left:14px}
+.banner{background:var(--warnbg);border:1px solid var(--warn);color:var(--ink);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start}
+.act{display:flex;align-items:baseline;gap:10px;margin:24px 0 8px}
+.act h3{font-size:18px}
+.act .rule{flex:1;border-top:1px solid var(--line)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:8px;min-width:0}
+.card.solved{border-color:var(--ok)}
+.card.locked{opacity:.7}
+.card-h{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.card-h h3{margin-right:auto}
+.pid{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.chip{font-size:12px;border-radius:999px;padding:1px 9px;background:var(--chip);color:var(--muted);white-space:nowrap}
+.chip.ok{background:var(--okbg);color:var(--ok)}
+.chip.warn{background:var(--warnbg);color:var(--warn)}
+.chip.bad{background:var(--badbg);color:var(--bad)}
+.chip.cross{background:var(--chip);color:var(--sea)}
+.gate{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.gate label{font-size:13px;color:var(--muted);width:100%}
+.gate input{flex:1 1 160px;font-family:var(--f-mono);letter-spacing:.06em;text-transform:uppercase}
+.msg{font-size:13px}
+.msg.bad{color:var(--bad)}
+.reveal{background:var(--okbg);border-radius:8px;padding:10px 12px}
+.hintrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.hint{background:var(--chip);border-radius:8px;padding:6px 10px;font-size:14px}
+.answer{background:var(--warnbg);border-radius:8px;padding:8px 12px;font-size:14px}
+.teampick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.teampick button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:12px;text-align:left}
+.teampick button b{font-family:var(--f-display);font-weight:400;font-size:20px;display:block}
+.teampick button span{display:block;font-size:12px;color:var(--muted)}
+/* puzzle content */
+.clues{padding-left:20px;margin:4px 0}
+.logline{font-family:var(--f-mono);background:var(--chip);border-radius:6px;padding:6px 10px;display:inline-block}
+.flagrow{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
+.flagrow svg{width:56px;height:56px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.flagchart{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:8px;margin-top:8px}
+.flagchart figure{margin:0;text-align:center;font-family:var(--f-mono);font-size:12px}
+.flagchart svg{width:40px;height:40px;display:block;margin:0 auto 2px}
+details.chart summary{cursor:pointer;color:var(--sea);font-size:14px}
+.chestgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.fragment,.keycard{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;background:var(--panel);min-width:0}
+.encport{font-family:var(--f-mono);font-size:20px;letter-spacing:.12em;margin:6px 0;word-break:break-word}
+.mirror{display:inline-block;transform:scaleX(-1)}
+.halfline{font-style:italic}
+.keyname{font-weight:600;font-size:13px}
+.keytab td,.keytab th{padding:3px 5px;text-align:center;font-family:var(--f-mono);font-size:12px}
+.morsegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:2px 8px;font-size:12px}
+.morsegrid code{font-family:var(--f-mono)}
+.mirrorcard{border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center;background:linear-gradient(135deg,var(--chip),var(--panel))}
+.seal b{font-family:var(--f-display);font-size:20px;color:var(--bad)}
+.letter{font-family:var(--f-display);font-size:16px;line-height:1.7}
+.ledger td{font-size:14px}
+.timeline{padding-left:18px}
+.cutlery{font-size:16px;letter-spacing:.06em}
+.cutlery.big{font-size:30px;letter-spacing:.2em}
+.galleyitems{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.galleyitems > div{border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
+.diary p{margin:6px 0}
+.envelope{font-size:15px}
+.bigletter{font-family:var(--f-display);font-size:44px;color:var(--bad);display:inline-block;margin-left:10px;vertical-align:middle}
+.jig{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-width:560px}
+.jig button{border:2px solid var(--line);border-radius:6px;padding:0;background:var(--panel);color:var(--ink);overflow:hidden}
+.jig button.sel{border-color:var(--sea)}
+.jig table{font-size:11px}
+.jig td,.jig th{height:34px;text-align:center;padding:2px;width:auto}
+.jig .reef{background:repeating-linear-gradient(45deg,var(--chip),var(--chip) 4px,var(--line) 4px,var(--line) 8px)}
+.jig .isle{color:var(--ok);font-weight:600}
+.jig .ship{color:var(--bad);font-weight:600}
+.rack{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-width:520px}
+.rack button{border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);padding:10px 6px;font-size:13px}
+.rack button.dust{opacity:.5}
+/* market */
+.inv{display:flex;flex-wrap:wrap;gap:6px}
+.inv span{background:var(--chip);border-radius:8px;padding:3px 9px;font-size:13px}
+.inv span b{font-family:var(--f-mono)}
+.recipe{border:1px solid var(--brass);border-radius:10px;padding:10px 12px}
+.recipe .foot{border-top:1px dashed var(--line);margin-top:8px;padding-top:6px;font-size:13px;color:var(--muted)}
+.mk{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+/* host */
+.board td.cell{text-align:center;white-space:nowrap;cursor:default}
+.board td.cell.ok{background:var(--okbg);color:var(--ok)}
+.board td.cell.warn{background:var(--warnbg);color:var(--warn)}
+.board td.cell.bad{background:var(--badbg);color:var(--bad)}
+.board td.cell.can{cursor:pointer}
+.board td.cell small{display:block;font-size:10px;color:var(--muted)}
+.scorebar{height:10px;border-radius:5px;background:var(--sea)}
+.bestmark{outline:2px solid var(--ok);outline-offset:-2px}
+.lockbox{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lockbox input{width:140px;font-family:var(--f-mono)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.rating{display:flex;gap:4px;flex-wrap:wrap}
+.rating button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.rating button[aria-pressed="true"]{background:var(--sea);color:var(--panel);border-color:var(--sea)}
+.fbgrid{display:grid;gap:10px}
+.fbgrid label{font-size:14px;font-weight:600}
+.fbgrid .scale{font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:520px){ .brand{font-size:16px} .clock{font-size:18px} }
+</style>
+
+<div class="bar"><div class="bar-in">
+  <div class="brand"><small id="brandSmall">Feasibility playtest</small><span id="brandTitle">大航海解谜</span></div>
+  <div class="seg" role="group" aria-label="view">
+    <button id="vTester" aria-pressed="true" type="button">测试员</button>
+    <button id="vHost" aria-pressed="false" type="button">主持人</button>
+  </div>
+  <div class="seg" role="group" aria-label="language">
+    <button id="lZh" aria-pressed="true" type="button">中</button>
+    <button id="lEn" aria-pressed="false" type="button">EN</button>
+  </div>
+  <span class="sync" id="sync"><i></i><span id="syncText">本机模式</span></span>
+</div></div>
+<main class="wrap" id="app"></main>
+
+<script>
+const DATA = {"games":[{"id":"A","name":{"zh":"五片航海图","en":"The Five Fragments"},"mode":{"zh":"纯合作","en":"Pure cooperation"},"testMinutes":35,"realMinutes":50,"roles":{"1":{"zh":"海鹰号","en":"Sea Hawk"},"2":{"zh":"北极星号","en":"Polaris"},"3":{"zh":"信风号","en":"Trade Wind"},"4":{"zh":"珊瑚号","en":"Coral"},"5":{"zh":"晨星号","en":"Morning Star"}},"roleWord":{"zh":"船","en":"Ship"},"story":{"zh":"1519 年，五艘船准备从里斯本出发寻找香料群岛。老船长临终前把唯一的航海图撕成五片，分别锁进五艘船的船长箱。今晚舰队在港口重新集结，必须在天亮前拼出完整航线。<b>每一片地图都不完整，每一把钥匙都不在它自己的船上。<\/b>","en":"1519: five ships prepare to leave Lisbon for the Spice Islands. The dying Admiral tore the only chart into five pieces and locked one in each captain's chest. Tonight the fleet regroups and must rebuild the route before dawn. <b>No fragment is complete, and no key is on its own ship.<\/b>"},"testNote":{"zh":"测试时一个人代表一整条船。第一幕的三道谜在真实活动里由 5 人并行，所以你的用时会偏长，这正是我们要观察的数据。","en":"In this test one person plays a whole ship. In the real event five people split Act 1, so your times will run long. That is exactly the data we want."},"watch":{"zh":["第一幕谁最先完成、闲了多久","钥匙环有没有造成某条船长时间等待","埃特巴什和镜像字是否太难或太简单","A5 是全员讨论还是一个人拍板"],"en":["Who finishes Act 1 first and how long they sit idle","Whether the key ring leaves one ship waiting","Whether Atbash and mirror writing are too hard or too easy","Whether A5 is a group discussion or one person deciding"]},"puzzles":[{"id":"A1","stage":"intra","target":6,"title":{"zh":"信号旗","en":"Signal flags"},"body":{"1":{"zh":"<p>桅杆上挂着一串旗。对照下方的国际信号旗表，拼出你的第一个数字。<\/p><div class=\"flagrow\" data-flags=\"SIX\"><\/div><details class=\"chart\"><summary>国际信号旗对照表<\/summary><div data-flagchart><\/div><\/details>","en":"<p>A string of flags flies from the mast. Use the signal flag chart below to spell your first number.<\/p><div class=\"flagrow\" data-flags=\"SIX\"><\/div><details class=\"chart\"><summary>International signal flag chart<\/summary><div data-flagchart><\/div><\/details>"},"2":{"zh":"<p>桅杆上挂着一串旗。对照下方的国际信号旗表，拼出你的第一个数字。<\/p><div class=\"flagrow\" data-flags=\"ONE\"><\/div><details class=\"chart\"><summary>国际信号旗对照表<\/summary><div data-flagchart><\/div><\/details>","en":"<p>A string of flags flies from the mast. Use the signal flag chart below to spell your first number.<\/p><div class=\"flagrow\" data-flags=\"ONE\"><\/div><details class=\"chart\"><summary>International signal flag chart<\/summary><div data-flagchart><\/div><\/details>"},"3":{"zh":"<p>桅杆上挂着一串旗。对照下方的国际信号旗表，拼出你的第一个数字。<\/p><div class=\"flagrow\" data-flags=\"NINE\"><\/div><details class=\"chart\"><summary>国际信号旗对照表<\/summary><div data-flagchart><\/div><\/details>","en":"<p>A string of flags flies from the mast. Use the signal flag chart below to spell your first number.<\/p><div class=\"flagrow\" data-flags=\"NINE\"><\/div><details class=\"chart\"><summary>International signal flag chart<\/summary><div data-flagchart><\/div><\/details>"},"4":{"zh":"<p>桅杆上挂着一串旗。对照下方的国际信号旗表，拼出你的第一个数字。<\/p><div class=\"flagrow\" data-flags=\"TWO\"><\/div><details class=\"chart\"><summary>国际信号旗对照表<\/summary><div data-flagchart><\/div><\/details>","en":"<p>A string of flags flies from the mast. Use the signal flag chart below to spell your first number.<\/p><div class=\"flagrow\" data-flags=\"TWO\"><\/div><details class=\"chart\"><summary>International signal flag chart<\/summary><div data-flagchart><\/div><\/details>"},"5":{"zh":"<p>桅杆上挂着一串旗。对照下方的国际信号旗表，拼出你的第一个数字。<\/p><div class=\"flagrow\" data-flags=\"FIVE\"><\/div><details class=\"chart\"><summary>国际信号旗对照表<\/summary><div data-flagchart><\/div><\/details>","en":"<p>A string of flags flies from the mast. Use the signal flag chart below to spell your first number.<\/p><div class=\"flagrow\" data-flags=\"FIVE\"><\/div><details class=\"chart\"><summary>International signal flag chart<\/summary><div data-flagchart><\/div><\/details>"}},"hints":[{"zh":"每面旗代表一个字母。","en":"Each flag stands for one letter."},{"zh":"逐面查表，拼出一个英文单词。","en":"Look each flag up; they spell an English word."},{"zh":"这个单词是一个数字的英文。","en":"The word is a number."}],"gate":{"label":{"zh":"锁的第 1 位数字","en":"Digit 1 of the lock"},"ph":{"zh":"例如 4","en":"e.g. 4"},"numwords":true,"blobs":{"1":["dkJhJ4YVtdp/e6I+iVAzA8GRMwCWNN/PUHtIFGib0X2fTcK1UPUOvHGAsCPacWponEmjM+KD/YLQFQwMqX/nTb2sm4+8Wzdndk1oVwMRaZ6d+A=="],"2":["Za7ULjSzO0wahHD5uvTGr5FpklFM9OEa4o9hy0ctYiolesaHiBbl48LLX+37Yhd+h/mdQCmbAMfQdAxDCt9ge9KXGDZefG7DGT2rreUwGgYB9A=="],"3":["S702Capeb/D9uUnn34JfF7YBxmx8K9tkxFLGeAxJ1I2zbBrpJ9YVrvrQ4peZVciZbYdxfT50v/8uj0oSrZzIwWAUH3BvCN5TdHx5xYtqI8rhLw=="],"4":["+38HFiiD1yXdvDbU6DlBZnfak5aCRVbn//smOLewUVTPXv7VR3KQxdSjPSffv6P9oxXkBe0a3OmdTb6caNfPyoACz0cbrbG4VBByGsUKniG+lA=="],"5":["s2lTaMLVfBK47P2T3+rlR7topH2ZKCrKrwsfS+hBVqnOViRNxQsIZblWnBcHJujYq2B3FgAjcn6w1pMCP+QfS2IotTJBut0DjXseGKJJdTDvlg=="]}}},{"id":"A2","stage":"intra","target":8,"title":{"zh":"船员名册","en":"Crew roster"},"body":{"0":{"zh":"<p>1–4 号铺住着 Pedro、Juan、Diego、Luis，职位分别是领航员、厨师、木匠、炮手（每人一个）。<\/p><ol class=\"clues\"><li>领航员睡在 1 号铺。<\/li><li>厨师的铺号正好比 Juan 大 1。<\/li><li>Luis 睡在最后一个铺位。<\/li><li>Diego 既不是木匠，也不是厨师。<\/li><li>炮手和木匠的铺位不相邻。<\/li><\/ol><p><b>厨师睡在几号铺？这是锁的第 2 位。<\/b><\/p>","en":"<p>Pedro, Juan, Diego and Luis sleep in bunks 1–4. Their jobs are navigator, cook, carpenter and gunner (one each).<\/p><ol class=\"clues\"><li>The navigator sleeps in bunk 1.<\/li><li>The cook's bunk is exactly one higher than Juan's.<\/li><li>Luis sleeps in the last bunk.<\/li><li>Diego is neither the carpenter nor the cook.<\/li><li>The gunner and the carpenter are not in adjacent bunks.<\/li><\/ol><p><b>Which bunk is the cook in? That is digit 2.<\/b><\/p>"}},"hints":[{"zh":"画一张 4×4 表格，先填确定的信息。","en":"Draw a 4×4 grid and fill in what is certain."},{"zh":"从第 3 条和第 1 条入手，再分情况讨论 Diego 的职位。","en":"Start from clues 3 and 1, then test each job for Diego."},{"zh":"Diego 是领航员，Juan 在 2 号铺。","en":"Diego is the navigator; Juan is in bunk 2."}],"gate":{"label":{"zh":"锁的第 2 位数字","en":"Digit 2 of the lock"},"ph":{"zh":"1–4","en":"1–4"},"numwords":true,"blobs":{"0":["o2Yg8+/3mtszVFC3ISU3TbVrqqDm9B6l3/d5Xn5Z1IeeV3rL4kvIDts53oR9YbaXs26L1vFAkRaHQtcFLENy/4vWUJDR0utOZx3lp8eEl/JIvw=="]}}},{"id":"A3","stage":"intra","target":5,"title":{"zh":"罗盘转向","en":"Compass turns"},"body":{"1":{"zh":"<p>罗盘卡：北=1，东北=2，东=3，东南=4，南=5，西南=6，西=7，西北=8。<\/p><p>船头朝北出发。航海日志写着：<\/p><p class=\"logline\">右转 90° → 右转 45° → 左转 180°<\/p><p>最终船头所指方向的数字，就是锁的第 3 位。<\/p>","en":"<p>Compass card: N=1, NE=2, E=3, SE=4, S=5, SW=6, W=7, NW=8.<\/p><p>The bow starts facing north. The log reads:<\/p><p class=\"logline\">Right 90° → Right 45° → Left 180°<\/p><p>The digit of your final heading is digit 3.<\/p>"},"2":{"zh":"<p>罗盘卡：北=1，东北=2，东=3，东南=4，南=5，西南=6，西=7，西北=8。<\/p><p>船头朝北出发。航海日志写着：<\/p><p class=\"logline\">左转 45° → 左转 90° → 右转 45°<\/p><p>最终船头所指方向的数字，就是锁的第 3 位。<\/p>","en":"<p>Compass card: N=1, NE=2, E=3, SE=4, S=5, SW=6, W=7, NW=8.<\/p><p>The bow starts facing north. The log reads:<\/p><p class=\"logline\">Left 45° → Left 90° → Right 45°<\/p><p>The digit of your final heading is digit 3.<\/p>"},"3":{"zh":"<p>罗盘卡：北=1，东北=2，东=3，东南=4，南=5，西南=6，西=7，西北=8。<\/p><p>船头朝北出发。航海日志写着：<\/p><p class=\"logline\">右转 135° → 左转 45° → 右转 90°<\/p><p>最终船头所指方向的数字，就是锁的第 3 位。<\/p>","en":"<p>Compass card: N=1, NE=2, E=3, SE=4, S=5, SW=6, W=7, NW=8.<\/p><p>The bow starts facing north. The log reads:<\/p><p class=\"logline\">Right 135° → Left 45° → Right 90°<\/p><p>The digit of your final heading is digit 3.<\/p>"},"4":{"zh":"<p>罗盘卡：北=1，东北=2，东=3，东南=4，南=5，西南=6，西=7，西北=8。<\/p><p>船头朝北出发。航海日志写着：<\/p><p class=\"logline\">右转 180° → 左转 45° → 左转 90°<\/p><p>最终船头所指方向的数字，就是锁的第 3 位。<\/p>","en":"<p>Compass card: N=1, NE=2, E=3, SE=4, S=5, SW=6, W=7, NW=8.<\/p><p>The bow starts facing north. The log reads:<\/p><p class=\"logline\">Right 180° → Left 45° → Left 90°<\/p><p>The digit of your final heading is digit 3.<\/p>"},"5":{"zh":"<p>罗盘卡：北=1，东北=2，东=3，东南=4，南=5，西南=6，西=7，西北=8。<\/p><p>船头朝北出发。航海日志写着：<\/p><p class=\"logline\">右转 90° → 右转 90° → 左转 45°<\/p><p>最终船头所指方向的数字，就是锁的第 3 位。<\/p>","en":"<p>Compass card: N=1, NE=2, E=3, SE=4, S=5, SW=6, W=7, NW=8.<\/p><p>The bow starts facing north. The log reads:<\/p><p class=\"logline\">Right 90° → Right 90° → Left 45°<\/p><p>The digit of your final heading is digit 3.<\/p>"}},"hints":[{"zh":"站起来真的转一转。","en":"Stand up and actually turn."},{"zh":"右转是顺时针，45° 是罗盘上相邻的一格。","en":"Right is clockwise; 45° is one step on the compass."},{"zh":"第一次转向后你朝向哪里？写下每一步。","en":"Write down your heading after every turn."}],"gate":{"label":{"zh":"锁的第 3 位数字","en":"Digit 3 of the lock"},"ph":{"zh":"1–8","en":"1–8"},"numwords":true,"blobs":{"1":["78imizueYIS5jT9TGi4XSfLQd8zL4aJCaUt6vX/Xu9nBQBouGz0rH4Ud2sbb09GOjl7d0J42+8klJLvVVccF4yGh/nAMNPiYqUHBQm5c9Q3m/Q=="],"2":["gsNXIpYJ2CTNpPWvqKH4xvr0W264Bs/rqmEYAldqNKCCRuV4Li0YN4Kx46FiPfPmFf6dmFaHXtr++tkwCrVWeC2f6ZkLIvvyrex1CC5ZHz/gRA=="],"3":["pPlp5fvXlawwOsNBs/SNthqM3ZFIflKt7P38VfIvXBodzLWRW1zHsTT3pn84cHM003WVjCmo4A0ivz2wAjx8I+Fzz62WiC5VLbP1WOY1MEkEDA=="],"4":["JH2UXYfQhtFdnVgMnwfNfVHtYVXMESvm+MZUvq+oozIMsuMnfcP2HNIeKNZL4zPCczoRu5NoD+LDEh3kURK1TpH1mC7REKCVMKN4GgwsY46pQA=="],"5":["XzeTb/st5DTMZ89Sl2X+QV6BYY2Os7gu4UABfr4r2PxgPSlZmpATpULsDMk8LCPp1thsLYDmM4fwpEPDQPklUVjFw6GzlzA/n1HxM62PJbnJAA=="]}}},{"id":"A-chest","stage":"intra","target":1,"title":{"zh":"打开船长箱","en":"Open the captain's chest"},"body":{"0":{"zh":"<p>船长箱挂着一把 3 位数字锁，顺序是 A1 → A2 → A3。<\/p>","en":"<p>The chest has a 3-digit lock, in the order A1 → A2 → A3.<\/p>"}},"hints":[{"zh":"把 A1、A2、A3 的数字按顺序连起来。","en":"Join the digits from A1, A2 and A3 in order."},{"zh":"三道题都要先解出来。","en":"All three must be solved first."},{"zh":"检查 A3 的每一次转向。","en":"Re-check each turn in A3."}],"gate":{"label":{"zh":"3 位密码","en":"3-digit code"},"ph":"000","blobs":{"1":["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"],"2":["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"],"3":["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"],"4":["8KW0MwfNdP2GunxXPe/K5f+UWzOJ6coNqcGjjjdfJrerxnCLKX6AT7g5tZNa0lRkB17wJNVZqUNrZ4ISD7c75B5pQzyzbFI3IJ5DyVC2O4gYi7pX3UvMFZ4hV32axKlKd4eFguPmQE0nMWddtLvoCf23OWnzn1khuPOVNeHm4+8aHMMK2su32dxRNbXltJ7KBOpvZyLmMDfx1F5boWnoTBn4dphL6GfHGtBBEY9HCTHD1Qy8Iqp2Og4kUvbohx4TefMoYtDTzPSOo8p45ZMz27L2N8ktnT1TCMU0Q04kc8MgjtbeR+iI2sTpcni9ZzUA5FlBmqJcu0lIY0QgI7jXn3ytXDbwTJWch1aK8P9R4IHTcL7KSCq9oWO0mfM1qOZDZHWGDeSaIaMi1o8LNKFcmGwvMNOP5bnQZi1g05FeURC5cwcGSaN9dG9miCYwQIuqIgpqgpeYhZjlt5k+wBgIB77fwrN5esPxSokDzseSNp+2O48CkaiNBvOnEXmOq69su1fRRLNsAniiXtnNJrMP8lOntKB3J1igN/Vh8wP4fE5ayFmXGSmUYp7bLaJceAmKlXTuCFAOa841WHsTQAadn4R+f0ipKC4BQ++WOFC3jq9/VOM57pCdVZgWIdzex50M8IeeVQE/NxwV1KRZFlhRLvvGnLvZbBIOIwUPchabyevIuGelamSDYg7GDsToMxngh6nt3fpZnCuM4HFIvs900dxibAOVZ2mECet1656vsIQLkbe2xcRgp1idipdR1H9cfOsHyU5KBkkEe36EiJiZPGzKDwv6YVHYeFXTP+v7AvQ7dPfRi+qNFo74ZRxT/8xPI6ZL+w0A58bTDNUDNhNi7eiRdjuEbWjfMUrIoAvxeh/c4EAh8UZqDNfnn67C6Qe+4Pt2YZ80TN+1nDjnBPUhfzCD6fK9/EYHXR443cUI9/9kg1D2sjZfaXRCQgrbKtRSANPjHawHIxaFC7IBIUMJYOawe6sA68lvcxvDDhnSQs18c+YSiwXF9DYchl//TNwDAed21SQzO5gl7eJpdzrXY5K3AlMi+02+ppauE/RL9+qadhUOKcQas0fEN1SgmM8fbcjndvQl+fCfrbYaMdl/BkicmWdqdAv5Ca6sFGZNfqgNXuByMnnmHi2eilUJVE9MxTCmos28g4KyuHmdgZt8oJ+30Yt/KAzv07H41uB6qqNfi+HjlYCRlkWB+XbRbYlh00ElZArWvYgJe4CQyky8e8TB7xIGjK3r5NOWN8x9iUsFcf3ccJkyhn4d4lyvnEZsMXL9FIM/KDBdKs7o3SX9/FDhD4PHh0psHK+MmryFv6DWT0jibS5BXimVJgE2aA6Ar9ZA7qDvKDT7W+4rSJ1/KP6r5b08X+mrc0ilFTWSQKi+IIHzhGCJ3sIBJ4vwHdsC0h8TGy/qCnHwDSugMSWwJGFY/bBYrraS/tYYGwxyS5RGBVnEpFeZd4pRYyZsHs8CTuttkCSR6Tly4B13gzQs17ltiSD+J1cB7MnF6uRgAt2i4+OvFKWlcfh8IYyuIQwsg8D8/jS08TfTNDaLYhSdsHpsjY1Q6I/VayOg34HDT+pE8AjxsV7GfmGqJutZ7t4gRkyRypEH/+BGO9afMDsdfHIMJdDvoPmRJ6s1oYMQdBNayr4LJSe5mBNgYeOglDqN7vtxSkLw+75gJk1oQ8/y79ME1vHQ1k2C9qEkv1gCbmbxksf9XLFo/dXhBjAshxPEpFv+8MpFP62dhAEXzC9CQNlK9ygNC0I+ZvpmR8T/c2gCFFD4x/qPJRPRHjcl6cEcLof1kZh1mc5fBzTiZyelNCMY1iPSFhc02g+KrbmGCDH57sodUOlTGnh6pc2dIPdUAd899O8lMX8K9lNXsnkIyCrV1SVS88aZ3Fawo0mSBvplnSWPjd2kQb8/553HcT4gLxgmxCeNsD0VHmEF"],"5":["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"]}}},{"id":"A4","stage":"cross","target":12,"requires":"A-chest","title":{"zh":"解开你的港口名","en":"Decode your port"},"body":{"0":{"zh":"<p>你的残图上的港口名是加密的。找到持有你钥匙卡的那艘船，请他们给你看钥匙。解出港口后在这里提交。<\/p>","en":"<p>The port on your fragment is encrypted. Find the ship holding your key card and ask to see it. Submit the port here.<\/p>"}},"hints":[{"zh":"钥匙卡背面写着船名，去找那艘船。","en":"The key card names a ship on its back. Go find it."},{"zh":"凯撒：每个字母往回数 3 位；埃特巴什：A↔Z 对折。","en":"Caesar: shift back 3. Atbash: fold A↔Z."},{"zh":"五个港口都在从里斯本到香料群岛的路上。","en":"All five ports lie on the route from Lisbon to the Spice Islands."}],"gate":{"label":{"zh":"港口名（英文或中文）","en":"Port name"},"ph":"PORT","blobs":{"1":["VBHf3SyXjjgiI5i+j7Whz00OZ/Ze3Urxtu0VVyhUe4LRqFnOVgitIjMxV6c6N9DI31ChME5T6oq04L6vijaxmCq1ygCDVeTXUxdiMRMM/V44Y/FOH7Tuq/xzlhBZdGHlad4grtcGmTWE6/C7mWM69qXFBXlMcNEeoy96VDa/e1uTF5g0Gv/WKR7mHeRBui8M9WnUMRFMrNQjhnSPwpPI+EvlTP6EANziBsYGlKhxVU+UT3LvBLc=","rJMLDYDwG+EO8agMRGs9cfrS9iHvo7jNtc789JYLvvufEiBJki3kpZErqZ9PYSzNhsCDivtLEiGa507MTHDLX4qUgMYukMKPj5b7uO+pMaNL/B0u/zhmuxgHqLfUsSxxVqb7vqmOOKULJhlyMvig4+a5yl8aayRhrCGLiU/JnRCq21TYSnB2pDx4t1Kz31uKyoLn9jYtXkqIWnX0s/3kweFCVmYnfhB/Rdb8t8STxH/e2HB/MJ4="],"2":["qAr8B+vnuZobG4qBzPnGBBgwG2IMlSsjNZtJTYQoNa6nAYIoYySWyux94uNET+e4d+F8SiZJbpjkH1iMKeCBXY4uF9RcGs2P1TGmLG6dZg/mxIcuWm8dJ+SbaBBfVNrrlQ9X7Yk0sDTGr1IV+HvycFK1qeqn59kW0uf2N5kc4v2KKAQlxpkg1h9TLKWDfNe/T1NYgP1pcR1dnyoiLWGP6xIInnCw9ujWBfyWEoSZlDj6Dw==","qdy7XSkP4/MTtsp/MRSEEh91MKAqZiEfMX+vVEVA88OIvGQM3SXTJ+erkAGO7oxue/LdSh7/l1X6Eo0tRnp5d1+2r/i9B/T3VFf1/4d0jpnNCJ8fDoAxZWW2bKLBGFh8+so/qcGuGd8Qz/8KszLGa7453q6vTx7X+9TFgVJ5hy8g5maxG1dg8fjec1Qpij1Gne7FpnHeQ5nQQLQcSWDc8tbbFrjsTrgzks4VctxzzvbUzw==","RKHwtq9GQm90l4R1vUSraXVuAzaXVFpC3KS/+n18YVzT3V1CBQ3ihVARWZAA5fOM0zIqnS41pB5KUdQPiX+nUiZ20vPrkD1E8w4Z13fsXbKi2Ti8dpMj6b6xeDbJ74MUKfT6bCc+ZG++Ld5X23UyCvOULa/EgdMojl4Jz1bFnsU2KhLhaTpH6+vT/NOyXj6lfoA+vJU6BTRIWO4gzsDfCKExtZtTi2e4VDK406yRCV9tsg=="],"3":["X0w+um/TwvJjI9VJDxXvKgN+e8VjtbwiLB0j3s2b2lAiYQcKbdaoEtyHJu68M4YT+hENjkzaPFxeCrrBhQkwODgHHx3P2f+4yMdQ3Xql5TPMZzGgzEhrVQGSPJPtgzkhD4RBJQl1NeKXGzhA69e1lLUcixZpglHRIuJugBEvOcwtT48C3IZC82eB3XegLTh/sqpftb5S63YiTD4jC6ulRiUDHZkK3YMGNPO9dyQ=","Xdp3jLCH8TFo/qmI6/JYy0TUm9hygrhEDffoQVxCe3WQNcMVLDag2zZRTecnpAWuVOkhC4N5yexvIz9UxlKGrHr3is9WHHdi9Leyx2X6PzpNgrt9g37+c9pdfvqH2iZCmGW5JKmOAMUtzoTF7VTjtWkKz+bnRzFlJtUkQoZFYx15Xh1/shyMvb7nU1IwpxfcW9mzdReBRJjPEpt9vbmJuRB/dQ08Lj4o+Fbcs0E="],"4":["dbyfRxchORZBWC9fs9cizYg18yo8q10xP/jl1w7SgBiHY2FOvtf/DeV5Sjzg9S8wweISoLzhMl2J/rve3ruOZRumjSZOCWaICVec3NxqvFwGO7Vt09pe98lBqQLyuKzEsnaj8HHhdfS63qndNm16dYqC0QyHHtjy2x9OHUG855AT/Bx8o9BQYDs6cqHY3cjQii5MgBLea9w0zM7C6oKOmxYi7oUGBBNtqaXSaiyrbV3BfjM4GJNYCw==","1CSgm2FLETS+F2k08DDxAY27Z+VXyFFLNWvwYzox2KE7QKjvBYZuXr/9JDjReZbhqPswKZBCDBRC5OMG8KSrV/rerEnrjU4p41yMRTuDhHOL+7rDbwWH6XoXL/hp9CVnwy4g0uHqD8tkjk/I9xa8kDOOr/8ZabBhkMAtAwKyRaK7vf/4BTEwOyHOyl6dMVqBu68wg4UB47B9V+JeL46WMwzJ16726pdaTXvaTgjh5J8nr32A19T2rw=="],"5":["KSvqNj1kHXt8E69ROCqCW/sux/agVmT4mABAymbWDg6vgwoY1RynKvnOK5b3+2EeEPI69/cBX9Z+qtvlW8eHVKXA+kaMutpqNvY9yfHgB+Kfzh4a2hwn1WVqJ04i4YnyP4BwaxrdzQ9WkIA4bTub5Gxk2yBx2+dx1sx39C/VcVBSxzGHLug/aBSIuOlzN5PiLt8AR1qsXTR8e7LdnTMVvgGks34HGrtygnH1ByNvM3U/bZ83oFvPqO+O","g3NRB6DEXhmMO42RVwg05IFai+WGo7sSpVoHrd+nxfAlfGmyd5pJ4rG7MQ2P7uk0KfpE6fk7HD/YuH4rKuObMEhory8OXWBhwTAQ2AdmrGTnazJfoJqniMiEeDSCJAHrkNj6HWcDb/EcmOUckYq7oiSd0690VmAsofCWOWPMbJ8fc3JibTSg59tUQCij+hTjr+v10VUX3oumdyoQ/m1O08gw4kb+TEF3k9Z751fG0wbOCuVumTMYkIuF","t2PKhNcwC+Z15xwfXGHyaAvD91wSr9fKCI6NxdMR7nbQEyILxjaZb11+zjNcKoFuct/O9u2Vcua3McTaovG5PCGOqU9IBISxFknQGkQFWKC8JkaBhCtrehoSZdjKUcl1TQyf92ORda6hzXl81glnaeDf+prMS6+qxXHCoxESt3Yvu9UV99UdNRp7GxPg68AFnvJD52ZxkXdvl9WFYQKX9SmHYlT+HT5aP3iwo0uKLZh8zXLPWrQScyUV","+aL0oSwZJmIfieSejgM4GdKdi/1zlfVUXd0r4s+duEHo7ub5TkV05hSbF0nlbq9D7BFeNJBHQ2hDMxs57ySFbYN8yq5QVHw8GXXkxFs46hfxIl7he/gbDUC6VpMM6qVKBaAFqP7kJpSaUD7eqc9gjrAsTpG0LGS2r32Z9x8Ne+zivJCpeCFAgWiBLHZR7/ZpUFWI/1UUfwlM5uUK9tMAcON+1jW07rcIkV4ZP+/3n5hudqUu9ypKyk7j","dxvCloUF5MQ8LxVcuxzQjcYRKhDl7B/WPyw94a8SBMgyGT7j4AhkLLJ6CFfVeFEUOiMf9KCasAnTgwcwz+5Yv/N7Zw5VNIuHbbqKpD1+pQMQlddJDoR2sEs3gPgtXu4BSlWW5ahecsx0gG1KAvZKAeaMO3q+PulFDm3NaXlRzJGHj+7Pos62fiyh/IptjzhP+675h1GqCjRuba9PkUVqj1gH637DbWOLorn2U8tQTI6e1gQdo0kZS08h","lInGPJ9Tphy4d2uJz4PFwWwzNkfZqIsa8bQ4K/pkYnHqAoUU7OXDyrulR0m+Thxn4ltmBKWEFkt/SLJGVD13IcJ+qIIZKMPk1muLJVE69nH7xSO2pKMHeoWTq+WtqCow6VMuoI20KzFx0PtKFwnhiEIV5YiPO0sY/zCYGiD7i+5AmZAWgjaH3hfw90HYi2oZH4IQaH+cWHNHb/rJMUcbZ8kb6nboqz6GH1nY8K64Wezc/m1+x/ATAJPs"]}}},{"id":"A5","stage":"cross","target":5,"shared":true,"title":{"zh":"航线顺序","en":"Route order"},"body":{"0":{"zh":"<p>全舰队一起决定五个港口的航行顺序，把半截句子按顺序连起来。任何一条船都可以提交。<\/p>","en":"<p>The whole fleet agrees the order of the five ports and joins the half-sentences. Any ship may submit.<\/p>"}},"hints":[{"zh":"从里斯本出发，往南绕过非洲。","en":"Leave Lisbon and head south around Africa."},{"zh":"印度之后是一条狭窄的海峡。","en":"After India comes a narrow strait."},{"zh":"里斯本 → 好望角 → 果阿 → ……","en":"Lisbon → Cape → Goa → …"}],"gate":{"label":{"zh":"按顺序输入 5 个港口的英文首字母","en":"First letters of the 5 ports, in order"},"ph":"XXXXX","blobs":{"0":["QpKORfqtebYG2R0JjXgviiaKsyUQVG7ziLTnMua/6YwAo2YT0DqPCfPGZIUZ+5boabFA5JhADlxoerCSMYjtcEQgxJ1uu/1DjI1WtsvpL5QZfq0FRr/C0PlZV8wbERsk7QeTrsSkLGBIe2ilBFJg8smVsCRg/QIcbFtEwEQYf47QsuBWGIM9QcorRMIvtEebbA8S6J80Irr7SThlrbLCo70QxkWBDyk52Llsume7QaPTWeBopBNkHzfZ0oaGD3PbxxmjUE4v0eBZUNKBn7tV0TkLLuY6JXKJJRWJU68ZsMjNpBRJcEG9wWFZnxGRl0pwLZF+m4SzCppv6/VdTakEp+wTj9cKv3MWSKY7cof6hYsojiBbXWJWCFZM1gW0fCKbkvHKzEDSp9zX/sJ1LJacbS3MWAkHmJT47mlJVazMQ8mazDoTi6qTzQ67C/YgmnSdyIkGsE+Rp5WnvHTyNM/h2pROgNjXKJ9c5eeo/pekoPpMWnQ34xV52pOrF1RwWC5N+XUeACHatdJ43xKZ455RAxWOw39ZY3JtU/rHlwerZihf6ok+TslRY3Lg9XB0L3/5dNEY44jkpuNWrK3z69jMUz2WxhkgZTNW8Nq9Sici0MZ0cw/7kugP4sj4P8zaggmnBGCHUB3U2xVDVlZzAexB7dyYQ4OVYjBTQPj36X5vhEfN3k3vyELsqOdLjFpVjp+pFrtYTO/DCQxjseBX/d37xcGq"]}}},{"id":"A6","stage":"final","target":6,"shared":true,"requires":"A5","title":{"zh":"老船长的最后宝箱","en":"The Admiral's last chest"},"body":{"0":{"zh":"<p>宝箱上刻着：“按航线顺序，盖上每一个港口的印章。”<\/p>","en":"<p>The lid reads: “Stamp each port's seal, in the order of the voyage.”<\/p>"}},"hints":[{"zh":"每条船手里都有一枚印章。","en":"Every ship holds one seal."},{"zh":"印章背面写着港口名。","en":"Each seal names a port on its back."},{"zh":"按 A5 的港口顺序排印章。","en":"Order the seals by the route from A5."}],"gate":{"label":{"zh":"5 位字母密码","en":"5-letter code"},"ph":"XXXXX","blobs":{"0":["kNPfPrgLg8qfVi87fxt9EdT2vTJ+j38YWKhXR16dgNZlcrDJz2gYYdfqK/GsRzXyHf2Z8tOOInOmPQgBRzOE8/0TWT1aXEGGVjb/jBL+EkYCGuN9hCcDFm9hrTFSdxBJH//olKd7RoznzxFlcHxH6oHFq5nFKldokj+1zYUFnENr7hWDjBnhFjnpy4bHKQWL2x3Mfr2hTJ3ELHvFUx/Gz3tX4bwMreKJujmL3g0bWABKWDny7Ur2E2VqE7iAaGLiUvho7pEvFmjQF+leO5CNO31faffc38bKbfhYDP3AOnOwZWmmmW0AdWEbYq6KuDIoNYtad7ARJZXGXZzm8t4Ic+LEhpmqF3WxlE1YRTGbkudp099/zjdwoG2LHzsayhT0u4nDFIjh5Zx1Y7Klt22Zr0bH7VaJu7NYbvyUctSKkfLKO5nayQ2kPFoNUMjzoofXSOJP/4wRe+7xGDJB3YhL8xlOUmthQSN6ybhtlzUa4/3Nqd9Le9sjXBatKC16GyxbtnaXBgY3Z8FUKK0Uf29QiMDo5OivXG7TYV/qLGChrdWtsQ/TWk+LVd8+Dvraw5jQHfZCVicE8n60qbhcP18pu/7ObEuRvl5hlwPZrfsGry3e2njTDGALvywS/uJMoUuWZDFp3DTHNnAEsPU+Lz0Qtx+ngJLVlqKjVIeah3/hJ2bo0z+ir4K3UmU5Uvs6plRBxD6iKlpX9HAZO/cKj2XXIqPGEv0R"]}}}]},{"id":"B","name":{"zh":"塞维利亚香料交易所","en":"The Seville Spice Exchange"},"mode":{"zh":"先竞争，后合作","en":"Compete, then cooperate"},"testMinutes":40,"realMinutes":50,"roles":{"1":{"zh":"狮子商行","en":"House of the Lion"},"2":{"zh":"雄鹰商行","en":"House of the Eagle"},"3":{"zh":"海豚商行","en":"House of the Dolphin"},"4":{"zh":"玫瑰商行","en":"House of the Rose"},"5":{"zh":"星辰商行","en":"House of the Star"}},"roleWord":{"zh":"商行","en":"House"},"market":true,"story":{"zh":"1520 年代的塞维利亚，香料比黄金还贵。国王宣布：第一个献上“皇家宴会配方”全部香料的商行，将获得下一次远航的特许状。五家商行各控制一种香料的产地，谁也凑不齐自己的配方。<b>交易、结盟、海盗，以及最后的诏书。<\/b>","en":"Seville, 1520s, when spice is worth more than gold. The King promises the next royal charter to the first house that presents every spice in the Royal Banquet Recipe. Each house controls one spice and none can finish its recipe alone. <b>Trades, alliances, pirates, and a final decree.<\/b>"},"testNote":{"zh":"测试时由主持人兼任交易所书记员，银行和事件在主持人视图里操作。香料“货箱”和金币都记在页面上，交易时双方各自点转账。B1 需要一个真实的闻香台（5 个罐子）。","en":"In this test the host doubles as the Exchange clerk; bank and events live in the host view. Crates and coins are tracked on the page: in a trade, each side sends its half. B1 needs one real smell station (5 jars)."},"watch":{"zh":["交易是否真的发生，还是有人囤货","银行和事件是否给主持人带来太大负担","反转（SPICE）时大家的反应","有没有商行因为缺货完全卡死"],"en":["Whether trades actually happen or someone hoards","Whether the bank and events overload the host","How people react to the SPICE twist","Whether any house is stuck for lack of goods"]},"recipes":{"1":["pepper","cinnamon","clove","nutmeg"],"2":["cinnamon","clove","nutmeg","anise"],"3":["clove","nutmeg","anise","pepper"],"4":["nutmeg","anise","pepper","cinnamon"],"5":["anise","pepper","cinnamon","clove"]},"home":{"1":"pepper","2":"cinnamon","3":"clove","4":"nutmeg","5":"anise"},"foreign":{"1":"anise","2":"pepper","3":"cinnamon","4":"clove","5":"nutmeg"},"foot":{"1":{"num":"II","text":{"zh":"不属于","en":"belongs to"},"seal":"P"},"2":{"num":"V","text":{"zh":"所有远航归来的人","en":"all who sailed home"},"seal":"E"},"3":{"num":"IV","text":{"zh":"而属于","en":"but to"},"seal":"C"},"4":{"num":"I","text":{"zh":"国王的宴席","en":"The King's feast"},"seal":"S"},"5":{"num":"III","text":{"zh":"任何一家商行","en":"no single house"},"seal":"I"}},"puzzles":[{"id":"B1","stage":"intra","target":6,"title":{"zh":"闻香辨货","en":"Smell the cargo"},"body":{"0":{"zh":"<p>去闻香台（5 个编号小罐）。根据描述判断每个罐子装的是什么。<\/p><ul class=\"cargo\"><li><b>黑胡椒<\/b>：马拉巴尔海岸的“黑色黄金”，闻一下就想打喷嚏。<\/li><li><b>肉桂<\/b>：锡兰树木的内皮，甜而温暖。<\/li><li><b>丁香<\/b>：摩鹿加群岛的花蕾，像小钉子，闻久了舌头发麻。<\/li><li><b>肉豆蔻<\/b>：班达群岛的果核，味道最“闷”。<\/li><li><b>八角<\/b>：来自中国南方的八角星，带甘草味。<\/li><\/ul>","en":"<p>Go to the smell station (5 numbered jars). Work out what each jar holds.<\/p><ul class=\"cargo\"><li><b>Black pepper<\/b>: the “black gold” of the Malabar Coast; one sniff and you sneeze.<\/li><li><b>Cinnamon<\/b>: Ceylon bark, sweet and warm.<\/li><li><b>Clove<\/b>: a Moluccan flower bud shaped like a nail; it numbs the tongue.<\/li><li><b>Nutmeg<\/b>: a Banda Islands seed, the most “muted” smell.<\/li><li><b>Star anise<\/b>: an eight-pointed star from southern China that smells of liquorice.<\/li><\/ul>"}},"hints":[{"zh":"先找最好认的：八角（甘草味）和肉桂（甜）。","en":"Start with the easy ones: anise (liquorice) and cinnamon (sweet)."},{"zh":"丁香会让鼻子发麻；肉豆蔻最闷。","en":"Clove numbs; nutmeg is the most muted."},{"zh":"1 号罐是肉桂，4 号罐是八角。","en":"Jar 1 is cinnamon and jar 4 is star anise."}],"rewards":{"1":[["pepper",2]],"2":[["cinnamon",2]],"3":[["clove",2]],"4":[["nutmeg",2]],"5":[["anise",2]]},"gate":{"label":{"zh":"按 胡椒·肉桂·丁香·肉豆蔻·八角 的顺序写罐号","en":"Jar numbers in the order pepper·cinnamon·clove·nutmeg·anise"},"ph":"00000","blobs":{"0":["wVrFdBZXWbfrp4fxOo2nGBSBS2TQr9bfAH3xnSOF//CSMf+5WDHbs6kMoQuHWKGE7n6BXXMODXoUzTryz/ebPE2V56O8JgEuZ5859lsKdvHchVToWxXh8Jn2VM9ZzTBlsLMA400k4CHPaJ/epk9yUYTGl1a2veybCfF7Qum/zmT/D4B4yPAByVY="]}}},{"id":"B2","stage":"intra","target":5,"title":{"zh":"罗马数字账簿","en":"Roman-numeral ledger"},"body":{"1":{"zh":"<p>司库偷了钱，还改了账本里的一行。找出被改的是第几行。<\/p><div class=\"tw\"><table class=\"ledger\"><tr><td>I<\/td><td>胡椒<\/td><td class=\"mono\">XII 袋 × III 金币 = XXXVI<\/td><\/tr><tr><td>II<\/td><td>肉桂<\/td><td class=\"mono\">VIII 袋 × V 金币 = XL<\/td><\/tr><tr><td>III<\/td><td>丁香<\/td><td class=\"mono\">XV 袋 × IV 金币 = LX<\/td><\/tr><tr><td>IV<\/td><td>肉豆蔻<\/td><td class=\"mono\">VI 袋 × IX 金币 = LIV<\/td><\/tr><tr><td>V<\/td><td>八角<\/td><td class=\"mono\">X 袋 × VII 金币 = LXXX<\/td><\/tr><tr><td><\/td><td>总计<\/td><td class=\"mono\">CCLXX<\/td><\/tr><\/table><\/div>","en":"<p>The treasurer stole money and altered one line of the ledger. Which line?<\/p><div class=\"tw\"><table class=\"ledger\"><tr><td>I<\/td><td>Pepper<\/td><td class=\"mono\">XII sacks × III coins = XXXVI<\/td><\/tr><tr><td>II<\/td><td>Cinnamon<\/td><td class=\"mono\">VIII sacks × V coins = XL<\/td><\/tr><tr><td>III<\/td><td>Clove<\/td><td class=\"mono\">XV sacks × IV coins = LX<\/td><\/tr><tr><td>IV<\/td><td>Nutmeg<\/td><td class=\"mono\">VI sacks × IX coins = LIV<\/td><\/tr><tr><td>V<\/td><td>Star anise<\/td><td class=\"mono\">X sacks × VII coins = LXXX<\/td><\/tr><tr><td><\/td><td>Total<\/td><td class=\"mono\">CCLXX<\/td><\/tr><\/table><\/div>"},"2":{"zh":"<p>司库偷了钱，还改了账本里的一行。找出被改的是第几行。<\/p><div class=\"tw\"><table class=\"ledger\"><tr><td>I<\/td><td>胡椒<\/td><td class=\"mono\">XII 袋 × III 金币 = XXXVI<\/td><\/tr><tr><td>II<\/td><td>肉桂<\/td><td class=\"mono\">VIII 袋 × V 金币 = L<\/td><\/tr><tr><td>III<\/td><td>丁香<\/td><td class=\"mono\">XV 袋 × IV 金币 = LX<\/td><\/tr><tr><td>IV<\/td><td>肉豆蔻<\/td><td class=\"mono\">VI 袋 × IX 金币 = LIV<\/td><\/tr><tr><td>V<\/td><td>八角<\/td><td class=\"mono\">X 袋 × VII 金币 = LXX<\/td><\/tr><tr><td><\/td><td>总计<\/td><td class=\"mono\">CCLXX<\/td><\/tr><\/table><\/div>","en":"<p>The treasurer stole money and altered one line of the ledger. Which line?<\/p><div class=\"tw\"><table class=\"ledger\"><tr><td>I<\/td><td>Pepper<\/td><td class=\"mono\">XII sacks × III coins = XXXVI<\/td><\/tr><tr><td>II<\/td><td>Cinnamon<\/td><td class=\"mono\">VIII sacks × V coins = L<\/td><\/tr><tr><td>III<\/td><td>Clove<\/td><td class=\"mono\">XV sacks × IV coins = LX<\/td><\/tr><tr><td>IV<\/td><td>Nutmeg<\/td><td class=\"mono\">VI sacks × IX coins = LIV<\/td><\/tr><tr><td>V<\/td><td>Star anise<\/td><td class=\"mono\">X sacks × VII coins = LXX<\/td><\/tr><tr><td><\/td><td>Total<\/td><td class=\"mono\">CCLXX<\/td><\/tr><\/table><\/div>"},"3":{"zh":"<p>司库偷了钱，还改了账本里的一行。找出被改的是第几行。<\/p><div class=\"tw\"><table class=\"ledger\"><tr><td>I<\/td><td>胡椒<\/td><td class=\"mono\">XII 袋 × III 金币 = XXXVI<\/td><\/tr><tr><td>II<\/td><td>肉桂<\/td><td class=\"mono\">VIII 袋 × V 金币 = XL<\/td><\/tr><tr><td>III<\/td><td>丁香<\/td><td class=\"mono\">XV 袋 × IV 金币 = LXX<\/td><\/tr><tr><td>IV<\/td><td>肉豆蔻<\/td><td class=\"mono\">VI 袋 × IX 金币 = LIV<\/td><\/tr><tr><td>V<\/td><td>八角<\/td><td class=\"mono\">X 袋 × VII 金币 = LXX<\/td><\/tr><tr><td><\/td><td>总计<\/td><td class=\"mono\">CCLXX<\/td><\/tr><\/table><\/div>","en":"<p>The treasurer stole money and altered one line of the ledger. Which line?<\/p><div class=\"tw\"><table class=\"ledger\"><tr><td>I<\/td><td>Pepper<\/td><td class=\"mono\">XII sacks × III coins = XXXVI<\/td><\/tr><tr><td>II<\/td><td>Cinnamon<\/td><td class=\"mono\">VIII sacks × V coins = XL<\/td><\/tr><tr><td>III<\/td><td>Clove<\/td><td class=\"mono\">XV sacks × IV coins = LXX<\/td><\/tr><tr><td>IV<\/td><td>Nutmeg<\/td><td class=\"mono\">VI sacks × IX coins = LIV<\/td><\/tr><tr><td>V<\/td><td>Star anise<\/td><td class=\"mono\">X sacks × VII coins = LXX<\/td><\/tr><tr><td><\/td><td>Total<\/td><td class=\"mono\">CCLXX<\/td><\/tr><\/table><\/div>"},"4":{"zh":"<p>司库偷了钱，还改了账本里的一行。找出被改的是第几行。<\/p><div class=\"tw\"><table class=\"ledger\"><tr><td>I<\/td><td>胡椒<\/td><td class=\"mono\">XII 袋 × III 金币 = XXXVI<\/td><\/tr><tr><td>II<\/td><td>肉桂<\/td><td class=\"mono\">VIII 袋 × V 金币 = XL<\/td><\/tr><tr><td>III<\/td><td>丁香<\/td><td class=\"mono\">XV 袋 × IV 金币 = LX<\/td><\/tr><tr><td>IV<\/td><td>肉豆蔻<\/td><td class=\"mono\">VI 袋 × IX 金币 = LXIV<\/td><\/tr><tr><td>V<\/td><td>八角<\/td><td class=\"mono\">X 袋 × VII 金币 = LXX<\/td><\/tr><tr><td><\/td><td>总计<\/td><td class=\"mono\">CCLXX<\/td><\/tr><\/table><\/div>","en":"<p>The treasurer stole money and altered one line of the ledger. Which line?<\/p><div class=\"tw\"><table class=\"ledger\"><tr><td>I<\/td><td>Pepper<\/td><td class=\"mono\">XII sacks × III coins = XXXVI<\/td><\/tr><tr><td>II<\/td><td>Cinnamon<\/td><td class=\"mono\">VIII sacks × V coins = XL<\/td><\/tr><tr><td>III<\/td><td>Clove<\/td><td class=\"mono\">XV sacks × IV coins = LX<\/td><\/tr><tr><td>IV<\/td><td>Nutmeg<\/td><td class=\"mono\">VI sacks × IX coins = LXIV<\/td><\/tr><tr><td>V<\/td><td>Star anise<\/td><td class=\"mono\">X sacks × VII coins = LXX<\/td><\/tr><tr><td><\/td><td>Total<\/td><td class=\"mono\">CCLXX<\/td><\/tr><\/table><\/div>"},"5":{"zh":"<p>司库偷了钱，还改了账本里的一行。找出被改的是第几行。<\/p><div class=\"tw\"><table class=\"ledger\"><tr><td>I<\/td><td>胡椒<\/td><td class=\"mono\">XII 袋 × III 金币 = XLVI<\/td><\/tr><tr><td>II<\/td><td>肉桂<\/td><td class=\"mono\">VIII 袋 × V 金币 = XL<\/td><\/tr><tr><td>III<\/td><td>丁香<\/td><td class=\"mono\">XV 袋 × IV 金币 = LX<\/td><\/tr><tr><td>IV<\/td><td>肉豆蔻<\/td><td class=\"mono\">VI 袋 × IX 金币 = LIV<\/td><\/tr><tr><td>V<\/td><td>八角<\/td><td class=\"mono\">X 袋 × VII 金币 = LXX<\/td><\/tr><tr><td><\/td><td>总计<\/td><td class=\"mono\">CCLXX<\/td><\/tr><\/table><\/div>","en":"<p>The treasurer stole money and altered one line of the ledger. Which line?<\/p><div class=\"tw\"><table class=\"ledger\"><tr><td>I<\/td><td>Pepper<\/td><td class=\"mono\">XII sacks × III coins = XLVI<\/td><\/tr><tr><td>II<\/td><td>Cinnamon<\/td><td class=\"mono\">VIII sacks × V coins = XL<\/td><\/tr><tr><td>III<\/td><td>Clove<\/td><td class=\"mono\">XV sacks × IV coins = LX<\/td><\/tr><tr><td>IV<\/td><td>Nutmeg<\/td><td class=\"mono\">VI sacks × IX coins = LIV<\/td><\/tr><tr><td>V<\/td><td>Star anise<\/td><td class=\"mono\">X sacks × VII coins = LXX<\/td><\/tr><tr><td><\/td><td>Total<\/td><td class=\"mono\">CCLXX<\/td><\/tr><\/table><\/div>"}},"hints":[{"zh":"先把罗马数字换成阿拉伯数字。","en":"Convert the numerals first."},{"zh":"I=1 V=5 X=10 L=50 C=100，小数在左边表示相减。","en":"I=1 V=5 X=10 L=50 C=100; smaller on the left subtracts."},{"zh":"逐行算乘法，看哪行对不上。","en":"Multiply each line and find the mismatch."}],"rewards":{"1":[["coins",5]],"2":[["coins",5]],"3":[["coins",5]],"4":[["coins",5]],"5":[["coins",5]]},"gate":{"label":{"zh":"被改的行号（1–5）","en":"Altered line (1–5)"},"ph":"1–5","numwords":true,"blobs":{"1":["qaWRkCeQybH3Nzm+L/0fgirBxBlacwzaKwdRwVENDMXgqEI2S+wUO7BmvuzHKORc5/xkVbUWqHZBbB7Xwg7ZNDwTYDKt+M1rWcYT0QEVkSXJWkzzDpvDPmgAw5b+5H6j2CyTQbn8knquELAGCJtyEmT8utiAyHEuhbKAUGJHMllQImf3g+xvx5KQdBv6/UFZrxA=","AsKn/VE0fZYfyFDFgSIoleP+4AA37ifHgMrDCPumU+u9t3ysNHxeFmLh1r4RVAOMhCZBgZ60TGVpgLcRXUHDpKFGqIrWgcYsaIQf8p6nklErsHP/Dak/uCsQKdRA62W6PaA3gzzin+q6forQCcQr6Sd1nv9b4KL+Hbyse2Wp/PZzWd80xc6gLYwjKXrEIOgIDv4="],"2":["2yQIxaYL39lST7E+P+/Wen51DxNctR3vOeeChjR0yCLAmAz7LjAxRQdS/OjFmsaj1aAgdT/4Gy5vysECA+ONxu3iLuHsHzfQBPK9Ws2ZiXobWSAx/aYENEzfUiQ4t6KhSzpjaL62F1Etdm2yi+q3LDKI6U0H47TiJ3TmRb+5/5aNAL41ra9hBHtiDap05Sf23OA=","X4dWXeZUTctFerVqmkNT7mXJm9MPaEtxMEQxkeyWXBbJpPJA/yPXZOQiaFZIzbXyuSYZqlvbp4f+J2s8mNY3OHQDcsx8UYbR20g7yrZUtsW/WgHuo20Cgp8YDNO2gU3pZFyh2QzXxrJMoXt7NeED33jNoDnTIrK9u+nU3Nb3PZD5MHHBfsrD8DwXqptgxXf7Zno="],"3":["tgCFjCZJAY2fRyKyL1KBCsBJBxWL4Z3HWOx2hWXVw+OnnjDwqs9Mxr0rbFLTpPcwNwFTZC05ELbbMRllwEkjC3L+dxBedPHfGukG1WG9KIEUIy+v+UVbfHp5l9jBNRuDXtM2PqJVPDA+6yJc9W61Eb7ksXZbBHv9FpI4V6T4yZZKWWS2C6b+5Kf4VbQUdYUaNVM=","MNsBZ1AyjFM2X6SSbmiWlNyLxrSzsEC41qJwX/KFl0YIfAhTwul0C7E7YP5IoEJDk+vzndTF2/nI5+bz/IqeyvZwBFRBWylf93Ihd4ol0ha+fxCvBbKHegwZFSalL4us+9kECjiqKWVIYF6HyjWOK2vWOOi5HGM++zHmlsxosqkxUv1HuVa8lzv2pzmk+BE4OBc="],"4":["+YHYJJK9Ucl11ZuGlVaOQwWVy34Zr+0oLOmo5EmlY6ja6eZ6imlh2BbmOEDCqC7115evUx9xUPJFW2M/P6u0nO0ILXQNjBGnbAlcC/Np5628f2MY/cvosJBFagHbeZaUadnjdDJZposapCz8xemVfd+gv2z1d0kP9PDYmW+3DVxmORuDHglDKk8rMtxK4zX0Dis=","6ch0zX9xU8MZizz6zKyuPW425EgSSp5Ogb/1HOQgpHkHul2QLRd2q9EyOKWMwYV0gdGUSVH/u56RiVnHdX5nb6eIaRRcN2hp99tzePpuEwFIlCzVAMN6ejMnh1Mrpg3SG42dLlPfSEZPK2dBkghTxni92j2HyjggQIXSmScxNTzuX4a5+F+EgRg9xIs/uPlrUmw="],"5":["KSIdiVETmRdnjRfqcncKJh5XYdStXV8dHSLHk9ImYQPPKRiwOH5PYbiNpoNoEPNy/szGd3CgEgyyz0lLK9484orM25KOMPBsITu0TH5pEDf7WtnB8Q1lSKMOPhwMMNJGJwkHnC2a4ukstk6JFIwTS6u3VOCVUWMWsQ/skGm5dT4BUqDYUc58gA2GeBUXP2gm60U=","QW6JNVXUift10maYcSmv2d8jzRUmaK3MgUcMb1NdeO7CPuR97OgupP1W62dfnzZfqS9xIf2rKG9fprIilHTMq6us9aQV73+wFYIxQC9pFod4xR6T4g/CQhLLB/FDnvqQzIcs0v+lRPV9U5W0VHe44ZPT+ctePnYLlDSCOGfF3IAFBV3Zg1bYGk9TLMy8E0X92co="]}}},{"id":"B3","stage":"intra","target":5,"title":{"zh":"四国货币","en":"Four currencies"},"body":{"1":{"zh":"<p>汇率：1 杜卡特 = 2 克鲁扎多；1 克鲁扎多 = 3 弗罗林；1 弗罗林 = 4 雷亚尔。<\/p><div class=\"tw\"><table><tr><th>里斯本<\/th><th>安特卫普<\/th><th>塞维利亚<\/th><th>威尼斯<\/th><\/tr><tr><td>3 克鲁扎多<\/td><td>8 弗罗林<\/td><td>1 杜卡特 + 10 雷亚尔<\/td><td>35 雷亚尔<\/td><\/tr><\/table><\/div><p><b>同一袋货在哪里最便宜？<\/b><\/p>","en":"<p>Rates: 1 ducat = 2 cruzados; 1 cruzado = 3 florins; 1 florin = 4 reales.<\/p><div class=\"tw\"><table><tr><th>Lisbon<\/th><th>Antwerp<\/th><th>Seville<\/th><th>Venice<\/th><\/tr><tr><td>3 cruzados<\/td><td>8 florins<\/td><td>1 ducat + 10 reales<\/td><td>35 reales<\/td><\/tr><\/table><\/div><p><b>Where is the same sack cheapest?<\/b><\/p>"},"2":{"zh":"<p>汇率：1 杜卡特 = 2 克鲁扎多；1 克鲁扎多 = 3 弗罗林；1 弗罗林 = 4 雷亚尔。<\/p><div class=\"tw\"><table><tr><th>里斯本<\/th><th>安特卫普<\/th><th>塞维利亚<\/th><th>威尼斯<\/th><\/tr><tr><td>3 克鲁扎多<\/td><td>10 弗罗林<\/td><td>1 杜卡特 + 14 雷亚尔<\/td><td>37 雷亚尔<\/td><\/tr><\/table><\/div><p><b>同一袋货在哪里最便宜？<\/b><\/p>","en":"<p>Rates: 1 ducat = 2 cruzados; 1 cruzado = 3 florins; 1 florin = 4 reales.<\/p><div class=\"tw\"><table><tr><th>Lisbon<\/th><th>Antwerp<\/th><th>Seville<\/th><th>Venice<\/th><\/tr><tr><td>3 cruzados<\/td><td>10 florins<\/td><td>1 ducat + 14 reales<\/td><td>37 reales<\/td><\/tr><\/table><\/div><p><b>Where is the same sack cheapest?<\/b><\/p>"},"3":{"zh":"<p>汇率：1 杜卡特 = 2 克鲁扎多；1 克鲁扎多 = 3 弗罗林；1 弗罗林 = 4 雷亚尔。<\/p><div class=\"tw\"><table><tr><th>里斯本<\/th><th>安特卫普<\/th><th>塞维利亚<\/th><th>威尼斯<\/th><\/tr><tr><td>4 克鲁扎多<\/td><td>11 弗罗林<\/td><td>1 杜卡特 + 18 雷亚尔<\/td><td>45 雷亚尔<\/td><\/tr><\/table><\/div><p><b>同一袋货在哪里最便宜？<\/b><\/p>","en":"<p>Rates: 1 ducat = 2 cruzados; 1 cruzado = 3 florins; 1 florin = 4 reales.<\/p><div class=\"tw\"><table><tr><th>Lisbon<\/th><th>Antwerp<\/th><th>Seville<\/th><th>Venice<\/th><\/tr><tr><td>4 cruzados<\/td><td>11 florins<\/td><td>1 ducat + 18 reales<\/td><td>45 reales<\/td><\/tr><\/table><\/div><p><b>Where is the same sack cheapest?<\/b><\/p>"},"4":{"zh":"<p>汇率：1 杜卡特 = 2 克鲁扎多；1 克鲁扎多 = 3 弗罗林；1 弗罗林 = 4 雷亚尔。<\/p><div class=\"tw\"><table><tr><th>里斯本<\/th><th>安特卫普<\/th><th>塞维利亚<\/th><th>威尼斯<\/th><\/tr><tr><td>4 克鲁扎多<\/td><td>11 弗罗林<\/td><td>1 杜卡特 + 22 雷亚尔<\/td><td>43 雷亚尔<\/td><\/tr><\/table><\/div><p><b>同一袋货在哪里最便宜？<\/b><\/p>","en":"<p>Rates: 1 ducat = 2 cruzados; 1 cruzado = 3 florins; 1 florin = 4 reales.<\/p><div class=\"tw\"><table><tr><th>Lisbon<\/th><th>Antwerp<\/th><th>Seville<\/th><th>Venice<\/th><\/tr><tr><td>4 cruzados<\/td><td>11 florins<\/td><td>1 ducat + 22 reales<\/td><td>43 reales<\/td><\/tr><\/table><\/div><p><b>Where is the same sack cheapest?<\/b><\/p>"},"5":{"zh":"<p>汇率：1 杜卡特 = 2 克鲁扎多；1 克鲁扎多 = 3 弗罗林；1 弗罗林 = 4 雷亚尔。<\/p><div class=\"tw\"><table><tr><th>里斯本<\/th><th>安特卫普<\/th><th>塞维利亚<\/th><th>威尼斯<\/th><\/tr><tr><td>2 克鲁扎多<\/td><td>5 弗罗林<\/td><td>1 杜卡特<\/td><td>22 雷亚尔<\/td><\/tr><\/table><\/div><p><b>同一袋货在哪里最便宜？<\/b><\/p>","en":"<p>Rates: 1 ducat = 2 cruzados; 1 cruzado = 3 florins; 1 florin = 4 reales.<\/p><div class=\"tw\"><table><tr><th>Lisbon<\/th><th>Antwerp<\/th><th>Seville<\/th><th>Venice<\/th><\/tr><tr><td>2 cruzados<\/td><td>5 florins<\/td><td>1 ducat<\/td><td>22 reales<\/td><\/tr><\/table><\/div><p><b>Where is the same sack cheapest?<\/b><\/p>"}},"hints":[{"zh":"把所有价格换成同一种货币。","en":"Convert every price to one currency."},{"zh":"换成最小的雷亚尔最方便。","en":"The real, the smallest unit, is easiest."},{"zh":"1 杜卡特 = 24 雷亚尔，1 克鲁扎多 = 12，1 弗罗林 = 4。","en":"1 ducat = 24 reales, 1 cruzado = 12, 1 florin = 4."}],"rewards":{"1":[["anise",1],["pass",1]],"2":[["pepper",1],["pass",1]],"3":[["cinnamon",1],["pass",1]],"4":[["clove",1],["pass",1]],"5":[["nutmeg",1],["pass",1]]},"gate":{"label":{"zh":"最便宜的港口","en":"Cheapest port"},"ph":{"zh":"港口名","en":"Port"},"blobs":{"1":["wSegDLuOPZ+gkdQPpjbgtIoHm2oetJqW+1Q8q2JeYy8SglbfycIUAcPohYsDK1/CQMtTRdu/2KrJBKEHmCTBHcfAEdQnssjTyQEqMuOuEX9TQNamDQjx1d0LwnosaWDGLW+miDq1LB2kPxe9Dke2bfJ4WxChlIwWYW7CfWpMDxAO6YxCiiCNYh4bYdH33hsHW/ZmA3r0xPR9CurBwrXJLCa16se/3Hw=","5sQAukwcIsc9UcLOgobinH2wOXD5CSOCdVc4dcp/vzsP+jRSfkRyZ2uTX+pwwsRQvVgx+9bJbum14ihlgytrYe6rNWxKRISEr6Fpl1z06OF2FA/jGYB0eMh5UbjmofOPTRgc0lAkVveNqeswctzhLNjEB37VMzfGuQnd9YY3SFQM019D6uzu6ERiXwKq3XD4PKCfz9+rh8W6Lho3iCPoAmQvb1Gotmo="],"2":["6beoUfpF8Yy1B3vVoaJfrW/xjeVGO1snFxZ5ecXDATDjWPo67mTZYmIaujzBqfMGYH04A1KtdYWHfwE1hkuJ08BVf1LkdLQffBBHyPrBR1uTHftpj+c0ykBjV+NT+2ukZezGi31YYpRkhoJ1mCkFNtYjZ0LJUQD5sr/afcdM41/8X8i8xdCCKcSFJmQgCj5N6Uh7GnUnQkiavBpbL9seuqFVXOWc+w==","shZ8oVfaDAmjdQMna50UEgrXOsRpqkoo3APxm7lxDATMKFQkInBXozdSP98/OWR1FwmR+nxkRHRyRZRtgFHweEYP5OIkPxVyIGFRCZUW5guAMPqM0+cQYoj1vgc0PkXEh11wVVf5gAGIe72Jb63ixYg/lxpEw1GFndZPhl7R9VzYsArUOhaa5XoB+9q8pjV4IKI11J9qvXdJLV0Q/yDX3SOHhBsCug=="],"3":["BLjwl4OuMVpK3x6xKdHWdsXRT878v3XeUJe4/27376kkMPnHrYbNjlG1mTqSMdG9YOqa1dZE6D6Y1Jq2k5PrycwIq16FeFfPn8J2OtW3hm7BhEOaJp62gIrrxZfoqzZnZLqYxniY40EwwqALNVJs0QSq/OcJ4IXnYtlZh3+gyBiT8tk7G2yNduOocw5ba7+QM61BD2ek7m0Jfmy4S1syItwdSdGj","MRS1qd8o+eJgK3YJtchgvoNIdDA6mlqn7YLtAbysVMyqmxZjKmFSjt+nu7wbMOUdWaJ9npVNe7g9RJzrdVNgUZh3pKK+Kv58v5drUK/Sc5IUs+H0NXBLNz3te+BpcQUHQnxdt+Ir7+i/HZxFipZmID4VryiMmQ7YN0uBumtLX+rWWTqrDkKZf/+wtVk/RCKrGEJiHx1TG7j2F+JQuYPIbAjd0C+A","LQwHgSbyd1pUH+TNvD5ljbngf7xJzRefvfD8gye42sOQD90KHhqSD813YvJPePWqqEL0FxxNrT7BP7gLwLoWBEOzcDPSB6/tLodE8MKNrCuLHdy1ejF9HmaAx3qmKNbYQpeaupaKe2SEqp4oI6MatlNEeI7AySUWsAAbbPb0sfF5yoyf5aK9mtl14FvEY40wl/dINC0PvV5aMlDeWodPxo46JQdR"],"4":["5/Et7NJNi52buWAxLgOI5EcwWSI3M28IAqpZlFfWq6ShCkYTkDG4+Cx9pt4BwbiibGu89ylgtRhw6dKVd/VhmXENohr9RcmrpEUfnkEKZtkyl+l3v+UC7+5yDUqI1C/QL1rw+Iux593KlF3MB/ADgZNmKsPiqbweAspen5lj4U4Kblp6fGjn6S3K6eCcPmL1fnep27RMMMAIF1NHiMO8YrOn","HlNDrz3yk7uRnbjIqbHxjZPG66hA/LLyQaPUkDZCn9WnZZ4igDrJgKWHX8G/9Dn/wu0VqZOn1KzX7IiGysIErQzFDz/DIG/uagZ+iRzWBlID3Nz860lYmuhcJsIBkAErYkcUHWaBjQ11P0Rngnba7A6LwrU3LbLbw4h2yIk9Um+Zrhk4HjMdD2c8Fv5DCM9Lr1ZbFu6WnGr2pl9nx07HdzKT"],"5":["Am7+cw2C8NFxhQGCGBTLPFocalcr2H6h2s/Ij31EToGr2R7G4FLlVgqbOzaIVY03cUTosyHrwP0YMOR3m74F0dS0ffhQrjofgIBJ7eYfYDa0CV1nCBWjTvXr7i4y+sGI3SnabaXCCmUO6LoaxJmP0rauwQoAvFk/IGoZ67woyb1mTZiYuUgmnVCYZsgLFBO6Q1NcFBBfHdmeIfzcMs8cQvKOgWn7aQ==","dHjr3BayNq/BvTgrH6jt0rtyLgS6OjaIry7YM9Dz9JsWCfn/oYb2utMrZk55rCTqRya89zjF8pylGTPtcphJpnq+j/5SpusIwSD/gYLypzFkyFufyyNaXp8B2MhTygK9wWtiWUKVvRl+RVVnlB3J06oPtQAMTUuGf8dJ8EMwudceH1YoTa5ki7hb9oSeT+cpOdB95d4SUrcM4czxFfJ0prgMxrZMxw=="]}}},{"id":"B4a","stage":"cross","target":8,"shared":true,"teams":[1,2],"title":{"zh":"双锁宝箱 α","en":"Double-lock chest α"},"body":{"1":{"zh":"<p>你手里是宝箱 α 的<b>事件卡<\/b>。年代图在雄鹰商行。<\/p><p>按下面事件的顺序，取每个事件发生年份的最后一位：<\/p><ol><li>达伽马抵达印度<\/li><li>迪亚士绕过好望角<\/li><li>麦哲伦船队出发<\/li><\/ol>","en":"<p>You hold chest α's <b>event card<\/b>. The timeline is with the Eagle.<\/p><p>In the order below, take the last digit of each event's year:<\/p><ol><li>Da Gama reaches India<\/li><li>Dias rounds the Cape<\/li><li>Magellan's fleet departs<\/li><\/ol>"},"2":{"zh":"<p>你手里是宝箱 α 的<b>年代图<\/b>。事件卡在狮子商行。<\/p><ul class=\"timeline\"><li><b>1405<\/b> 巨大的宝船，明朝的旗帜<\/li><li><b>1488<\/b> 非洲最南端的“风暴之角”<\/li><li><b>1492<\/b> 三艘船，西班牙国旗，“西印度”<\/li><li><b>1498<\/b> 卡利卡特港，印度的胡椒<\/li><li><b>1500<\/b> 意外漂到的南美海岸<\/li><li><b>1519<\/b> 五艘船出发，目标是绕地球一圈<\/li><\/ul>","en":"<p>You hold chest α's <b>timeline<\/b>. The event card is with the Lion.<\/p><ul class=\"timeline\"><li><b>1405<\/b> A colossal treasure ship under a Ming banner<\/li><li><b>1488<\/b> The “Cape of Storms” at Africa's tip<\/li><li><b>1492<\/b> Three ships, a Spanish flag, “the Indies”<\/li><li><b>1498<\/b> The port of Calicut, Indian pepper<\/li><li><b>1500<\/b> A South American coast reached by accident<\/li><li><b>1519<\/b> Five ships set out to circle the globe<\/li><\/ul>"}},"hints":[{"zh":"你只有一半信息，去找另一家商行。","en":"You only have half. Find the other house."},{"zh":"把事件和年代图上的图画一一对应。","en":"Match each event to a picture on the timeline."},{"zh":"达伽马 = 1498。","en":"Da Gama = 1498."}],"rewards":{"1":[["saffron",1]],"2":[["saffron",1]]},"gate":{"label":{"zh":"宝箱 α 的 3 位密码","en":"Chest α code"},"ph":"000","blobs":{"0":["1a7xWNdNmRvztdyjBFFr9OLBGlryft6I5u0SuoPmWhiiZowzQKTfRxfc98DXaFxZXnvSAzUqUGqNcJTGonB/XIg1OKxVzMg0xg4Dyhx6AthbmNCo0oCGiTmLDOBPHWPqKOjk9YH6YNP0aJWdfwItcJghuN6vbc990hhvkBQFVd8aeb8QlCY9oYPVy6qlUYqFmnHh4wrCd3TCnEw6OwbsKP40z3amJplWjFKh"]}}},{"id":"B4b","stage":"cross","target":8,"shared":true,"teams":[3,4],"title":{"zh":"双锁宝箱 β","en":"Double-lock chest β"},"body":{"3":{"zh":"<p>你手里是宝箱 β 的<b>事件卡<\/b>。年代图在玫瑰商行。<\/p><p>按下面事件的顺序，取每个事件发生年份的最后一位：<\/p><ol><li>哥伦布抵达美洲<\/li><li>郑和首次下西洋<\/li><li>卡布拉尔抵达巴西<\/li><\/ol>","en":"<p>You hold chest β's <b>event card<\/b>. The timeline is with the Rose.<\/p><p>In the order below, take the last digit of each event's year:<\/p><ol><li>Columbus reaches the Americas<\/li><li>Zheng He's first voyage<\/li><li>Cabral reaches Brazil<\/li><\/ol>"},"4":{"zh":"<p>你手里是宝箱 β 的<b>年代图<\/b>。事件卡在海豚商行。<\/p><ul class=\"timeline\"><li><b>1405<\/b> 巨大的宝船，明朝的旗帜<\/li><li><b>1488<\/b> 非洲最南端的“风暴之角”<\/li><li><b>1492<\/b> 三艘船，西班牙国旗，“西印度”<\/li><li><b>1498<\/b> 卡利卡特港，印度的胡椒<\/li><li><b>1500<\/b> 意外漂到的南美海岸<\/li><li><b>1519<\/b> 五艘船出发，目标是绕地球一圈<\/li><\/ul>","en":"<p>You hold chest β's <b>timeline<\/b>. The event card is with the Dolphin.<\/p><ul class=\"timeline\"><li><b>1405<\/b> A colossal treasure ship under a Ming banner<\/li><li><b>1488<\/b> The “Cape of Storms” at Africa's tip<\/li><li><b>1492<\/b> Three ships, a Spanish flag, “the Indies”<\/li><li><b>1498<\/b> The port of Calicut, Indian pepper<\/li><li><b>1500<\/b> A South American coast reached by accident<\/li><li><b>1519<\/b> Five ships set out to circle the globe<\/li><\/ul>"}},"hints":[{"zh":"你只有一半信息，去找另一家商行。","en":"You only have half. Find the other house."},{"zh":"把事件和年代图上的图画一一对应。","en":"Match each event to a picture on the timeline."},{"zh":"哥伦布 = 1492。","en":"Columbus = 1492."}],"rewards":{"3":[["saffron",1]],"4":[["saffron",1]]},"gate":{"label":{"zh":"宝箱 β 的 3 位密码","en":"Chest β code"},"ph":"000","blobs":{"0":["Yu/6lIPFxmCahMESVB8raatP3wUWQ7yl1/lEloUZ6lla+tJiQSpu5VSa1DkTCJvFXCLn1njt2jLclcGS8hvXeffyv379Vd7iwtm+GdmIF1I+nWLRH8fyymPadyQmq/++J401lF+yS47jwwFi8iu7wD6SZNmcwRKm0NvmVDlY1fMyOKABNfNyWg4o9Xc9QlVH"]}}},{"id":"B5","stage":"cross","target":8,"shared":true,"teams":[5,2,3],"title":{"zh":"海盗的藏身处","en":"The pirate hideout"},"body":{"5":{"zh":"<p>你有海图：4×4 网格（列 A–D，行 1–4），岛屿在 <b>A2、B4、C1、C3、D2<\/b>。“海盗一定藏在岛上。”另外两条情报在雄鹰和海豚手里。<\/p>","en":"<p>You hold the chart: a 4×4 grid (columns A–D, rows 1–4) with islands at <b>A2, B4, C1, C3, D2<\/b>. “Pirates always hide on an island.” Two more clues are with the Eagle and the Dolphin.<\/p>"},"2":{"zh":"<p>情报：“海盗不在 C 列，也不在 D 列。”海图在星辰商行。<\/p>","en":"<p>Intel: “The pirates are not in column C or D.” The chart is with the Star.<\/p>"},"3":{"zh":"<p>情报：“海盗藏身的行号大于 2。”海图在星辰商行。<\/p>","en":"<p>Intel: “The pirates' row number is greater than 2.” The chart is with the Star.<\/p>"}},"hints":[{"zh":"三条情报要合在一起。","en":"All three clues are needed together."},{"zh":"先列出岛屿，再逐条排除。","en":"List the islands, then rule them out clue by clue."},{"zh":"A、B 两列只有两个岛。","en":"Columns A and B hold only two islands."}],"rewards":{"5":[["coins",2]],"2":[["coins",2]],"3":[["coins",2]]},"gate":{"label":{"zh":"海盗所在格子（38 分钟前）","en":"Pirate square (before 38')"},"ph":"A1","blobs":{"0":["j5dvPVa0LjoZxKPQbzyuk5qT7YEm0exIegbDgwBZN72b/wKnMrcMFdDGLY4+IUBvT/abH8sWoPLAIZrycznAnEhP0yl49VuOELzuvyqHQHCSazzYGMSMMTML8U0Bo4nWcJfRBYlroDSzDYoVoBQJQjEBdcfABiAlEMeEbPP2vuN84iODEniWNNybyrNtxvuCO75Fuq74FL3oFsRmtQAjnTZqTN3p1I0dQYnc8Vx4knrNpXE5Fy+FgUKP899oYPE6mI6eFrssIH5EUTm81+bwh5UIlw39rwDVTzY="]}}},{"id":"B7","stage":"final","target":8,"shared":true,"title":{"zh":"国王的宴席","en":"The King's banquet"},"body":{"0":{"zh":"<p>主持人宣布闭市并宣读诏书：“国王只接受一份配方。它被分成五段，写在五张商行配方卡的底部。”<\/p><p>看看你的配方卡底部（交易面板里）。<\/p>","en":"<p>The host closes the market and reads the decree: “The King will accept one recipe only. It is split into five parts, written at the foot of the five house recipe cards.”<\/p><p>Look at the foot of your recipe card (in the trading panel).<\/p>"}},"hints":[{"zh":"五张卡底部的句段带着罗马数字。","en":"The five fragments carry Roman numerals."},{"zh":"按 I–V 排好，句子就通了。","en":"Order them I–V and the sentence reads."},{"zh":"印章字母也按 I–V 排。","en":"Order the seal letters I–V too."}],"gate":{"label":{"zh":"皇家宝箱 5 位字母","en":"Royal chest, 5 letters"},"ph":"XXXXX","blobs":{"0":["nDAanqJf5+NOwfrBZiXkuD4yvzCDd9a/S+kvu7+wsrcq0U1eW0IpQJX6vK4ZPBtfu/udTku0JKVXqEnjafAkJWXzQkwCuYSTl87cg++4u01+JPkDuCCAIh5fL/uA3tN0gHMxdRryK+S8plmnDOIEtBHNaqEyS4fWjRFQNWDtVOaUbncen5hJa5+rJsggjrVdCWAh6EYyc2wgxcvPndsYwKxDRJsE2M1AbREdYi0gPQjOr4+8VB8OrZuEnun7JbdNU+uUpusMvbW7as0q9vmHr8Q50Sl2Lnxanwbz0jJDYCcdCxpNjenW3VO4qtlb9/IJgHgMbhhjcw755fJUSKKRmM1fuKHeQnKSitXEiUYKBicf3kKoDK6l0LGfYkPV5D9B7im3e5Vxf9jILiBYLcQRLB81ggQ9Ljo2v9SMqxwgWY2Nh3KFs5aeq1lB5T7qocTCI2rp6lHezV111KA5aWTIL2ZdG4fJz/MOGdwCBtehMlVqourqruNUfc35H5kHxZX5fbvd+T3VvPpKj6C3jc6kLakOP25oYwXs3yp0AG49pv9iwQzdCkEteWz0K52yDK8rmc2jCflOpqxPK6lPcr7VuoMYY7QHz1pFlg4/iBS+eXj1Y+o="]}}}]},{"id":"C","name":{"zh":"最后一次航行","en":"The Last Voyage"},"mode":{"zh":"完全互相依赖","en":"Total interdependence"},"testMinutes":40,"realMinutes":50,"roles":{"1":{"zh":"领航组","en":"Navigators"},"2":{"zh":"制图组","en":"Cartographers"},"3":{"zh":"军需组","en":"Quartermasters"},"4":{"zh":"船医组","en":"Surgeons"},"5":{"zh":"厨房组","en":"Galley"}},"roleWord":{"zh":"部门","en":"Department"},"story":{"zh":"远洋帆船“希望号”在一夜风暴后醒来：船长失踪，船偏离航线，淡水只够撑一小时。五个部门各自只掌握一部分线索。<b>船长留下一句话：“当你们找到彼此的时候，就会找到我。”<\/b>","en":"The Esperança wakes after a night of storms: the Captain is missing, the ship is off course, and there is an hour of water left. Each department holds only part of the picture. <b>The Captain left one line: “When you find each other, you will find me.”<\/b>"},"testNote":{"zh":"这一局最考验依赖链：每个部门都要给出线索，也要等别人的线索。请留意你“干等”的时间，填反馈时会问到。","en":"This game is all about the dependency chain: every department gives and waits. Notice how long you spend just waiting; the feedback form asks."},"watch":{"zh":["依赖链有没有哪一环卡超过 5 分钟","厨房组和船医组是否主动把东西给出去","制图组拼图是否太简单","终局念信时的气氛"],"en":["Whether any link in the chain stalls for more than 5 minutes","Whether the Galley and Surgeons hand things over unprompted","Whether the jigsaw is too easy","The mood when the letter is read"]},"puzzles":[{"id":"C1a","stage":"intra","target":6,"teams":[1],"title":{"zh":"时钟里的经度","en":"Longitude from a clock"},"body":{"1":{"zh":"<p>母港位于 0° 经线，船上时钟保持母港时间。今天太阳升到最高点时，时钟显示 <b>16:00<\/b>。地球每小时自转 15°。<\/p><p>我们在母港以东还是以西？多少度？<\/p>","en":"<p>Home port is on the 0° meridian; the ship's clock keeps home time. At local noon today the clock read <b>16:00<\/b>. The Earth turns 15° an hour.<\/p><p>Are we east or west of home, and by how much?<\/p>"}},"hints":[{"zh":"太阳到头顶时，母港已经是下午了。","en":"When it is noon here, home is already in the afternoon."},{"zh":"差几个小时就乘以 15°。","en":"Multiply the hour difference by 15°."},{"zh":"16 − 12 = 4 小时，在母港以西。","en":"16 − 12 = 4 hours, west of home."}],"gate":{"label":{"zh":"经度（格式：度数+E/W）","en":"Longitude (degrees + E/W)"},"ph":"45E","blobs":{"1":["HEnPs1BXAK8CjbMGvtB3cpygb81Od3oJIh1qflM2KR8RDwJOYNdM4CPa3O+xxsAUUqddJhKmZ1NVlA/mOd+nxM6RfAwCuKwKP+b8D90lqRnzxca6LYltv//st1rOB8jpqemsn5t9vaRTOw8FEMKkOhzEQF9JUH7HncyD9NP8sIEl64e4Tcyu+FIPs4hv5qVfWfzlFQ==","zRn4+6gXyATJCpcoZarDtdDX4lvt81TNXOKSZuZt9Pk/jGt3FCzrGpNakqUpv8Khe9gzUcwhUkmjuiwJZG56DXjU0VxQ/S++ElW60b1IUsIqspsM3EqdakGlKtyfAk9l4UwoooFAgSMc6M6UlaInZLwXnUVKi/MdhQsxj88KQIithwazpja8vmn3MRDIIx5A1ExIaQ==","2qOspoIOJEZPCM8tRWWJlXLoquTJQfSapyX7mSfVntRX4hArQeNV6FOlQ5hAEeW8jBk9qr4nd2Ootw4cGtSuAgtj/JMzRRoGQC0UcNEXPcMDuUPJJehKdfymRhqWwiq7BTwLIfPN5QL7tw0amJpyDkRvUEWzu3CpWBc9fskU1mgJfKZsDEXY5mzucXVuV95IUjM40Q==","9PMIAySiIHGy5PjpP0iaNwO/MdiDfpN2UU2GKQVEC1SmuSWDoJ01eTBg2KLOMQl642eBsNqeDrr6jZCBHrV8m9SXPAQYEW2ro3OV1qGdbUS2LfPnKnbWvvAXOszKqxcW+CTuyzzJ2fNsHmCgghsrfV/ixnzdl72rR27cTLxvg0jGSVpm4IQoPJ6wARFrXKL6Dh7GxQ=="]}}},{"id":"C1b","stage":"cross","target":8,"teams":[1],"requires":"C1a","title":{"zh":"纬度","en":"Latitude"},"body":{"1":{"zh":"<p>六分仪记录：“____ 日正午，太阳高度角 83°。”（日期被海水洇湿）<\/p><p>公式：纬度 = 90° − 太阳高度角 + 当日太阳赤纬。<\/p><p class=\"note\">日期和赤纬都不在你手上。<\/p>","en":"<p>Sextant record: “Noon on ____: sun altitude 83°.” (the date is washed out)<\/p><p>Formula: latitude = 90° − sun altitude + the sun's declination that day.<\/p><p class=\"note\">Neither the date nor the declination is on your table.<\/p>"}},"hints":[{"zh":"谁的日记里写着日期？","en":"Whose diaries carry dates?"},{"zh":"哪种日历上会写太阳赤纬？","en":"What kind of calendar lists declination?"},{"zh":"6 月 21 日，赤纬 +23°。","en":"21 June, declination +23°."}],"gate":{"label":{"zh":"纬度（格式：度数+N/S）","en":"Latitude (degrees + N/S)"},"ph":"10N","blobs":{"1":["u6g3OPKIw0g9pt3YChTrRe0eD2mV8RsxVFn1GQ86ee+gKpPqhAuUAvWyplCQGYAHfBy4dN7xscdDfPLz6GYfX0f/55c7d7sINZ2AHt0Jm3KBH9VIgCdmZ8nFZW+Z6O8aPz59c2T3TMo1TfpCTTVM92K5rT1y6GMRtjC5VTrJYovxhwF60Cz/nYCW","UrcU+59eECCw1q11D5hrV7d3lyqpFOX4aumHPG4DVuD3OXgDFcSuck7lm4J2bsDoHuobO6EhTgUevHINuMGfOSs0cwtZnx8J5+F+9xePKu2mxU3XTe26HeKRCKu1jlGRFbogYyOZJOdwU3jiZClGJgYLE/kMLyE/2MwIPWhM0OM8D8FoYSYFqb0n","OxgkTG8/nQQwjgaIT9Ir/b7Br14J7x4zba4E6ygxCsOC7SYrGBmtX9128qbTENhCqLgvPVTEG51hM11emg5HMO15cN1HayXQy6XrYK1D3Haa3BzgqYcu5iZSBHkBWoKx2lvG1O7pEWmrtgAPDiaxZbqAea9oRpNw/Mge8kCp9kJHJq7R6q//sQrY"]}}},{"id":"C2a","stage":"intra","target":8,"teams":[2],"jigsaw":true,"title":{"zh":"拼合海图","en":"Rebuild the chart"},"body":{"2":{"zh":"<p>海图被撕成 6 块。依次点两块即可交换位置，经纬度刻度只印在边缘。<\/p><div data-jigsaw><\/div>","en":"<p>The chart is torn into 6 pieces. Tap two pieces to swap them. Latitude and longitude labels are printed only on the edges.<\/p><div data-jigsaw><\/div>"}},"hints":[{"zh":"先找带刻度的边缘块。","en":"Find the pieces with edge labels first."},{"zh":"纬度从上到下递减，经度从左到右递减。","en":"Latitude falls top to bottom, longitude falls left to right."},{"zh":"左上角是 50°N 90°W。","en":"The top-left corner is 50°N 90°W."}]},{"id":"C2b","stage":"cross","target":6,"teams":[2],"requires":"C2a","title":{"zh":"最短航线","en":"Shortest route"},"body":{"2":{"zh":"<p>海图角落的说明：“船每次只能横向或纵向移动一格，不能进入礁石，必须走最短的航线。”<\/p><p>目的地坐标在领航组手里。<\/p>","en":"<p>Note in the corner: “The ship moves one square at a time, horizontally or vertically, never into a reef, and must take the shortest route.”<\/p><p>The destination is with the Navigators.<\/p>"}},"hints":[{"zh":"先确定回声岛的位置。","en":"Locate Echo Island first."},{"zh":"先往北会撞礁。","en":"Going north first hits a reef."},{"zh":"一共 2 格向东、2 格向北。","en":"Two squares east, two north."}],"gate":{"label":{"zh":"航线（R/L/U/D 或 →←↑↓）","en":"Route (R/L/U/D or arrows)"},"ph":"RLUD","dir":true,"blobs":{"2":["26jZRniBuMj/b8SEPRhPFvr7rGAG5/u/ogq9QYCNMUi1y2ytsBUQOuYvtuteX1h6FEmVSk9jlYAbpt5qwSiLzh+ty+gIfrAWEAgB1AFmBgAuZgJ4UBI46XkfRPLyD9C3pwvVBUsj6jk1x2cXl4JZI6gOEt/R4SdanpW8r7Feut2mVT5M/+dWnbUX+o9SxGp7rdLRrA=="]}}},{"id":"C3a","stage":"intra","target":6,"teams":[3],"title":{"zh":"超重的木桶","en":"The overweight barrel"},"body":{"3":{"zh":"<p>清点货舱时，有一个桶的重量不对劲。<\/p><div class=\"tw\"><table><tr><th>桶<\/th><th>清单<\/th><th>实测<\/th><\/tr><tr><td>1<\/td><td>淡水 40 升<\/td><td>40 kg<\/td><\/tr><tr><td>2<\/td><td>饼干 20 包<\/td><td>10 kg<\/td><\/tr><tr><td>3<\/td><td>腌肉 8 块<\/td><td>20 kg<\/td><\/tr><tr><td>4<\/td><td>葡萄酒 30 升<\/td><td>30 kg<\/td><\/tr><tr><td>5<\/td><td>火药 12 包<\/td><td>18 kg<\/td><\/tr><tr><td>6<\/td><td>绳索 6 卷<\/td><td>18 kg<\/td><\/tr><tr><td>7<\/td><td>大米 25 kg<\/td><td>37 kg<\/td><\/tr><tr><td>8<\/td><td>豆子 16 kg<\/td><td>16 kg<\/td><\/tr><tr><td>9<\/td><td>盐 10 kg<\/td><td>10 kg<\/td><\/tr><\/table><\/div><p class=\"note\">单位重量：淡水 1 kg/升 · 饼干 0.5 kg/包 · 腌肉 2.5 kg/块 · 葡萄酒 1 kg/升 · 火药 1.5 kg/包 · 绳索 3 kg/卷<\/p>","en":"<p>One barrel in the hold weighs wrong.<\/p><div class=\"tw\"><table><tr><th>Barrel<\/th><th>Manifest<\/th><th>Weighed<\/th><\/tr><tr><td>1<\/td><td>Fresh water 40 L<\/td><td>40 kg<\/td><\/tr><tr><td>2<\/td><td>Biscuits 20 packs<\/td><td>10 kg<\/td><\/tr><tr><td>3<\/td><td>Salt pork 8 pieces<\/td><td>20 kg<\/td><\/tr><tr><td>4<\/td><td>Wine 30 L<\/td><td>30 kg<\/td><\/tr><tr><td>5<\/td><td>Gunpowder 12 bags<\/td><td>18 kg<\/td><\/tr><tr><td>6<\/td><td>Rope 6 coils<\/td><td>18 kg<\/td><\/tr><tr><td>7<\/td><td>Rice 25 kg<\/td><td>37 kg<\/td><\/tr><tr><td>8<\/td><td>Beans 16 kg<\/td><td>16 kg<\/td><\/tr><tr><td>9<\/td><td>Salt 10 kg<\/td><td>10 kg<\/td><\/tr><\/table><\/div><p class=\"note\">Unit weights: water 1 kg/L · biscuits 0.5 kg/pack · salt pork 2.5 kg/piece · wine 1 kg/L · gunpowder 1.5 kg/bag · rope 3 kg/coil<\/p>"}},"hints":[{"zh":"逐桶算出应有重量。","en":"Work out each barrel's expected weight."},{"zh":"单位重量卡上没有大米，大米按 kg 计。","en":"Rice is listed by the kilo."},{"zh":"比较 7、8、9 号桶。","en":"Compare barrels 7, 8 and 9."}],"gate":{"label":{"zh":"桶号","en":"Barrel number"},"ph":"1–9","numwords":true,"blobs":{"3":["EwVosy2CWL7ADH2JUwteupB1YFUBrr56Mv39MMZwu0LOw4z5ir1NBPhjpjJEeVMbuPRAE18IL7usEYvoADin7x0RGgijGvY8bMoWzYzcP/0aSVg1uX6diFjLjll0nScBcy6Z7/3vM3j6PZxIDHf3SxRu/SQH8joBmQRaWhqRQezqB6lviVcVg3GJ3iUPtuvlX6Nrh9xvZWT/wg+UKyGRufts0szkAdX0KcByEZIfF0ob5ftbUTRed5K2TD/AlIdK4Myw38GC/ueWnNhxd0hvv4rVJ7stQj2dV01NDEk+mIP4pm2BK79B/OKFSR5CgTONBf+y"]}}},{"id":"C3b","stage":"cross","target":6,"teams":[3],"requires":"C3a","title":{"zh":"密码本","en":"The codebook"},"body":{"3":{"zh":"<p>密码本挂着 4 位字母锁。锁码不在你手上。<\/p>","en":"<p>The codebook has a 4-letter lock. The code is not on your table.<\/p>"}},"hints":[{"zh":"船医在调查船长最后说了什么。","en":"The Surgeons are investigating the Captain's last words."},{"zh":"那个词写在厨师的日记里。","en":"The word is in the cook's diary."},{"zh":"一个与“回声”有关的英文词。","en":"An English word meaning a repeated sound."}],"gate":{"label":{"zh":"4 位字母","en":"4 letters"},"ph":"XXXX","blobs":{"3":["546D615Cdae9K+h4s6g6Go/RG0HrL0ZxIb2vvx5sh9pZRDOKCpawmPFK58G+jvHyflFsGsaiLAdLZp0/VBvLdrp2bht+coCKtqcvYWaGcmrIcqavSvbBuFO7MhGGlgGXI6RS8rezl/jepuDEyv3+iLHEl9LZbxNnlcLVeDUvhV0tNvaWQ3OsTOEvSjnzK4fpS0nRPzOSC0bZBst6E3fI8XJMoqtQzWMW7kZFDM9/AXqYkTzKarMhhcRdNkZi7iDZgnVgsesfxwzN2hSR4DEA7lQIz0H5NVHpIUD9K8pU71sLYA39A5znytXua3+7lFRFXIsr/ok3RXFcVMThA82wGAWh1dpthN02jQl8qpXgsTDQ7Ayst28k+Nxyh67o0pHQg43EZpKl/M4deGFvd33rb49SCCvepKgFxc9ovkA99m0g/VhsLrwO3x0G4aQurU3q3q+q3LY1jtlfgJcLh48FDpLA57I9p2+skUh04uGuO8MpB2XmT16/pVENpdqMjNmA7bJLUNpFuFx0UW2vnnAK0jhK7ZYpqRxxaWzPXLpI1HK+SM8sa0kZ9cbyQMVpebODGhUI3Sc="]}}},{"id":"C3c","stage":"cross","target":5,"teams":[3,5],"shared":true,"requires":"C3b","title":{"zh":"解读炖菜食谱","en":"Decode the stew recipe"},"body":{"3":{"zh":"<p>用密码本去解厨房组的食谱。<\/p>","en":"<p>Use the codebook on the Galley's recipe.<\/p>"},"5":{"zh":"<p>军需组拿到密码本后，和他们一起解你们的食谱。<\/p>","en":"<p>Once the Quartermasters open the codebook, decode your recipe together.<\/p>"}},"hints":[{"zh":"食谱的分量是数字代码。","en":"The recipe quantities are codes."},{"zh":"21 33 05 12 50。","en":"21 33 05 12 50."},{"zh":"红盒子 · 锁 · 等于 · 回声岛 · 航线。","en":"red box · lock · equals · Echo Island · route."}],"gate":{"label":{"zh":"红盒子的锁 = 去哪个岛的航线？","en":"The red box lock = route to which island?"},"ph":{"zh":"岛名","en":"Island"},"blobs":{"0":["QYC82AgNjslVZluO7Yefp3E4ORL9bcoBCR2yFwU5JMpjKIDeWgSRtX5N9dUswgb7uqJDKDmwLEAEAIg+RRc9VEjmdOFi6KZHBcqjK1QWYzgmYIdib4LieX8YUJwc58L+jv1QRgvRoCwouModbHoJgJ4yUmT8ygfS7whp4IroW/XDh0i2p+dEetPrhJIeIiMi6zoz8d+W0n6iCYEBUc8qeXJF02BsVHU0iiCihAYvKWZo3hMnZg==","KOGBWNBqTWaGKUzWxcVgaNXJznW0OzpAZcVjnl6N97UXZAsJSNA+AevKpF5QVA0h7qmGHQZESGv4CVGFBEzBLSbf2CT3Tif1oGktEb6tgsiLEBhsVnGdVPoRA+RQkasSpr+m0Wyi87MN+qH6ywMsBtvXK9PdtusEtLFHi/fhStmr7pF7OlkPwlHZCxcSldn/2U6IWVyr9Bo0M2gsFo9qeq9BwyPjsR214+unQMOWQZHplfpAZw==","zhOt6f2YoLKHxsVeYLy2A7MWrUGTALWHrw9p6vhh6lws8Dt3gn4nEt2cELqEa9+eq2wavU3P88KbUZq4WKT39VvkraR8Z1L7DbjpKZte21fguv4iIhAPjZHkZgG86nltlCwTSkCDLXOttqbp8q3ImIIlQJjWtcIGiZEVk9xoFP/U9CHelUuLh8xgrXzulgOpdxIQU1Ak7/9NcXOCBPxEPXPQRQsOxN5FPPhqHQBZuYn5sLs3gQ=="]}}},{"id":"C4a","stage":"intra","target":7,"teams":[4],"title":{"zh":"船员日记","en":"The crew diaries"},"body":{"4":{"zh":"<div class=\"diary\"><p><b>水手长<\/b>：6 月 21 日。22:00 船长还在掌舵。22:30 我回舱睡觉。<\/p><p><b>炮手<\/b>：23:00 船长来火药舱检查，十分钟就走了，说要去“找点吃的”。<\/p><p><b>见习水手<\/b>：23:20 我在楼梯上和船长擦肩而过。他往下走，怀里抱着一个红色的盒子。<\/p><p><b>领航员助手<\/b>：23:30 我在船尾值班，一个人都没看见。<\/p><p><b>厨师<\/b>：（第 5 页全是餐具符号，看不懂）<\/p><\/div>","en":"<div class=\"diary\"><p><b>Boatswain:<\/b> 21 June. At 22:00 the Captain was still at the helm. At 22:30 I went below to sleep.<\/p><p><b>Gunner:<\/b> At 23:00 the Captain checked the powder room, left after ten minutes, said he was going to “find something to eat”.<\/p><p><b>Cabin boy:<\/b> At 23:20 I passed the Captain on the stairs. He was heading down, carrying a red box.<\/p><p><b>Navigator's mate:<\/b> At 23:30 I was on watch at the stern. Saw no one.<\/p><p><b>Cook:<\/b> (page 5 is all cutlery symbols, unreadable)<\/p><\/div>"}},"hints":[{"zh":"按时间排序。","en":"Put the entries in time order."},{"zh":"“找点吃的”+“往下走”。","en":"“Find something to eat” + “heading down”."},{"zh":"吃的东西在哪里做？","en":"Where is food made?"}],"gate":{"label":{"zh":"船长最后去了哪里？","en":"Where did the Captain go last?"},"ph":{"zh":"地点","en":"Place"},"blobs":{"4":["JPQHL/1Qnlgd3Rw2I19pDxDl7OX4tUdrkqaH7B4lxTP9bEdUJiYtHeSIG+Tni6LFMvjYhGr4cCY+0BW5iQvIYgtKaGjfofGViynhEuiwLJNvUjKkO6XnkY8TH2gm2p1WyzKIKJipCNzELWpRjh6Kmj/nxHMpV/myHAnbyjLIwFt1zBbLuBbHERvR2/fQsl6QxBG9FkxYbs/IrPYg/T+fRkN2jma+rhYxwXhSFp/tHMw+F9VeXPJ6kpp6AZyjzulF0hiBKZCouqXahQVO2x9EcJFmmZAZN08UjtfuacyESaDL5jWpzDgfBQkLky+YqFd950oRzZfPLRUKGmKrbV+wl2/kjbdoqdEr2IXHPH+HJ7jcmILVBu92vh24EMdvvaqRPAgQ","h46rCOZNqKAM6acBBZQ82u+JDREAZ9SLMy/H2oHp2ouACx2g/V/utkMNTih9V1qD4NGJW2CY1lwsN/g7QbphJuk2j+/N2FJH+pmt2ne3zIltru8mTK3OCfhnf1PZ1GYqVULvYdB6FAtZ9cYqsR5r8+i9GcUbbT18hY5lOajbOpND9mcvn9L3MOwsNiyFq4GmZOddueT9T7EYR2L7z0mfSRrd8MBh1i37i576ZSFNpZQcjcPJyOouW7zQNHEcnWHSTZ5Us4hvEzp7nJUFCTpzsVaVx8onaozT0OBbcZIz4UB5KWJFfDJA0VtJtH82PIHN0MyZ8pe4LTob4Vp/sdYewSHSONkeqs7W6wrd7scZf1CoftuoyLio2xLW7qKHRdHWS34/","E4G+RGDu1cK9KPclXYZcELPUjwt0QuT/cQjMAjlvGPHQjo0kX8qydl7p6fPh77rHmfLpBo/sXlwYOwlLYADna10wr3i0xp9zrA8IFDcEth5C7/A1fADbvEnhLjgUjH4N693Y43TpPgjIUpZRJIrJwdwX3pu5CKHi6XmqzbnAh1Oup5QNrjeLyuCsCWjESD56mcQq2tsGLaghiWpzP9eHPcg1hCSFxMizXYuCYJzhmr1EMXnmcggpEnYMYSuc2y0SM1UOXc/DBLeTv0ZYFiuWM3Jpk5GXBHYzZxTS2ksKtZXpYvRCyCWQtx9CeJIeKLWH8+HeDVl9/i0wXqgtkWvguzMA7GLCfxovPefKjcd+hJbGGCVqoStmeJMLatpoHBJr8s1/","3r/NMmNmv9r/zTMUuTmaBUGZP0JPwY/aGnEg8Fxl2U03vGuHxuSOZIAggHQuhRCsXy3aWZ2KNlpAndEpA7t3vJEhrQPeNQ6khHlFQtJfjTS49f8Nf/m7nOkNxbjrknS1Gbp2QzDjHeNRX6aCbnB0QFtuZlgJ+XfBoVFBk9L1miXqNzG1W1/3MpoLcLHNmajjOEFJi4efuzri8Ar/6iw2+mJtd1blCl1ZKHGkBJkKhFRpCOUwitn19mQVCHyaGfzdHEILjznxn5k3hqaWNiA4qjmmFLVDNxdaDqj3/CBV450k6m/Sh12ruWJAtgw48WGoO9m8AJkGzdoxsM5EbaEUYhG18LJfaffiw0jCKG1g56Dx2YMptaJYa+EWxWNdEt8B6aIB","5t3dQ1rqrCduNLmbWdvzp7bAw/jBZid2e2zdjLDtW9SZT0A9DK6KurvkTiiTE+v/jziQYnq+M0vBNgItoCyHU3Mu82FkdpxAe6tv7OU6KwsxHxNzjSlHGxCK4WGk6siebZtWovQsUcSscMX6u5tZMHVlA1vzP4PX2WGiP3Q0JQNZ5nrIJaBV+8gdPLqeGv77+JojsTjnxNhsi4a/o0NPC2wPt5LFo0Jy3fW7rtkMd2wmXIPO1jIjk1wtWY8YaeZcxHzsEg7osEAz/BYkqA0VMJG4cQXRla3MUs3SAkB0aVVkuNNgAyvAkzQmVqE5pC2Fv+f6KcN3mJk5BXvl2ztwNy6NEjB73EfROh2c8W8GHFvccYBUN3SKv2A9f8t3Zz/jycoA"]}}},{"id":"C4b","stage":"cross","target":6,"teams":[4],"requires":"C4a","title":{"zh":"第 5 页","en":"Page 5"},"body":{"4":{"zh":"<p class=\"cutlery big\">🥄🍴🔪☕<\/p><p>你需要餐具密码表。<\/p>","en":"<p class=\"cutlery big\">🥄🍴🔪☕<\/p><p>You need the cutlery key.<\/p>"}},"hints":[{"zh":"厨房组有一张对照表。","en":"The Galley has a key."},{"zh":"一个符号对应一个字母。","en":"One symbol per letter."},{"zh":"勺子是 E。","en":"The spoon is E."}],"gate":{"label":{"zh":"船长低声说的词","en":"The word the Captain whispered"},"ph":"XXXX","blobs":{"4":["l9wUVCOz4SteE918XxmphLDYRstRQVl0vwZ5BqBsAnHi2Vz2N5pBtXKRen8j7pjYM4oC1Mye+eCz30uLWp+9aicbZv44jHHqmjhz4qVQnQKmAfD9jw/JpVgRXBI7zj5SVFazBAH/PnTVphCTENe1b31wyd6W7adZpFhTIZVwwUYNYJ1SN3CO7NjqDRd6lKq0fsCNroN4+PCPHRPHYHPWanUiRbV69RCzk0qY6lihQ27RU1hxQyWNPAUEDU/u+af+4lncDZW/ZpCrumA="]}}},{"id":"C5a","stage":"intra","target":4,"teams":[5],"choice":["salt","sugar","pepper","anise","cinnamon","chili","cumin","sichuan"],"title":{"zh":"调料架后面","en":"Behind the spice rack"},"body":{"5":{"zh":"<p>船长的字条：“我把最重要的东西，藏在了一个既不咸也不甜、来自东方、长着八个角的东西后面。”<\/p><div data-rack><\/div><p class=\"note\">你的桌上还摊着这些东西，别人可能会来要：<\/p><div class=\"galleyitems\"><div><p class=\"eyebrow\">厨房日历 · 航海年鉴<\/p><p>3/21 赤纬 0° · 5/21 +20° · 6/21 +23° · 8/21 +12° · 9/21 0°<\/p><\/div><div><p class=\"eyebrow\">餐具密码表<\/p><p class=\"cutlery\">🥄=E 🍴=C 🔪=H ☕=O 🍷=A 🧂=S 🍞=R 🫖=T 🍽️=N 🥢=I<\/p><\/div><div><p class=\"eyebrow\">船长的秘制炖菜<\/p><p>面粉 21 克 · 黄油 33 克 · 盐 5 撮 · 鸡蛋 12 个 · 糖 50 勺<\/p><\/div><\/div>","en":"<p>The Captain's note: “I hid what matters most behind something neither salty nor sweet, from the East, with eight points.”<\/p><div data-rack><\/div><p class=\"note\">Also lying on your table, in case anyone asks:<\/p><div class=\"galleyitems\"><div><p class=\"eyebrow\">Kitchen calendar · almanac<\/p><p>21 Mar declination 0° · 21 May +20° · 21 Jun +23° · 21 Aug +12° · 21 Sep 0°<\/p><\/div><div><p class=\"eyebrow\">Cutlery key<\/p><p class=\"cutlery\">🥄=E 🍴=C 🔪=H ☕=O 🍷=A 🧂=S 🍞=R 🫖=T 🍽️=N 🥢=I<\/p><\/div><div><p class=\"eyebrow\">The Captain's secret stew<\/p><p>flour 21 g · butter 33 g · salt 5 pinches · eggs 12 · sugar 50 spoons<\/p><\/div><\/div>"}},"hints":[{"zh":"八个角。","en":"Eight points."},{"zh":"来自中国南方的香料。","en":"A spice from southern China."},{"zh":"八角。","en":"Star anise."}],"gate":{"blobs":{"5":["7BPlNfxFsB1B0TZO8zlUTm7wIkW1NeUt1lKqjgzFQgRcfGXJsGeqD+oqTmdHiWt9Jt7DSDLoawe4eTSLIxmZEj1/rtVmtV2/RsuqWXE0yRwd70Bd1xBhTuEE2LWEt1xLMMdu25d1zxyIOYoZSlkd5pI5bQ2Yf3RgXAZ3vaMyNiXXPGmlK2VIyxJk58mgladMWfUu3fVN0G+fgapGi+u9cJqyPA/7zsm+oFAjNbbe3uucu7g+RaaVzsaSwFbm"]}}},{"id":"C5b","stage":"cross","target":8,"teams":[5],"requires":"C5a","title":{"zh":"红盒子","en":"The red box"},"body":{"5":{"zh":"<p>方向锁需要一串方向。<\/p>","en":"<p>The direction lock needs a sequence of directions.<\/p>"}},"hints":[{"zh":"谁手里有海图？","en":"Who has the chart?"},{"zh":"从希望号到回声岛的最短航线。","en":"The shortest route from the ship to Echo Island."},{"zh":"先向东。","en":"East first."}],"gate":{"label":{"zh":"方向（R/L/U/D 或 →←↑↓）","en":"Directions (R/L/U/D or arrows)"},"ph":"RLUD","dir":true,"blobs":{"5":["fponGzjY8LEPeHsWrZJ1jmMX74sSQFg8Q6qOAS1bzk2csO0mSCxUHS/7UqTZOoPJFBVYxbNhHEa6WJkRoZs4XxJwegxEvRQiOWVVyrFhaxxwZoGtmH2CoHtHPcJ/e45s6VeJibegxxpesuWRB/5IjarVc78zF5AaAHPNqPAVvPL5C7SocQZ8Xu53Vo4tvQrDrAzfNcnfpWngnLAaT/ocK67ettb/khAU/SyFXqe3NESmok+IUpz0eyu1UJh+JvozMLY3Oam/tEI71AOZjrdDGV1+FxJ3EZ9JWg5NIcTotKGCwamIl9f8+3xlghPXsBlcMb/T7bPjkF9WSGxgUt+1FlRwRsNA9ae8JlY19dP3TDwqZoHzcSiOyDdSYx7hcKDZ7MKNzgof+vmvRNJux1CjDvXKHIerUd6CUJHvV7euYTLkt5ksH50JQmuDGaBBjkTur0rD+5F+YiPMJZG/1w73uUchrMscSDnS/pmcSjs0Qpgkb+ZkU/I1REZ/N6wwSfU7Nm/0SpL0mx+ixU2zQH6lP56zmpGNtornncoQ9yRH7WtDTNXEykSQ65IjFCxj7610oXmXOZXI5IHGWyj1l57kbL3WEAhnJ6ORszTzwQYtISYBThgYX1KyFkJnsBU4S4XJxyBKuZ2CcIPHNDy+G79Lu5zXz0LSIy8NRm/HrmMpGRLkIj9XpiJ9Js0WtmxGroYnZnFJqfgCz/2pXrf21IIWbw6x3Q65amV4gHqujv3jIHMc/sRJOCN3fNOC/XNWmnRyw/IUA3INb/C+gmmiP9hidDGOdENWTlJpx+Q00wYO/rlDi620ugeNIXt8Lg2/AbIdNadrTetF6QkuKgCbtfrVCQCEmmpQ4uh6/QxgEE3//tqEes6QP0F5nYydIxVHwVxr/rcjtB2/YezYFHg3qbpYFDtJkY9YOt5+WfB86L/XnMGs3WeSw33/gcI13CRAO0nbwLFTtM5i+mrOXrpAXP0FDWugPdqbcgoKKQrWzMW0zzP2tjXcQK1jlCNacOEWrm7Pdr+uxAXLr/LNFo9zySOrFXPQcNP1pSojdhBojCD/myrIc7OdjeZ2yxfyy9wU8PiYbRsoFFgL5s9E/qKusxhpPtw55DKRCpqQhdSfl58/hlcK2fpHGh4GINBdAzW9SZVDOOAqQjgdmLT8LMGg+Ac27nq9gL6CDZRvzzgpLJyP9N716EA9geo1ETa6WwMfOcRAreRrGodGDDxLhYyhnannCXiVmULbvkPRH8vxsJWlsa65r6UHFlL0ugGUn0y0sxvJNLG9VKD/PYsGkRlJDY8rCdx4J03YlifTXoWLZZGwJ4ALRHnr5hmBLAoNI5+CQKf+HJNJolSD032OyULKPAXi3DQv4e/vvLOkjoMlkuhioJnV1gy4VmnzkiEcMrYQKaGmmBZ+gZm0BOoqXN6aIKAt8YpPcmdGz1UKSrX+Ir+qjcz0A+Hk8GG7eZ/G02vllPF9km5rDfq5mniXLvO8qTXjIiAWvdtkOhpMrfi7Tg=="]}}},{"id":"C6","stage":"final","target":2,"from":"C5b","envelope":true,"title":{"zh":"你的小信封","en":"Your envelope"},"body":{"0":{"zh":"<p>红盒子打开后，信封会出现在这里。<\/p>","en":"<p>Your envelope appears here once the red box is open.<\/p>"}},"hints":[{"zh":"等厨房组打开红盒子。","en":"Wait for the Galley to open the red box."},{"zh":"","en":""},{"zh":"","en":""}],"gate":{"blobs":{"1":["g9d+xMT2DHAgTYAXMZ3Jko30x98S1aLS3SNqjrCHFocKmoZvuVZiTd7oQNRIxLZthIj3sSGdQOfGSR7aByJ2EcyHTNo7hvTwuBPwNbJUzDmb20IT/QO0YPEhLlgykOuvCJeL5mcAgUerZT3liVVBxbgEiX6rgnVyGGfU6X+KmxS0pbQ4FgPihnn4nmnmh+mEeT8O6qIrmxWV72EOoXHJ5pot2jBPnxbC82JjO3sNM6Rt3pHDGm7ITEHFYnGMthBMtIQdfSj6vZnVGqYVsgW/oTGsRaSiHDJCGsCrVw0Oq829vP7cw1JllIHea6qWCxF1WScvE3La6mUhrBe/8rQE"],"2":["/g4MRc14G1Xd2hR/s9j0O79f4nCrkmVD5pHYpnb8yT/eYDKgWxokt/Ef5i9rima0qXY4grrKCzVbOolEM18wL1i6xz9rIZ1CsWuShDKMaRUGmtIfFSUijhCfoGAmh/hKDsHqzleBsYWOK7zD/2dPxMLzjWDwQZiIlHtbCwsMKF+W/ztH6NJIegvsoPlpAw7/nyNCgaCrgSqExGJQ/Cjv9VP5jm3Aa990xERlzVaSTr5ArEtTnhAvaKBMTYDb+pCNw6IFYNj8to9cecGUTSpb9FiZdq+B5K4EHXxtDOwPj4LWudaTt5BXpPbzPSzC5jYyQbj2m1UvLvSpsbldNfXy0PHB"],"3":["bZcdaugb2KEgw54tapWVzNGPhbiaYUZYBrcYc0Hv90eIxnQghtHCKRdm9mecEqhAvPeTIEikdSSWmiavxLEASM1n0ntPffXZECWlplhn5i6VZMq+wkkjdl1T0ymdsHOYwYMj5rTCrqyPgA0KYXwtS7qkpTSB9RTVOFe2YIF3hhC/GpGu4NWMStsG0A2tXrteye79ijZsDBATkJkddZNpLfipRiYjHPSKYz4WW2FchgPrpsK1nGafHMHLBKLktACuXivt7AA3v3giCO1esePEXNDFW4oFZgkzmU/t0KvQ/z2KiRAfZuPW4aTod6r8QHHXlNJxGdtQOp2d763u2Xygp+m5Tg=="],"4":["XMIJ8k3QoQbq59rp0sS28Da+19IGitCTKTfyTGAoq+HCZdbNet0n9wNtUeFJHUxdQ61DfqqEH3L2Oe4yB8FxdYF+gbbtx9Uq7EAS/OAsUni1OnwEZnIEibhWvRbh/Wd2SAIE/oasUyuFcv0eCQkSPoy2/rrKhbq3dl4qbnVeTnuLfn+xGgAUh0EQOxgdaMsPH2fIB7NUOSo+SRbHXLwCkt9faO/QtxV6UJrEHyqhe1TPbnbrs9gWZSP5Sxkd9Fp86kzknSH9CwC7wAF1hfq20YLEJsuxVs8103nbVJBoIBpRqxy9gn3lcibmTNe7A/JIF+lZmghl7+aVGniBfg=="],"5":["XeZ+84/YVbVq8oOQueQLbP9bTAiXydS61ir3aDUDAastsyPzo2ejWtZf1LL4+/f08FpJQVjJPftD96CoOcJYFXjTes4YkFCtDFj9PbeR/SjRK1B3wp0bp+MoyYppuqRPvi1yWQiKz2AOIYV2141cb9RbnM6RORhGok1zpaWjTdjDSMCrnVyM6xhGSGS83P/WB81kEEmiwitkDZk8/m0cgS/T1Phl4gHrjynrrgxTY/XnPeps9qJRR8FQqvfwn8UTzOa6PxYLlHcFweB3QteUdUjdVm6NXz4DqZIQTAXtsrnL5Wv/pn7aIx5PdqPgcRvqlCgzGMb/rC+4DF4="]}}},{"id":"C7","stage":"final","target":6,"shared":true,"title":{"zh":"船长舱的宝箱","en":"The Captain's cabin chest"},"body":{"0":{"zh":"<p>5 位字母锁。按信里的岗位顺序：掌舵、看图、清点、疗伤、开饭。<\/p>","en":"<p>A 5-letter lock. Follow the letter's order: steer, chart, count, heal, feed.<\/p>"}},"hints":[{"zh":"每个部门一个字母。","en":"One letter per department."},{"zh":"掌舵 = 领航组。","en":"Steer = Navigators."},{"zh":"领航、制图、军需、船医、厨房。","en":"Navigators, Cartographers, Quartermasters, Surgeons, Galley."}],"gate":{"label":{"zh":"5 位字母","en":"5 letters"},"ph":"XXXXX","blobs":{"0":["F++jSNXIsvlYC3Ot4qKU75UW/DsKkl0oWLmF/oFGLudMh3KKnUfOplUddBUQN87z0+O25I0jRpqB2TeawyayPpIfEWtNuMinaNWMt50ziBODDA0Dt5HHXVcyu7ZXsRaiwrwMpI+yFex3PsvvrIa4+Z6PFRqzFQBjmHwI3YbD8CKsKZa7FMeCIdTLA/XK6VHCrWGoHCJeG3DNyjxeo3RlaicuuHvReq2mtRsFpa8DqV5EehVMfGqkfOmGAn+P1+g5FbjWulACWjLf2gjJRzqUG6jsNbSa2F2731KE2sRkNQt+JbgDm98jWtbydZ+xx37CRlaL6u9RHhWoKBM23aW3hqb8reIVEJ1MPV9FQImdD6n3lWN6EGZSS4Xp6Ttmd+RGOG3SPcO3w5wy8golVlNZnb0vMsRDsbm/ehcB/9ZGEUoPunRit3wb1uuZXZcm/AscoYgw1wsJt11LX9YPy6DjWmccGQ=="]}}}]}],"spices":["pepper","cinnamon","clove","nutmeg","anise"],"itemNames":{"pepper":{"zh":"黑胡椒","en":"Pepper"},"cinnamon":{"zh":"肉桂","en":"Cinnamon"},"clove":{"zh":"丁香","en":"Clove"},"nutmeg":{"zh":"肉豆蔻","en":"Nutmeg"},"anise":{"zh":"八角","en":"Star anise"},"saffron":{"zh":"藏红花（万能）","en":"Saffron (wild)"},"coins":{"zh":"金币","en":"Coins"}},"sol":"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","backend":null,"events":{"monsoon":{"zh":"季风到来：交易所银行卖价降到 3 金币一箱。","en":"The monsoon arrives: the bank now sells at 3 coins a crate."},"embargo":{"zh":"荷兰封锁班达群岛：银行停售肉豆蔻。","en":"Dutch blockade of the Banda Islands: the bank stops selling nutmeg."},"pirates":{"zh":"海盗来袭！如果还没把海盗藏身处报给交易所，每家商行交 1 箱香料给海盗（交易面板里的“交给海盗”）。","en":"Pirate raid! If the hideout hasn't been reported, every house hands 1 crate to the pirates (use “Hand 1 crate to the pirates”)."},"closed":{"zh":"交易所闭市。请看看你们配方卡的底部。","en":"The Exchange is closed. Look at the foot of your recipe card."}},"protocol":{"schedule":{"zh":"<div class=\"tw\"><table><tr><th>时间<\/th><th>内容<\/th><th>主持人<\/th><\/tr><tr><td>0:00–0:10<\/td><td>介绍目的；每人在自己手机或电脑上打开页面，选测试员编号 1–5<\/td><td>确认右上角显示“已同步”<\/td><\/tr><tr><td>0:10–0:45<\/td><td><b>A 局<\/b>（35 分钟）<\/td><td>在“测试流程”里点开始；看实时进度<\/td><\/tr><tr><td>0:45–0:50<\/td><td>A 局反馈<\/td><td>点结束；提醒每人填反馈<\/td><\/tr><tr><td>0:50–1:30<\/td><td><b>B 局<\/b>（40 分钟）<\/td><td>兼任交易所书记员；25′ 季风、32′ 封锁、38′ 海盗、42′ 闭市<\/td><\/tr><tr><td>1:30–1:40<\/td><td>B 局反馈 + 休息<\/td><td><\/td><\/tr><tr><td>1:40–2:20<\/td><td><b>C 局<\/b>（40 分钟）<\/td><td>25′ 和 35′ 各巡一次卡点<\/td><\/tr><tr><td>2:20–2:25<\/td><td>C 局反馈<\/td><td><\/td><\/tr><tr><td>2:25–2:45<\/td><td>看“结果对比”，讨论并选定方案<\/td><td>公开答案，一起复盘<\/td><\/tr><\/table><\/div>","en":"<div class=\"tw\"><table><tr><th>Time<\/th><th>What<\/th><th>Host<\/th><\/tr><tr><td>0:00–0:10<\/td><td>Explain the goal; everyone opens the page on their own phone or laptop and picks tester 1–5<\/td><td>Check the top bar says “Synced”<\/td><\/tr><tr><td>0:10–0:45<\/td><td><b>Game A<\/b> (35 min)<\/td><td>Press Start under Session; watch live progress<\/td><\/tr><tr><td>0:45–0:50<\/td><td>Feedback on A<\/td><td>Press End; remind everyone to fill in feedback<\/td><\/tr><tr><td>0:50–1:30<\/td><td><b>Game B<\/b> (40 min)<\/td><td>Act as Exchange clerk; 25′ monsoon, 32′ blockade, 38′ pirates, 42′ close<\/td><\/tr><tr><td>1:30–1:40<\/td><td>Feedback on B + break<\/td><td><\/td><\/tr><tr><td>1:40–2:20<\/td><td><b>Game C<\/b> (40 min)<\/td><td>Check for stalls at 25′ and 35′<\/td><\/tr><tr><td>2:20–2:25<\/td><td>Feedback on C<\/td><td><\/td><\/tr><tr><td>2:25–2:45<\/td><td>Review Results together and pick the game<\/td><td>Reveal answers and walk through them<\/td><\/tr><\/table><\/div>"},"prep":{"zh":"<ul><li>在分享菜单里把 4 位测试员加为 <b>Contributor<\/b>（或更高）。只能查看的人写不进进度和反馈。<\/li><li>五个人分坐五张桌子，模拟真实的跨队距离。跨队信息必须走过去当面说，不许截图转发。<\/li><li>B 局需要一个闻香台：5 个不透明小罐，编号 1–5（摆放方式见完整答案）。没有香料时，主持人可以在实时进度里手动标记 B1 已解。<\/li><li>准备纸笔，方便推理题和画网格。<\/li><li>主持人保持答案锁定，直到最后复盘。<\/li><\/ul>","en":"<ul><li>In the share menu, add the four testers as <b>Contributor<\/b> or higher. View-only people can't save progress or feedback.<\/li><li>Seat the five people at five separate tables to mimic real distances. Cross-team information must be carried in person; no screenshots.<\/li><li>Game B needs one smell station: 5 opaque jars numbered 1–5 (layout in the full solutions). Without spices, the host can mark B1 solved from Live progress.<\/li><li>Have paper and pens for the logic puzzles and grids.<\/li><li>Keep the answers locked until the final review.<\/li><\/ul>"}}};
+(function(){
+"use strict";
+// ---------------------------------------------------------------- i18n
+const UI = {
+  brandSmall:["可行性测试","Feasibility playtest"], brand:["大航海解谜","Age of Discovery Puzzles"],
+  tester:["测试员","Tester"], host:["主持人","Host"], local:["本机模式（不共享）","Local only (not shared)"], shared:["已同步","Synced"],
+  pickTitle:["你是几号测试员？","Which tester are you?"],
+  pickLead:["五位测试员各代表一个小组，并且在三局里都是同一个编号。选好后会记在这台设备上。","Each of the five testers stands in for one team and keeps the same number in all three games. Your choice is remembered on this device."],
+  testerN:["测试员","Tester"], change:["换编号","Change"],
+  notStarted:["主持人还没开始这一局","The host hasn't started this game"], running:["进行中","Running"], ended:["已结束","Ended"],
+  testLimit:["测试限时","Test limit"], realLimit:["正式活动","Real event"], min:["分钟","min"],
+  story:["故事","Story"], testNote:["测试说明","Test note"], youAre:["你的身份","You are"],
+  act_intra:["第一幕 · 队内","Act 1 · Intra-team"], act_cross:["第二幕 · 跨队","Act 2 · Cross-team"], act_final:["第三幕 · 终局","Act 3 · Finale"],
+  stage_intra:["队内","Intra"], stage_cross:["跨队","Cross"], stage_final:["终局","Finale"],
+  target:["目标","Target"], solved:["已解","Solved"], open:["未解","Open"], lockedBy:["先完成","Unlocks after"], sharedP:["共同谜题，任何一方提交都算","Shared: any listed team may submit"],
+  submit:["提交","Submit"], wrong:["不对，再想想。","Not right yet."], hint:["提示","Hint"], hintsUsed:["已用提示","Hints used"],
+  answer:["答案","Answer"], solvedBy:["解出","Solved by"], waitingEnv:["等厨房组打开红盒子。","Waiting for the Galley to open the red box."],
+  dust:["罐子后面只有灰尘。","Only dust behind this jar."], swapTip:["点两块交换位置","Tap two pieces to swap"], assembled:["海图拼好了","Chart assembled"],
+  feedback:["这一局的反馈","Feedback on this game"], fbLead:["这一局结束后填写。所有测试员的反馈会汇总到主持人视图，用来选最终方案。","Fill this in when the game ends. All testers' answers feed the host view used to pick the final game."],
+  difficulty:["难度","Difficulty"], diffScale:["1 太简单 · 3 刚好 · 5 太难","1 too easy · 3 just right · 5 too hard"],
+  interactivity:["跨队互动","Cross-team interaction"], interScale:["1 几乎不用和别人说话 · 5 一直在和别人配合","1 barely talked to anyone · 5 constantly working with others"],
+  fun:["好玩程度","Fun"], funScale:["1 无聊 · 5 很想再玩","1 boring · 5 want to play again"],
+  clarity:["规则清晰度","Clarity of rules"], clarScale:["1 经常不知道该干嘛 · 5 一直很清楚","1 often lost · 5 always clear"],
+  idle:["干等 / 闲着的分钟数（估计）","Minutes spent idle or waiting (estimate)"],
+  stuck:["最卡的一步","Where you got most stuck"], none:["没有","None"],
+  realIdle:["换成 5 人团队，你觉得会有几人闲着？","With a real team of 5, how many would sit idle?"],
+  change1:["最想改的一点","One thing you'd change"], comment:["其他意见","Other comments"],
+  saveFb:["保存反馈","Save feedback"], fbSaved:["已保存","Saved"],
+  market:["交易面板","Trading panel"], inventory:["库存","Inventory"], recipeCard:["商行配方卡","House recipe card"],
+  need:["需要","Needs"], complete:["配方已凑齐","Recipe complete"], missing:["还缺","Missing"], wildcard:["藏红花可顶替任意一种","Saffron covers any one spice"],
+  transfer:["转给其他商行","Send to another house"], to:["给","To"], item:["物品","Item"], qty:["数量","Qty"], send:["转出","Send"],
+  bank:["交易所银行","Exchange bank"], buy:["买 1 箱","Buy 1 crate"], sell:["卖 1 箱（得 2 金币）","Sell 1 crate (+2 coins)"], price:["价格","Price"], stock:["剩余库存","Stock left"],
+  needPass:["需要港口通行证（解出 B3）","Needs a Port Pass (solve B3)"], pass:["港口通行证","Port Pass"], marketClosed:["交易所已闭市","The market is closed"],
+  embargo:["荷兰封锁：银行停售肉豆蔻","Dutch blockade: no nutmeg from the bank"], pirateGive:["交 1 箱给海盗","Hand 1 crate to the pirates"],
+  notEnough:["数量不够","Not enough"], score:["当前得分","Current score"],
+  // host
+  hostTitle:["主持人控制台","Host console"], answersLock:["答案","Answers"], pw:["主持人密码","Host password"], unlock:["解锁","Unlock"],
+  pwBad:["密码不对","Wrong password"], unlockedLocal:["已在本机解锁，只有你能看到答案。","Unlocked on this device. Only you can see the answers."],
+  revealAll:["向所有测试员公开答案","Reveal answers to all testers"], hideAll:["收回公开","Hide answers again"],
+  revealedAll:["答案已向所有人公开","Answers are visible to everyone"], ownerOnly:["只有页面所有者能开始局、发事件或公开答案。","Only the page owner can start games, send events or reveal answers."],
+  session:["测试流程","Session"], start:["开始","Start"], restart:["重新开始","Restart"], end:["结束","End"], startedAt:["开始于","Started"],
+  board:["实时进度","Live progress"], boardLead:["格子里是解出用时（分:秒）。绿色在目标内，黄色超时 50% 以内，红色超出更多。点格子可以手动标记为已解（需先解锁答案）。",
+    "Cells show solve time (min:sec). Green is within target, amber up to 50% over, red beyond. Click a cell to mark it solved by hand (unlock the answers first)."],
+  hostMark:["手动标记为已解？","Mark as solved?"], yes:["确认","Confirm"], cancel:["取消","Cancel"],
+  results:["结果对比","Results"], resultsLead:["推荐分 = 互动×2 + 好玩 + 清晰×0.5 − |难度−3|×2 + 按时完成 1 分。分数越高越适合正式活动。",
+    "Score = interaction×2 + fun + clarity×0.5 − |difficulty−3|×2 + 1 if finished in time. Higher fits the real event better."],
+  responses:["份反馈","responses"], finished:["终局用时","Finale time"], hints:["提示","Hints"], wrongs:["错答","Wrong"], recommend:["推荐","Recommended"],
+  noData:["还没有数据","No data yet"], comments:["文字反馈","Written feedback"],
+  marketHost:["交易所（B 局）","Exchange (Game B)"], monsoon:["季风：银行价降到 3","Monsoon: bank price 3"], blockade:["荷兰封锁肉豆蔻","Dutch nutmeg blockade"],
+  pirates:["广播：海盗来袭","Announce: pirate raid"], closeMk:["闭市","Close market"], reopenMk:["重新开市","Reopen market"],
+  broadcast:["广播","Broadcast"], custom:["自定义广播","Custom message"], sendBc:["发送","Send"], clearBc:["清除广播","Clear broadcast"],
+  protocol:["测试安排","Test plan"], prep:["测试前准备","Before the test"], watch:["观察重点","What to watch"], notes:["观察笔记","Observation notes"], saveNotes:["保存笔记","Save notes"],
+  solutions:["完整答案","Full solutions"], lockedAnswers:["输入主持人密码后可见。","Visible after entering the host password."],
+  dismiss:["知道了","Dismiss"], team:["组","Team"], perTeam:["每队","Per team"], inTime:["按时","In time"], overTime:["超时","Over"],
+};
+let lang = "zh";
+const t = k => (UI[k] ? UI[k][lang === "zh" ? 0 : 1] : k);
+const L = o => (o == null ? "" : typeof o === "string" ? o : (o[lang] ?? o.zh ?? ""));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LS = {
+  get(k, d){ try { const v = localStorage.getItem("aod_" + k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem("aod_" + k, JSON.stringify(v)); } catch(e){} }
+};
+
+// ---------------------------------------------------------------- crypto (answers stay encrypted in the source)
+const te = new TextEncoder();
+async function sha(bytes){ return new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)); }
+async function hexHash(s){ return Array.from(await sha(te.encode(s)), b => b.toString(16).padStart(2, "0")).join(""); }
+const decCache = new Map();
+async function dec(pidc, key, b64){
+  const ck = pidc + "|" + key + "|" + b64.slice(0, 24);
+  if (decCache.has(ck)) return decCache.get(ck);
+  let res = null;
+  try {
+    const K = await sha(te.encode("aod|" + pidc + "|" + key));
+    const bin = atob(b64); const ct = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) ct[i] = bin.charCodeAt(i);
+    const out = new Uint8Array(ct.length);
+    for (let b = 0; b * 32 < ct.length; b++){
+      const blk = new Uint8Array(36); blk.set(K);
+      blk[32] = (b >>> 24) & 255; blk[33] = (b >>> 16) & 255; blk[34] = (b >>> 8) & 255; blk[35] = b & 255;
+      const ks = await sha(blk);
+      for (let j = 0; j < 32 && b * 32 + j < ct.length; j++) out[b*32+j] = ct[b*32+j] ^ ks[j];
+    }
+    const s = new TextDecoder().decode(out);
+    if (s.startsWith("OK|")) res = JSON.parse(s.slice(3));
+  } catch(e){ res = null; }
+  decCache.set(ck, res);
+  return res;
+}
+const NUMW = {ZERO:"0",ONE:"1",TWO:"2",THREE:"3",FOUR:"4",FIVE:"5",SIX:"6",SEVEN:"7",EIGHT:"8",NINE:"9","零":"0","一":"1","二":"2","三":"3","四":"4","五":"5","六":"6","七":"7","八":"8","九":"9"};
+const DIRS = {"→":"R","←":"L","↑":"U","↓":"D","右":"R","左":"L","上":"U","下":"D","东":"R","西":"L","北":"U","南":"D"};
+function norm(s, g){
+  s = String(s || "").toUpperCase();
+  if (g && g.dir) s = s.replace(/[→←↑↓右左上下东西北南]/g, c => DIRS[c]);
+  s = s.replace(/[^A-Z0-9一-鿿]/g, "");
+  if (g && g.numwords && NUMW[s]) s = NUMW[s];
+  if (g && g.aliases && g.aliases[s]) s = g.aliases[s];
+  return s;
+}
+
+// ---------------------------------------------------------------- store (shared db, or this device only)
+const S = {
+  view: LS.get("view", "tester"), team: LS.get("team", 0), game: LS.get("game", "A"),
+  session: {runs:{}, current:null}, reveal: null, market: {}, broadcast: null, notes: {},
+  ev: [], tx: [], fb: {}, isOwner: false, mode: "local", solKey: LS.get("solKey", null), sol: null,
+  drafts: {}, msgs: {}, sel: null, dismissedBc: LS.get("dismissedBc", 0), confirm: null,
+};
+lang = LS.get("lang", "zh");
+let db = null;
+const localDocs = LS.get("localdb", {});
+const localSubs = [];
+const SB = DATA.backend || null;           // Supabase (Vercel build); null in the claude.ai build
+let hostToken = LS.get("hostToken", null);
+function localEmit(){ if (!SB) LS.set("localdb", localDocs); localSubs.forEach(f => f()); }
+const sbHdr = () => ({apikey: SB.key, Authorization: "Bearer " + SB.key, "Content-Type": "application/json"});
+async function sbWrite(path, obj){
+  let r;
+  if (path.startsWith("control/")){
+    r = await fetch(SB.url + "/rest/v1/rpc/aod_host_set", {method: "POST", headers: sbHdr(), body: JSON.stringify({p_path: path, p_data: obj, p_token: hostToken || ""})});
+  } else {
+    r = await fetch(SB.url + "/rest/v1/aod_docs", {method: "POST", headers: Object.assign(sbHdr(), {Prefer: "resolution=merge-duplicates,return=minimal"}), body: JSON.stringify({path, data: obj})});
+  }
+  if (!r.ok) throw new Error("save failed (" + r.status + ")");
+}
+let sbSince = null;
+async function sbPoll(){
+  try {
+    let q = SB.url + "/rest/v1/aod_docs?select=path,data,updated_at&order=updated_at.asc&limit=1000";
+    if (sbSince) q += "&updated_at=gt." + encodeURIComponent(new Date(Date.parse(sbSince) - 5000).toISOString());
+    const r = await fetch(q, {headers: sbHdr()});
+    if (!r.ok) throw new Error(r.status);
+    const rows = await r.json(); let changed = false;
+    for (const row of rows){
+      if (JSON.stringify(localDocs[row.path]) !== JSON.stringify(row.data)){ localDocs[row.path] = row.data; changed = true; }
+      if (!sbSince || Date.parse(row.updated_at) > Date.parse(sbSince)) sbSince = row.updated_at;
+    }
+    if (S.mode !== "shared"){ S.mode = "shared"; changed = true; }
+    if (changed) localEmit();
+  } catch(e){ if (S.mode !== "local"){ S.mode = "local"; schedule(); } }
+  setTimeout(sbPoll, 2000);
+}
+const store = {
+  async set(path, obj){
+    if (db) return db.doc(path).set(obj);
+    const prev = localDocs[path];
+    localDocs[path] = JSON.parse(JSON.stringify(obj)); localEmit();
+    if (SB){ try { await sbWrite(path, obj); } catch(e){ if (prev === undefined) delete localDocs[path]; else localDocs[path] = prev; localEmit(); throw e; } }
+  },
+  async del(path){ if (db) return db.doc(path).delete(); delete localDocs[path]; localEmit(); },
+  watchDoc(path, cb){
+    if (db) return db.doc(path).onSnapshot(s => cb(s.exists ? s.data() : null), e => console.warn(path, e));
+    const f = () => cb(localDocs[path] || null); localSubs.push(f); f();
+  },
+  watchCol(col, cb){
+    if (db) return db.collection(col).onSnapshot(s => cb(s.docs.map(d => Object.assign({_id:d.id}, d.data()))), e => console.warn(col, e));
+    const f = () => cb(Object.keys(localDocs).filter(p => p.startsWith(col + "/")).map(p => Object.assign({_id:p.slice(col.length+1)}, localDocs[p])));
+    localSubs.push(f); f();
+  }
+};
+window.addEventListener("storage", e => { if (e.key === "aod_localdb" && !db){ try { Object.assign(localDocs, JSON.parse(e.newValue || "{}")); localSubs.forEach(f => f()); } catch(_){} } });
+
+function subscribeAll(){
+  store.watchDoc("control/session", d => { S.session = d || {runs:{}, current:null}; schedule(); });
+  store.watchDoc("control/reveal", d => { S.reveal = d; loadSolutions(); });
+  store.watchDoc("control/market", d => { S.market = d || {}; schedule(); });
+  store.watchDoc("control/broadcast", d => { S.broadcast = d; schedule(); });
+  store.watchDoc("control/notes", d => { S.notes = d || {}; schedule(); });
+  store.watchCol("ev", rows => { S.ev = rows; schedule(); });
+  store.watchCol("tx", rows => { S.tx = rows; schedule(); });
+  store.watchCol("fb", rows => { const m = {}; rows.forEach(r => m[r._id] = r); S.fb = m; schedule(); });
+}
+
+async function boot(){
+  try {
+    if (window.claude && window.claude.use){
+      const d = await window.claude.use("db");
+      if (d){ db = d; S.mode = "shared"; }
+      const u = await window.claude.use("user");
+      S.isOwner = u ? !!(await u.isOwner()) : false;
+    }
+  } catch(e){ db = null; }
+  if (!db && SB){ S.isOwner = !!hostToken; sbPoll(); }   // Vercel build: host rights come from the host password
+  else if (!db) S.isOwner = true; // this device only: you are your own host
+  subscribeAll();
+  loadSolutions();
+  render();
+}
+
+// ---------------------------------------------------------------- derived state
+const G = id => DATA.games.find(g => g.id === id);
+const runOf = gid => (S.session.runs && S.session.runs[gid]) || {id: gid + "-0", startedAt: null};
+const evRun = gid => S.ev.filter(e => e.run === runOf(gid).id);
+const P = (g, pid) => g.puzzles.find(p => p.id === pid);
+const teamsOf = p => p.teams || [1,2,3,4,5];
+function solveEvent(g, p, team){
+  const evs = evRun(g.id).filter(e => e.type === "solve" && e.pid === p.id);
+  if (p.shared) return evs.sort((a,b) => a.ts - b.ts)[0] || null;
+  return evs.filter(e => e.team === team).sort((a,b) => a.ts - b.ts)[0] || null;
+}
+function isSolved(g, p, team){
+  if (p.envelope) return !!solveEvent(g, P(g, p.from), 5);
+  return !!solveEvent(g, p, team);
+}
+function hintsUsed(g, p, team){ return evRun(g.id).filter(e => e.type === "hint" && e.pid === p.id && e.team === team).map(e => e.level); }
+function wrongCount(g, p, team){ return evRun(g.id).filter(e => e.type === "wrong" && e.pid === p.id && e.team === team).length; }
+function elapsedOf(gid, ts){ const r = runOf(gid); return r.startedAt ? Math.max(0, ts - r.startedAt) : null; }
+const mmss = ms => { if (ms == null) return "–"; const s = Math.round(ms/1000); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); };
+
+// ---------------------------------------------------------------- solutions
+async function loadSolutions(){
+  let key = S.solKey;
+  if (!key && S.reveal && S.reveal.open && S.reveal.key) key = S.reveal.key;
+  S.sol = key ? await dec("SOL#0", key, DATA.sol) : null;
+  schedule();
+}
+const answersVisible = () => !!S.sol;
+const ownSolUnlocked = () => !!(S.solKey && S.sol);
+
+// ---------------------------------------------------------------- writes
+const uid = () => Math.random().toString(36).slice(2, 10);
+async function logEvent(gid, team, pid, type, extra){
+  const run = runOf(gid).id;
+  const id = type === "solve" ? `${run}_s_${team}_${pid}` : type === "hint" ? `${run}_h_${team}_${pid}_${extra.level}` : `${run}_w_${team}_${pid}_${uid()}`;
+  try { await store.set("ev/" + id, Object.assign({run, game: gid, team, pid, type, ts: Date.now()}, extra || {})); }
+  catch(e){ flash(pid, String(e && e.message || e), true); }
+}
+async function grantRewards(g, p, team){
+  if (!p.rewards) return;
+  const run = runOf(g.id).id;
+  const targets = p.shared ? Object.keys(p.rewards).map(Number) : [team];
+  for (const b of targets){
+    for (const [item, qty] of (p.rewards[b] || [])){
+      await store.set(`tx/${run}_rw_${p.id}_${b}_${item}`, {run, from: "game", to: b, item, qty, kind: "reward", ts: Date.now()});
+    }
+  }
+}
+async function openGate(p, team, key){
+  const bt = p.gate.blobs[team] != null ? team : 0;
+  for (const b of p.gate.blobs[bt] || []){ const out = await dec(`${p.id}#${bt}`, key, b); if (out) return out; }
+  return null;
+}
+async function trySubmit(g, p, team, raw){
+  const gate = p.gate; const key = norm(raw, gate);
+  if (!key) return;
+  const out = await openGate(p, team, key);
+  if (out){
+    S.drafts[p.id] = "";
+    await logEvent(g.id, team, p.id, "solve", {key});
+    await grantRewards(g, p, team);
+  } else {
+    await logEvent(g.id, team, p.id, "wrong", {});
+    flash(p.id, t("wrong"), true);
+  }
+}
+function flash(pid, text, bad){ S.msgs[pid] = {text, bad}; schedule(); setTimeout(() => { if (S.msgs[pid] && S.msgs[pid].text === text){ delete S.msgs[pid]; schedule(); } }, 3500); }
+async function revealFor(g, p, team){
+  // returns decrypted reveal for a solved puzzle, using the key in its solve event
+  const ev = p.envelope ? solveEvent(g, P(g, p.from), 5) : solveEvent(g, p, team);
+  if (!ev || !p.gate) return null;
+  return openGate(p, team, ev.key);
+}
+
+// inventory (Game B), computed from a ledger so concurrent trades never overwrite each other
+const ITEMS = ["coins","pepper","cinnamon","clove","nutmeg","anise","saffron"];
+function inventory(team){
+  const run = runOf("B").id; const inv = {coins:10, pepper:0, cinnamon:0, clove:0, nutmeg:0, anise:0, saffron:0, pass:0};
+  S.tx.filter(x => x.run === run).forEach(x => {
+    if (x.to === team) inv[x.item] = (inv[x.item] || 0) + x.qty;
+    if (x.from === team) inv[x.item] = (inv[x.item] || 0) - x.qty;
+  });
+  return inv;
+}
+function recipeStatus(team){
+  const inv = inventory(team); const need = G("B").recipes[team];
+  const miss = need.filter(s => (inv[s] || 0) < 1);
+  return {inv, need, miss, complete: miss.length <= inv.saffron};
+}
+const bankSold = () => S.tx.filter(x => x.run === runOf("B").id && x.kind === "bankbuy" && x.from === "bank").length;
+const bankPrice = () => (S.market.monsoon ? 3 : 4);
+async function txPair(a, b){ await store.set("tx/" + uid() + uid(), a); if (b) await store.set("tx/" + uid() + uid(), b); }
+
+// ---------------------------------------------------------------- render scheduling
+let rq = false;
+function schedule(){ if (!rq){ rq = true; requestAnimationFrame(() => { rq = false; render(); }); } }
+function keepFocus(fn){
+  const a = document.activeElement; const id = a && a.id; let ss = null, se = null;
+  if (id && "selectionStart" in a){ try { ss = a.selectionStart; se = a.selectionEnd; } catch(e){} }
+  fn();
+  if (id){ const n = document.getElementById(id); if (n){ n.focus({preventScroll:true}); if (ss != null){ try { n.setSelectionRange(ss, se); } catch(e){} } } }
+}
+
+// ---------------------------------------------------------------- flags (ICS signal flags, drawn)
+const FC = {R:"var(--flagR)",B:"var(--flagB)",Y:"var(--flagY)",W:"var(--flagW)",K:"var(--flagK)"};
+function flagSVG(L1){
+  const r = (x,y,w,h,c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${FC[c]}"/>`;
+  const pg = (pts,c) => `<polygon points="${pts}" fill="${FC[c]}"/>`;
+  const sal = c => `<path d="M0 0L30 30M30 0L0 30" stroke="${FC[c]}" stroke-width="6"/>`;
+  const crs = c => r(12,0,6,30,c) + r(0,12,30,6,c);
+  let s = "";
+  switch(L1){
+    case "A": s = r(0,0,15,30,"W") + pg("15,0 30,0 21,15 30,30 15,30","B"); break;
+    case "B": s = pg("0,0 30,0 21,15 30,30 0,30","R"); break;
+    case "C": s = r(0,0,30,6,"B")+r(0,6,30,6,"W")+r(0,12,30,6,"R")+r(0,18,30,6,"W")+r(0,24,30,6,"B"); break;
+    case "D": s = r(0,0,30,30,"Y")+r(0,7.5,30,15,"B"); break;
+    case "E": s = r(0,0,30,15,"B")+r(0,15,30,15,"R"); break;
+    case "F": s = r(0,0,30,30,"W")+pg("15,0 30,15 15,30 0,15","R"); break;
+    case "G": for (let i=0;i<6;i++) s += r(i*5,0,5,30,i%2?"B":"Y"); break;
+    case "H": s = r(0,0,15,30,"W")+r(15,0,15,30,"R"); break;
+    case "I": s = r(0,0,30,30,"Y")+`<circle cx="15" cy="15" r="7" fill="${FC.K}"/>`; break;
+    case "J": s = r(0,0,30,30,"B")+r(0,10,30,10,"W"); break;
+    case "K": s = r(0,0,15,30,"Y")+r(15,0,15,30,"B"); break;
+    case "L": s = r(0,0,15,15,"Y")+r(15,0,15,15,"K")+r(0,15,15,15,"K")+r(15,15,15,15,"Y"); break;
+    case "M": s = r(0,0,30,30,"B")+sal("W"); break;
+    case "N": for (let i=0;i<4;i++) for (let j=0;j<4;j++) s += r(j*7.5,i*7.5,7.5,7.5,(i+j)%2?"W":"B"); break;
+    case "O": s = pg("0,0 0,30 30,30","Y")+pg("0,0 30,0 30,30","R"); break;
+    case "P": s = r(0,0,30,30,"B")+r(10,10,10,10,"W"); break;
+    case "Q": s = r(0,0,30,30,"Y"); break;
+    case "R": s = r(0,0,30,30,"R")+crs("Y"); break;
+    case "S": s = r(0,0,30,30,"W")+r(10,10,10,10,"B"); break;
+    case "T": s = r(0,0,10,30,"R")+r(10,0,10,30,"W")+r(20,0,10,30,"B"); break;
+    case "U": s = r(0,0,15,15,"R")+r(15,0,15,15,"W")+r(0,15,15,15,"W")+r(15,15,15,15,"R"); break;
+    case "V": s = r(0,0,30,30,"W")+sal("R"); break;
+    case "W": s = r(0,0,30,30,"B")+r(6,6,18,18,"W")+r(11,11,8,8,"R"); break;
+    case "X": s = r(0,0,30,30,"W")+crs("B"); break;
+    case "Y": s = r(0,0,30,30,"Y"); for (let k=-30;k<60;k+=8) s += `<path d="M${k} 30L${k+30} 0" stroke="${FC.R}" stroke-width="4"/>`; break;
+    case "Z": s = pg("0,0 30,0 15,15","Y")+pg("30,0 30,30 15,15","B")+pg("0,30 30,30 15,15","R")+pg("0,0 0,30 15,15","K"); break;
+  }
+  return `<svg viewBox="0 0 30 30" role="img" aria-label="flag"><defs><clipPath id="fc"><rect width="30" height="30"/></clipPath></defs><g clip-path="url(#fc)">${s}</g><rect x=".25" y=".25" width="29.5" height="29.5" fill="none" stroke="var(--line)" stroke-width=".5"/></svg>`;
+}
+function hydrate(root){
+  root.querySelectorAll("[data-flags]").forEach(el => { el.innerHTML = el.dataset.flags.split("").map(flagSVG).join(""); });
+  root.querySelectorAll("[data-flagchart]").forEach(el => {
+    el.className = "flagchart";
+    el.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(c => `<figure>${flagSVG(c)}<figcaption>${c}</figcaption></figure>`).join("");
+  });
+}
+
+// ---------------------------------------------------------------- jigsaw (Game C, Cartographers)
+const LAT = ["50°N","40°N","30°N","20°N","10°N","0°"], LON = ["90°W","80°W","70°W","60°W","50°W","40°W"];
+const CELLS = {"0,4":["isle",{zh:"风岛",en:"Wind Isle"}],"1,1":["isle",{zh:"雾岛",en:"Fog Isle"}],"2,3":["isle",{zh:"回声岛",en:"Echo Island"}],
+  "2,5":["isle",{zh:"鲸岛",en:"Whale Isle"}],"3,1":["reef",{zh:"礁",en:"Reef"}],"3,2":["reef",{zh:"礁",en:"Reef"}],
+  "4,1":["ship",{zh:"⛵ 希望号",en:"⛵ Esperança"}],"5,4":["isle",{zh:"龟岛",en:"Turtle Isle"}]};
+function pieceHTML(pi){
+  const pr = Math.floor(pi/2), pc = pi % 2; let h = "<table>";
+  if (pr === 0) h += "<tr>" + (pc === 0 ? "<th></th>" : "") + [0,1,2].map(c => `<th>${LON[pc*3+c]}</th>`).join("") + "</tr>";
+  for (let rr = 0; rr < 2; rr++){
+    const R = pr*2 + rr; h += "<tr>" + (pc === 0 ? `<th>${LAT[R]}</th>` : "");
+    for (let cc = 0; cc < 3; cc++){ const C = pc*3 + cc; const v = CELLS[R+","+C]; h += v ? `<td class="${v[0]}">${esc(L(v[1]))}</td>` : "<td></td>"; }
+    h += "</tr>";
+  }
+  return h + "</table>";
+}
+function jigsawHTML(g, team){
+  const solved = isSolved(g, P(g,"C2a"), team);
+  const ord = solved ? [0,1,2,3,4,5] : LS.get("jig_" + runOf("C").id, [4,2,5,0,3,1]);
+  return `<p class="note">${solved ? t("assembled") : t("swapTip")}</p><div class="jig">` + ord.map((pi, pos) =>
+    `<button type="button" data-jig="${pos}" class="${S.sel === pos ? "sel" : ""}" ${solved ? "disabled" : ""}>${pieceHTML(pi)}</button>`).join("") + "</div>";
+}
+async function jigClick(pos){
+  const k = "jig_" + runOf("C").id; const ord = LS.get(k, [4,2,5,0,3,1]);
+  if (S.sel == null){ S.sel = pos; schedule(); return; }
+  const a = S.sel; S.sel = null;
+  if (a !== pos){ [ord[a], ord[pos]] = [ord[pos], ord[a]]; LS.set(k, ord); }
+  schedule();
+  if (ord.every((v, i) => v === i)) await logEvent("C", S.team, "C2a", "solve", {key: "MAP"});
+}
+
+// ---------------------------------------------------------------- rack (Game C, Galley)
+const RACK = {salt:{zh:"盐",en:"Salt"},sugar:{zh:"糖",en:"Sugar"},pepper:{zh:"黑胡椒",en:"Black pepper"},anise:{zh:"八角",en:"Star anise"},
+  cinnamon:{zh:"肉桂",en:"Cinnamon"},chili:{zh:"辣椒粉",en:"Chili powder"},cumin:{zh:"孜然",en:"Cumin"},sichuan:{zh:"花椒",en:"Sichuan pepper"}};
+function rackHTML(g, p, team){
+  const solved = isSolved(g, p, team); const dust = LS.get("dust_" + runOf("C").id, []);
+  return `<div class="rack">` + p.choice.map(c => `<button type="button" data-rack="${c}" class="${dust.includes(c) ? "dust" : ""}" ${solved ? "disabled" : ""}>${esc(L(RACK[c]))}</button>`).join("") + "</div>";
+}
+
+// ---------------------------------------------------------------- tester view
+function teamPicker(){
+  return `<section class="stack"><h1>${t("pickTitle")}</h1><p class="muted">${t("pickLead")}</p><div class="teampick">` +
+    [1,2,3,4,5].map(n => `<button type="button" data-team="${n}"><b>${t("testerN")} ${n}</b>` +
+      DATA.games.map(g => `<span>${g.id} · ${esc(L(g.roles[n]))}</span>`).join("") + "</button>").join("") + "</div></section>";
+}
+function gameTabs(){
+  return `<nav class="gametabs">` + DATA.games.map(g => {
+    const r = runOf(g.id); const live = S.session.current === g.id && r.startedAt && !r.endedAt;
+    return `<button type="button" class="gametab" data-game="${g.id}" aria-pressed="${S.game === g.id}"><b>${g.id} · ${esc(L(g.name))}</b><span>${esc(L(g.mode))}${live ? ` · <span class="live">● ${t("running")}</span>` : ""}</span></button>`;
+  }).join("") + "</nav>";
+}
+function clockHTML(g){
+  const r = runOf(g.id);
+  if (!r.startedAt) return `<span class="muted">${t("notStarted")}</span>`;
+  const end = r.endedAt || Date.now(); const ms = end - r.startedAt; const over = ms > g.testMinutes * 60000;
+  return `<span class="clock ${over ? "over" : ""}" id="clock" data-g="${g.id}">${mmss(ms)}</span> <span class="muted">/ ${g.testMinutes}:00 ${r.endedAt ? "· " + t("ended") : ""}</span>`;
+}
+function bannerHTML(){
+  const b = S.broadcast; if (!b || !b.ts || b.ts <= S.dismissedBc) return "";
+  return `<div class="banner" role="status"><div style="flex:1"><p class="eyebrow">${t("broadcast")}</p><p>${esc(L(b.text))}</p></div><button class="btn small" type="button" data-act="dismissBc">${t("dismiss")}</button></div>`;
+}
+function hintBlock(g, p, team){
+  const used = hintsUsed(g, p, team); const hs = (p.hints || []).filter(h => L(h));
+  if (!hs.length) return "";
+  const next = used.length < hs.length ? used.length + 1 : 0;
+  let h = `<div class="hintrow">`;
+  [...used].sort().forEach(l => { h += `<div class="hint"><b>${t("hint")} ${l}</b> · ${esc(L(hs[l-1]))}</div>`; });
+  if (next) h += `<button class="btn small" type="button" data-hint="${p.id}" data-level="${next}">${t("hint")} ${next} / ${hs.length}</button>`;
+  return h + "</div>";
+}
+function answerFor(p, team){
+  if (!S.sol || !S.sol.keys[p.id]) return null;
+  const k = S.sol.keys[p.id]; return k[team] ?? k[0] ?? null;
+}
+function cardHTML(g, p, team){
+  const vis = teamsOf(p).includes(team) || p.envelope;
+  if (!vis) return "";
+  const req = p.requires ? P(g, p.requires) : null;
+  const locked = req && !isSolved(g, req, team);
+  const solved = isSolved(g, p, team);
+  const ev = p.envelope ? null : solveEvent(g, p, team);
+  const time = ev ? elapsedOf(g.id, ev.ts) : null;
+  const chips = [`<span class="chip ${p.stage === "cross" ? "cross" : ""}">${t("stage_" + p.stage)}</span>`, `<span class="chip">${t("target")} ${p.target} ${t("min")}</span>`];
+  if (solved) chips.push(`<span class="chip ok">✓ ${t("solved")}${time != null ? " " + mmss(time) : ""}</span>`);
+  let h = `<article class="card ${solved ? "solved" : ""} ${locked ? "locked" : ""}" id="card-${p.id}"><div class="card-h"><span class="pid">${p.id}</span><h3>${esc(L(p.title))}</h3>${chips.join("")}</div>`;
+  if (locked){ return h + `<p class="muted">${t("lockedBy")} ${req.id} · ${esc(L(req.title))}</p></article>`; }
+  if (p.shared && teamsOf(p).length > 1) h += `<p class="note">${t("sharedP")}: ${teamsOf(p).map(n => esc(L(g.roles[n]))).join(" · ")}</p>`;
+  const body = p.body[team] || p.body[0];
+  h += `<div class="body">${L(body)}</div>`;
+  if (p.jigsaw) h += `<div data-jigwrap></div>`;
+  if (p.choice) h += `<div data-rackwrap="${p.id}"></div>`;
+  if (p.envelope){
+    h += `<div data-reveal="${p.id}">${solved ? "" : `<p class="muted">${t("waitingEnv")}</p>`}</div>`;
+    return h + "</article>";
+  }
+  if (p.gate && !solved && !p.choice){
+    const g2 = p.gate; const val = S.drafts[p.id] || "";
+    h += `<form class="gate" data-gate="${p.id}"><label for="in-${p.id}">${esc(L(g2.label))}</label><input id="in-${p.id}" autocomplete="off" spellcheck="false" placeholder="${esc(L(g2.ph))}" value="${esc(val)}"><button class="btn primary" type="submit">${t("submit")}</button></form>`;
+  }
+  const m = S.msgs[p.id]; if (m) h += `<p class="msg ${m.bad ? "bad" : ""}">${esc(m.text)}</p>`;
+  if (solved && p.gate) h += `<div class="reveal" data-reveal="${p.id}"></div>`;
+  if (!solved) h += hintBlock(g, p, team);
+  const ans = answerFor(p, team);
+  if (ans && answersVisible()) h += `<div class="answer"><b>${t("answer")}</b> · <span class="mono">${esc(ans)}</span></div>`;
+  return h + "</article>";
+}
+function marketHTML(team){
+  const g = G("B"); const st = recipeStatus(team); const inv = st.inv; const foot = g.foot[team];
+  const closed = !!S.market.closed; const price = bankPrice(); const stock = Math.max(0, 3 - bankSold());
+  const name = it => esc(L(DATA.itemNames[it]));
+  const score = (st.complete ? 10 : 0) + inv.coins;
+  let h = `<section class="panel stack" id="market"><div class="card-h"><h3>${t("market")} · ${esc(L(g.roles[team]))}</h3><span class="chip">${t("score")} ${score}</span>${closed ? `<span class="chip bad">${t("marketClosed")}</span>` : ""}</div><div class="mk">`;
+  h += `<div><p class="eyebrow">${t("inventory")}</p><div class="inv">` + ITEMS.map(it => `<span>${name(it)} <b>${inv[it] || 0}</b></span>`).join("") +
+       (inv.pass ? `<span>✓ ${t("pass")}</span>` : "") + `</div></div>`;
+  h += `<div class="recipe"><p class="eyebrow">${t("recipeCard")}</p><p>${t("need")}: ` + st.need.map(s => `${(inv[s]||0) >= 1 ? "✓" : "○"} ${name(s)}`).join(" · ") + `</p>` +
+       `<p class="${st.complete ? "" : "muted"}">${st.complete ? "✓ " + t("complete") : t("missing") + " " + st.miss.length + " · " + t("wildcard")}</p>` +
+       `<p class="foot">${foot.num} · ${esc(L(foot.text))} <span class="seal"><b>${foot.seal}</b></span></p></div>`;
+  h += `</div><div class="mk"><form class="stack" data-act="transfer"><p class="eyebrow">${t("transfer")}</p><div class="row">` +
+       `<select id="tf-to" aria-label="${t("to")}">` + [1,2,3,4,5].filter(n => n !== team).map(n => `<option value="${n}" ${String(S.drafts["tf-to"]) === String(n) ? "selected" : ""}>${esc(L(g.roles[n]))}</option>`).join("") + `</select>` +
+       `<select id="tf-item" aria-label="${t("item")}">` + ITEMS.map(it => `<option value="${it}" ${S.drafts["tf-item"] === it ? "selected" : ""}>${name(it)}</option>`).join("") + `</select>` +
+       `<input id="tf-qty" type="number" min="1" value="${esc(S.drafts["tf-qty"] || 1)}" style="width:70px" aria-label="${t("qty")}">` +
+       `<button class="btn primary" type="submit" ${closed ? "disabled" : ""}>${t("send")}</button></div></form>`;
+  h += `<div class="stack"><p class="eyebrow">${t("bank")} · ${t("price")} ${price} · ${t("stock")} ${stock}</p>` +
+       (S.market.embargo ? `<p class="note">${t("embargo")}</p>` : "") +
+       (inv.pass ? "" : `<p class="note">${t("needPass")}</p>`) +
+       `<div class="row"><select id="bk-item" aria-label="${t("item")}">` + DATA.spices.map(s => `<option value="${s}" ${S.drafts["bk-item"] === s ? "selected" : ""}>${name(s)}</option>`).join("") + `</select>` +
+       `<button class="btn" type="button" data-act="buy" ${(!inv.pass || closed) ? "disabled" : ""}>${t("buy")}</button>` +
+       `<button class="btn" type="button" data-act="sell" ${(!inv.pass || closed) ? "disabled" : ""}>${t("sell")}</button>` +
+       `<button class="btn warn" type="button" data-act="pirate">${t("pirateGive")}</button></div></div></div>`;
+  const m = S.msgs.market; if (m) h += `<p class="msg ${m.bad ? "bad" : ""}">${esc(m.text)}</p>`;
+  return h + "</section>";
+}
+function feedbackHTML(g, team){
+  const id = `${g.id}_${team}`; const saved = S.fb[id] || {};
+  const d = S.drafts["fb_" + id] || (S.drafts["fb_" + id] = Object.assign({}, saved));
+  const scale = (field, label, sc) => `<div><label>${t(label)}</label><div class="scale">${t(sc)}</div><div class="rating">` +
+    [1,2,3,4,5].map(n => `<button type="button" data-fb="${field}" data-v="${n}" aria-pressed="${Number(d[field]) === n}">${n}</button>`).join("") + "</div></div>";
+  const opts = [`<option value="">${t("none")}</option>`].concat(g.puzzles.filter(p => teamsOf(p).includes(team) && !p.envelope).map(p => `<option value="${p.id}" ${d.stuck === p.id ? "selected" : ""}>${p.id} · ${esc(L(p.title))}</option>`)).join("");
+  return `<section class="panel stack" id="feedback"><h2 style="margin:0">${t("feedback")}</h2><p class="muted">${t("fbLead")}</p><form class="fbgrid" data-act="fb" data-fbid="${id}">` +
+    scale("difficulty","difficulty","diffScale") + scale("interactivity","interactivity","interScale") + scale("fun","fun","funScale") + scale("clarity","clarity","clarScale") +
+    `<div><label for="fb-idle-${id}">${t("idle")}</label><br><input id="fb-idle-${id}" data-fbf="idle" type="number" min="0" style="width:90px" value="${esc(d.idle ?? "")}"></div>` +
+    `<div><label for="fb-real-${id}">${t("realIdle")}</label><br><input id="fb-real-${id}" data-fbf="realIdle" type="number" min="0" max="5" style="width:90px" value="${esc(d.realIdle ?? "")}"></div>` +
+    `<div><label for="fb-stuck-${id}">${t("stuck")}</label><br><select id="fb-stuck-${id}" data-fbf="stuck">${opts}</select></div>` +
+    `<div><label for="fb-change-${id}">${t("change1")}</label><textarea id="fb-change-${id}" data-fbf="change">${esc(d.change || "")}</textarea></div>` +
+    `<div><label for="fb-comment-${id}">${t("comment")}</label><textarea id="fb-comment-${id}" data-fbf="comment">${esc(d.comment || "")}</textarea></div>` +
+    `<div class="row"><button class="btn primary" type="submit">${t("saveFb")}</button>${saved.ts ? `<span class="chip ok">✓ ${t("fbSaved")}</span>` : ""}</div></form></section>`;
+}
+function testerView(){
+  if (!S.team) return teamPicker();
+  const g = G(S.game) || DATA.games[0]; const team = S.team;
+  let h = `<div class="row" style="justify-content:space-between"><p class="eyebrow" style="margin:0">${t("testerN")} ${team} · ${DATA.games.map(x => x.id + " " + esc(L(x.roles[team]))).join(" · ")}</p><button class="btn small" type="button" data-act="changeTeam">${t("change")}</button></div>`;
+  h += gameTabs() + bannerHTML();
+  h += `<section class="panel stack"><div class="card-h"><h1>${esc(L(g.name))}</h1><div>${clockHTML(g)}</div></div>` +
+       `<p class="eyebrow">${t("youAre")}: ${esc(L(g.roleWord))} · ${esc(L(g.roles[team]))}</p>` +
+       `<div class="story">${L(g.story)}</div><p class="note"><b>${t("testNote")}</b> · ${L(g.testNote)}</p>` +
+       `<p class="note">${t("testLimit")} ${g.testMinutes} ${t("min")} · ${t("realLimit")} ${g.realMinutes} ${t("min")}</p></section>`;
+  if (g.market) h += "<div style='height:12px'></div>" + marketHTML(team);
+  ["intra","cross","final"].forEach(stage => {
+    const cards = g.puzzles.filter(p => p.stage === stage).map(p => cardHTML(g, p, team)).filter(Boolean);
+    if (!cards.length) return;
+    h += `<div class="act"><h3>${t("act_" + stage)}</h3><div class="rule"></div></div><div class="stack">${cards.join("")}</div>`;
+  });
+  if (answersVisible()) h += `<h2>${t("solutions")}</h2><div class="panel">${L(S.sol.games[g.id])}</div>`;
+  h += "<div style='height:20px'></div>" + feedbackHTML(g, team);
+  return h;
+}
+
+// ---------------------------------------------------------------- host view
+function lockBox(){
+  let h = `<section class="panel stack"><div class="card-h"><h3>${t("answersLock")}</h3>${answersVisible() ? `<span class="chip ok">✓</span>` : ""}${S.reveal && S.reveal.open ? `<span class="chip warn">${t("revealedAll")}</span>` : ""}</div>`;
+  if (!ownSolUnlocked()){
+    h += `<form class="lockbox" data-act="unlock"><label for="pw" class="muted">${t("pw")}</label><input id="pw" type="password" autocomplete="off" value="${esc(S.drafts.pw || "")}"><button class="btn primary" type="submit">${t("unlock")}</button></form>`;
+    const m = S.msgs.pw; if (m) h += `<p class="msg bad">${esc(m.text)}</p>`;
+  } else {
+    h += `<p class="muted">${t("unlockedLocal")}</p><div class="row">` +
+      (S.reveal && S.reveal.open ? `<button class="btn" type="button" data-act="hideAll" ${S.isOwner ? "" : "disabled"}>${t("hideAll")}</button>` :
+       `<button class="btn warn" type="button" data-act="revealAll" ${S.isOwner ? "" : "disabled"}>${t("revealAll")}</button>`) + `</div>`;
+  }
+  if (!S.isOwner) h += `<p class="note">${t("ownerOnly")}</p>`;
+  return h + "</section>";
+}
+function sessionBox(){
+  let h = `<section class="panel stack"><h3>${t("session")}</h3><div class="tw"><table><tr><th></th><th>${t("startedAt")}</th><th></th><th></th></tr>`;
+  DATA.games.forEach(g => {
+    const r = runOf(g.id); const live = S.session.current === g.id && r.startedAt && !r.endedAt;
+    h += `<tr><td><b>${g.id}</b> ${esc(L(g.name))}</td><td>${r.startedAt ? new Date(r.startedAt).toLocaleTimeString() + (live ? ` · <span class="live">● ${t("running")}</span>` : r.endedAt ? " · " + t("ended") : "") : "–"}</td>` +
+      `<td>${r.startedAt ? `<span class="mono">${mmss((r.endedAt || Date.now()) - r.startedAt)}</span> / ${g.testMinutes}:00` : ""}</td>` +
+      `<td class="row"><button class="btn small primary" type="button" data-start="${g.id}" ${S.isOwner ? "" : "disabled"}>${r.startedAt ? t("restart") : t("start")}</button>` +
+      `<button class="btn small" type="button" data-end="${g.id}" ${S.isOwner && live ? "" : "disabled"}>${t("end")}</button></td></tr>`;
+  });
+  return h + "</table></div></section>";
+}
+function cellClass(g, p, team){
+  if (!teamsOf(p).includes(team) && !p.envelope) return {cls:"", txt:""};
+  const ev = p.envelope ? solveEvent(g, P(g, p.from), 5) : solveEvent(g, p, team);
+  const hs = hintsUsed(g, p, team).length; const w = wrongCount(g, p, team);
+  const extra = (hs || w) ? `<small>${hs ? "H" + hs : ""}${hs && w ? " " : ""}${w ? "✕" + w : ""}</small>` : "";
+  if (!ev) return {cls: "", txt: "·" + extra, open: true};
+  const ms = elapsedOf(g.id, ev.ts); if (ms == null) return {cls:"ok", txt:"✓" + extra};
+  const ratio = ms / (p.target * 60000);
+  // targets are per puzzle; the comparison uses the cumulative clock, so scale by the sum of targets up to this puzzle
+  const cum = g.puzzles.slice(0, g.puzzles.indexOf(p) + 1).filter(q => teamsOf(q).includes(team) || q.envelope).reduce((a, q) => a + q.target, 0) * 60000;
+  const r2 = ms / cum;
+  return {cls: r2 <= 1 ? "ok" : r2 <= 1.5 ? "warn" : "bad", txt: mmss(ms) + extra};
+}
+function boardBox(){
+  let h = `<section class="panel stack"><h3>${t("board")}</h3><p class="note">${t("boardLead")}</p>`;
+  DATA.games.forEach(g => {
+    h += `<h4>${g.id} · ${esc(L(g.name))}</h4><div class="tw"><table class="board"><tr><th>${t("team")}</th>` + g.puzzles.map(p => `<th title="${esc(L(p.title))}">${p.id}<br><span class="muted">${p.target}′</span></th>`).join("") + "</tr>";
+    [1,2,3,4,5].forEach(team => {
+      h += `<tr><td>${team} ${esc(L(g.roles[team]))}</td>` + g.puzzles.map(p => {
+        const c = cellClass(g, p, team); const can = c.open && ownSolUnlocked() && S.isOwner && !p.envelope && (teamsOf(p).includes(team));
+        return `<td class="cell ${c.cls} ${can ? "can" : ""}" ${can ? `data-mark="${g.id}|${p.id}|${team}"` : ""}>${c.txt}</td>`;
+      }).join("") + "</tr>";
+    });
+    h += "</table></div>";
+  });
+  if (S.confirm){
+    const [gid, pid, team] = S.confirm.split("|");
+    h += `<div class="banner"><div style="flex:1">${t("hostMark")} <b>${gid} · ${pid}</b> · ${t("team")} ${team}</div><button class="btn small primary" type="button" data-act="markYes">${t("yes")}</button><button class="btn small" type="button" data-act="markNo">${t("cancel")}</button></div>`;
+  }
+  return h + "</section>";
+}
+function gameStats(g){
+  const fbs = [1,2,3,4,5].map(n => S.fb[`${g.id}_${n}`]).filter(Boolean);
+  const avg = f => { const v = fbs.map(x => Number(x[f])).filter(n => n > 0); return v.length ? v.reduce((a,b) => a+b, 0) / v.length : null; };
+  const evs = evRun(g.id);
+  const finale = g.puzzles.filter(p => p.stage === "final" && !p.envelope).pop();
+  const fe = finale ? evs.filter(e => e.type === "solve" && e.pid === finale.id).sort((a,b) => a.ts - b.ts)[0] : null;
+  const ftime = fe ? elapsedOf(g.id, fe.ts) : null;
+  const inTime = ftime != null && ftime <= g.testMinutes * 60000;
+  const s = {n: fbs.length, diff: avg("difficulty"), inter: avg("interactivity"), fun: avg("fun"), clar: avg("clarity"), idle: avg("idle"), realIdle: avg("realIdle"),
+    hints: evs.filter(e => e.type === "hint").length, wrong: evs.filter(e => e.type === "wrong").length, ftime, inTime, fbs};
+  s.score = (s.inter == null) ? null : s.inter * 2 + (s.fun || 0) + (s.clar || 0) * 0.5 - Math.abs((s.diff || 3) - 3) * 2 + (inTime ? 1 : 0);
+  return s;
+}
+function resultsBox(){
+  const stats = DATA.games.map(g => [g, gameStats(g)]);
+  const best = stats.filter(([,s]) => s.score != null).sort((a,b) => b[1].score - a[1].score)[0];
+  const f = v => v == null ? "–" : v.toFixed(1);
+  let h = `<section class="panel stack"><h3>${t("results")}</h3><p class="note">${t("resultsLead")}</p><div class="tw"><table><tr><th></th>` +
+    stats.map(([g]) => `<th class="${best && best[0] === g ? "bestmark" : ""}">${g.id} · ${esc(L(g.name))}${best && best[0] === g ? ` <span class="chip ok">${t("recommend")}</span>` : ""}</th>`).join("") + "</tr>";
+  const row = (label, fn) => { h += `<tr><td>${label}</td>` + stats.map(([g, s]) => `<td>${fn(s, g)}</td>`).join("") + "</tr>"; };
+  row(t("responses"), s => s.n);
+  row(t("difficulty"), s => f(s.diff)); row(t("interactivity"), s => f(s.inter)); row(t("fun"), s => f(s.fun)); row(t("clarity"), s => f(s.clar));
+  row(t("idle"), s => f(s.idle)); row(t("realIdle"), s => f(s.realIdle));
+  row(t("finished"), (s, g) => s.ftime == null ? "–" : `${mmss(s.ftime)} <span class="chip ${s.inTime ? "ok" : "bad"}">${s.inTime ? t("inTime") : t("overTime")}</span>`);
+  row(t("hints"), s => s.hints); row(t("wrongs"), s => s.wrong);
+  const maxS = Math.max(1, ...stats.map(([,s]) => s.score || 0));
+  row("<b>Score</b>", s => s.score == null ? "–" : `<b>${s.score.toFixed(1)}</b><div class="scorebar" style="width:${Math.max(4, (s.score / maxS) * 100)}%"></div>`);
+  h += "</table></div>";
+  h += `<h4>${t("comments")}</h4>`;
+  stats.forEach(([g, s]) => {
+    const items = s.fbs.filter(x => x.change || x.comment || x.stuck);
+    if (!items.length) return;
+    h += `<p class="eyebrow">${g.id} · ${esc(L(g.name))}</p><ul>` + items.map(x => `<li><b>${t("testerN")} ${esc(x.team)}</b>${x.stuck ? ` · ${t("stuck")}: ${esc(x.stuck)}` : ""}${x.change ? ` · ${esc(x.change)}` : ""}${x.comment ? ` · ${esc(x.comment)}` : ""}</li>`).join("") + "</ul>";
+  });
+  if (!stats.some(([,s]) => s.n)) h += `<p class="muted">${t("noData")}</p>`;
+  return h + "</section>";
+}
+function marketHostBox(){
+  const g = G("B");
+  let h = `<section class="panel stack"><h3>${t("marketHost")}</h3><div class="row">` +
+    `<button class="btn ${S.market.monsoon ? "primary" : ""}" type="button" data-mk="monsoon" ${S.isOwner ? "" : "disabled"}>${t("monsoon")}</button>` +
+    `<button class="btn ${S.market.embargo ? "primary" : ""}" type="button" data-mk="embargo" ${S.isOwner ? "" : "disabled"}>${t("blockade")}</button>` +
+    `<button class="btn warn" type="button" data-act="bcPirate" ${S.isOwner ? "" : "disabled"}>${t("pirates")}</button>` +
+    `<button class="btn" type="button" data-mk="closed" ${S.isOwner ? "" : "disabled"}>${S.market.closed ? t("reopenMk") : t("closeMk")}</button></div>`;
+  h += `<p class="note">${t("bank")} · ${t("price")} ${bankPrice()} · ${t("stock")} ${Math.max(0, 3 - bankSold())}</p><div class="tw"><table><tr><th>${t("team")}</th>` +
+    ITEMS.map(it => `<th>${esc(L(DATA.itemNames[it]))}</th>`).join("") + `<th>${t("pass")}</th><th>${t("recipeCard")}</th><th>${t("score")}</th></tr>`;
+  [1,2,3,4,5].forEach(n => {
+    const st = recipeStatus(n); const inv = st.inv;
+    h += `<tr><td>${n} ${esc(L(g.roles[n]))}</td>` + ITEMS.map(it => `<td>${inv[it] || 0}</td>`).join("") + `<td>${inv.pass ? "✓" : ""}</td><td>${st.complete ? "✓" : t("missing") + " " + st.miss.length}</td><td><b>${(st.complete ? 10 : 0) + inv.coins}</b></td></tr>`;
+  });
+  return h + "</table></div></section>";
+}
+function broadcastBox(){
+  return `<section class="panel stack"><h3>${t("broadcast")}</h3><form class="row" data-act="bcCustom"><input id="bc-text" style="flex:1 1 220px" value="${esc(S.drafts["bc-text"] || "")}" placeholder="${t("custom")}"><button class="btn primary" type="submit" ${S.isOwner ? "" : "disabled"}>${t("sendBc")}</button><button class="btn" type="button" data-act="bcClear" ${S.isOwner ? "" : "disabled"}>${t("clearBc")}</button></form>` +
+    (S.broadcast && S.broadcast.ts ? `<p class="note">${esc(L(S.broadcast.text))}</p>` : "") + `</section>`;
+}
+function protocolBox(){
+  const P2 = DATA.protocol;
+  let h = `<section class="panel stack"><h3>${t("protocol")}</h3>${L(P2.schedule)}<h4>${t("prep")}</h4>${L(P2.prep)}<h4>${t("watch")}</h4><div class="tw"><table><tr>` +
+    DATA.games.map(g => `<th>${g.id} · ${esc(L(g.name))}</th>`).join("") + "</tr><tr>" +
+    DATA.games.map(g => `<td><ul>${L(g.watch).map(w => `<li>${esc(w)}</li>`).join("")}</ul></td>`).join("") + "</tr></table></div>";
+  h += `<h4>${t("notes")}</h4><form class="stack" data-act="notes"><textarea id="notes-text">${esc(S.drafts["notes-text"] ?? (S.notes.text || ""))}</textarea><div class="row"><button class="btn" type="submit" ${S.isOwner ? "" : "disabled"}>${t("saveNotes")}</button></div></form>`;
+  return h + "</section>";
+}
+function solutionsBox(){
+  let h = `<section class="panel stack"><h3>${t("solutions")}</h3>`;
+  if (!answersVisible()) return h + `<p class="muted">${t("lockedAnswers")}</p></section>`;
+  DATA.games.forEach(g => { h += `<h4>${g.id} · ${esc(L(g.name))}</h4><div class="tw">${L(S.sol.games[g.id])}</div>`; });
+  return h + "</section>";
+}
+function hostView(){
+  return `<div class="stack"><h1>${t("hostTitle")}</h1>${bannerHTML()}${lockBox()}${sessionBox()}${boardBox()}${resultsBox()}${marketHostBox()}${broadcastBox()}${protocolBox()}${solutionsBox()}</div>`;
+}
+
+// ---------------------------------------------------------------- render
+async function fillReveals(root){
+  if (S.view !== "tester" || !S.team) return;
+  const g = G(S.game);
+  for (const el of root.querySelectorAll("[data-reveal]")){
+    const p = P(g, el.dataset.reveal); if (!isSolved(g, p, S.team)) continue;
+    const r = await revealFor(g, p, S.team);
+    if (r && el.isConnected) el.innerHTML = L(r);
+  }
+}
+function render(){
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  document.getElementById("brandSmall").textContent = t("brandSmall");
+  document.getElementById("brandTitle").textContent = t("brand");
+  document.getElementById("vTester").textContent = t("tester"); document.getElementById("vHost").textContent = t("host");
+  document.getElementById("vTester").setAttribute("aria-pressed", S.view === "tester"); document.getElementById("vHost").setAttribute("aria-pressed", S.view === "host");
+  document.getElementById("lZh").setAttribute("aria-pressed", lang === "zh"); document.getElementById("lEn").setAttribute("aria-pressed", lang === "en");
+  const sy = document.getElementById("sync"); sy.classList.toggle("on", S.mode === "shared"); document.getElementById("syncText").textContent = S.mode === "shared" ? t("shared") : t("local");
+  const app = document.getElementById("app");
+  keepFocus(() => { app.innerHTML = S.view === "host" ? hostView() : testerView(); });
+  hydrate(app);
+  if (S.view === "tester" && S.team){
+    const g = G(S.game);
+    const jw = app.querySelector("[data-jigwrap]"); if (jw) jw.innerHTML = jigsawHTML(g, S.team);
+    app.querySelectorAll("[data-rackwrap]").forEach(el => { el.innerHTML = rackHTML(g, P(g, el.dataset.rackwrap), S.team); });
+  }
+  fillReveals(app);
+}
+setInterval(() => {
+  const c = document.getElementById("clock"); if (c){ const g = G(c.dataset.g); const r = runOf(g.id); if (r.startedAt && !r.endedAt){ const ms = Date.now() - r.startedAt; c.textContent = mmss(ms); c.classList.toggle("over", ms > g.testMinutes * 60000); } }
+  if (S.view === "host" && S.session.current && runOf(S.session.current).startedAt && !runOf(S.session.current).endedAt && !document.activeElement?.matches("input,textarea,select")) schedule();
+}, 1000);
+
+// ---------------------------------------------------------------- events
+document.getElementById("vTester").onclick = () => { S.view = "tester"; LS.set("view", "tester"); render(); };
+document.getElementById("vHost").onclick = () => { S.view = "host"; LS.set("view", "host"); render(); };
+document.getElementById("lZh").onclick = () => { lang = "zh"; LS.set("lang", lang); render(); };
+document.getElementById("lEn").onclick = () => { lang = "en"; LS.set("lang", lang); render(); };
+const app = document.getElementById("app");
+app.addEventListener("input", e => {
+  const el = e.target;
+  if (el.id && el.id.startsWith("in-")) S.drafts[el.id.slice(3)] = el.value;
+  else if (el.dataset.fbf){ const f = el.closest("form"); S.drafts["fb_" + f.dataset.fbid][el.dataset.fbf] = el.value; }
+  else if (el.id) S.drafts[el.id] = el.value;
+});
+app.addEventListener("change", e => {
+  const el = e.target;
+  if (el.dataset.fbf){ const f = el.closest("form"); S.drafts["fb_" + f.dataset.fbid][el.dataset.fbf] = el.value; }
+  else if (el.id) S.drafts[el.id] = el.value;
+});
+app.addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = e.target;
+  if (f.dataset.gate){ const g = G(S.game); const p = P(g, f.dataset.gate); const v = f.querySelector("input").value; await trySubmit(g, p, S.team, v); return; }
+  const act = f.dataset.act;
+  if (act === "unlock"){
+    const v = norm(f.querySelector("input").value); const ksol = await hexHash("aod-sol|" + v); const sol = await dec("SOL#0", ksol, DATA.sol);
+    if (sol){
+      S.solKey = ksol; LS.set("solKey", ksol); S.drafts.pw = ""; S.sol = sol;
+      if (SB){ hostToken = await hexHash("aod-host|" + v); LS.set("hostToken", hostToken); S.isOwner = true; }
+      render();
+    } else flash("pw", t("pwBad"), true);
+  } else if (act === "fb"){
+    const id = f.dataset.fbid; const d = S.drafts["fb_" + id] || {}; const [gid, team] = id.split("_");
+    await store.set("fb/" + id, Object.assign({}, d, {game: gid, team: Number(team), ts: Date.now()}));
+  } else if (act === "transfer"){
+    const to = Number(document.getElementById("tf-to").value); const item = document.getElementById("tf-item").value; const qty = Math.max(1, parseInt(document.getElementById("tf-qty").value, 10) || 1);
+    const inv = inventory(S.team);
+    if ((inv[item] || 0) < qty){ flash("market", t("notEnough"), true); return; }
+    await txPair({run: runOf("B").id, from: S.team, to, item, qty, kind: "trade", ts: Date.now()});
+  } else if (act === "bcCustom"){
+    const v = document.getElementById("bc-text").value.trim(); if (!v) return;
+    await store.set("control/broadcast", {text: {zh: v, en: v}, ts: Date.now()}); S.drafts["bc-text"] = "";
+  } else if (act === "notes"){
+    await store.set("control/notes", {text: document.getElementById("notes-text").value, ts: Date.now()});
+  }
+});
+app.addEventListener("click", async e => {
+  const b = e.target.closest("button, td[data-mark]"); if (!b) return;
+  const d = b.dataset;
+  if (d.team){ S.team = Number(d.team); LS.set("team", S.team); render(); return; }
+  if (d.game){ S.game = d.game; LS.set("game", d.game); render(); window.scrollTo({top:0}); return; }
+  if (d.hint){ await logEvent(S.game, S.team, d.hint, "hint", {level: Number(d.level)}); return; }
+  if (d.jig != null && d.jig !== undefined && b.closest(".jig")){ await jigClick(Number(d.jig)); return; }
+  if (d.rack){
+    const g = G("C"); const p = P(g, "C5a");
+    const out = await openGate(p, S.team, d.rack.toUpperCase());
+    if (out){ await logEvent("C", S.team, "C5a", "solve", {key: d.rack.toUpperCase()}); }
+    else { const k = "dust_" + runOf("C").id; const dust = LS.get(k, []); if (!dust.includes(d.rack)) dust.push(d.rack); LS.set(k, dust); await logEvent("C", S.team, "C5a", "wrong", {}); flash("C5a", t("dust"), true); }
+    return;
+  }
+  if (d.fb){ const f = b.closest("form"); S.drafts["fb_" + f.dataset.fbid][d.fb] = Number(d.v); render(); return; }
+  if (d.start){
+    const gid = d.start; const runs = Object.assign({}, S.session.runs || {}); runs[gid] = {id: gid + "-" + Date.now(), startedAt: Date.now()};
+    await store.set("control/session", {runs, current: gid}); return;
+  }
+  if (d.end){ const gid = d.end; const runs = Object.assign({}, S.session.runs || {}); runs[gid] = Object.assign({}, runs[gid], {endedAt: Date.now()}); await store.set("control/session", {runs, current: S.session.current}); return; }
+  if (d.mark){ S.confirm = d.mark; render(); return; }
+  if (d.mk){ const m = Object.assign({}, S.market); m[d.mk] = !m[d.mk]; await store.set("control/market", m);
+    if (d.mk === "monsoon" && m.monsoon) await store.set("control/broadcast", {text: DATA.events.monsoon, ts: Date.now()});
+    if (d.mk === "embargo" && m.embargo) await store.set("control/broadcast", {text: DATA.events.embargo, ts: Date.now()});
+    if (d.mk === "closed" && m.closed) await store.set("control/broadcast", {text: DATA.events.closed, ts: Date.now()});
+    return; }
+  const act = d.act;
+  if (act === "changeTeam"){ S.team = 0; LS.set("team", 0); render(); }
+  else if (act === "dismissBc"){ S.dismissedBc = S.broadcast.ts; LS.set("dismissedBc", S.dismissedBc); render(); }
+  else if (act === "revealAll"){ await store.set("control/reveal", {open: true, key: S.solKey, ts: Date.now()}); }
+  else if (act === "hideAll"){ await store.set("control/reveal", {open: false, ts: Date.now()}); }
+  else if (act === "markNo"){ S.confirm = null; render(); }
+  else if (act === "markYes"){
+    const [gid, pid, team] = S.confirm.split("|"); S.confirm = null; const g = G(gid); const p = P(g, pid); const tn = Number(team);
+    const k = S.sol.keys[pid]; const key = p.jigsaw ? "MAP" : (k[tn] ?? k[0]);
+    await logEvent(gid, tn, pid, "solve", {key, by: "host"}); await grantRewards(g, p, tn); render();
+  }
+  else if (act === "bcPirate"){ await store.set("control/broadcast", {text: DATA.events.pirates, ts: Date.now()}); }
+  else if (act === "bcClear"){ await store.set("control/broadcast", {text: "", ts: 0}); }
+  else if (act === "buy" || act === "sell" || act === "pirate"){
+    const item = document.getElementById("bk-item").value; const inv = inventory(S.team); const run = runOf("B").id; const ts = Date.now();
+    if (act === "buy"){
+      if (S.market.embargo && item === "nutmeg"){ flash("market", t("embargo"), true); return; }
+      if (3 - bankSold() <= 0 || inv.coins < bankPrice()){ flash("market", t("notEnough"), true); return; }
+      await txPair({run, from: S.team, to: "bank", item: "coins", qty: bankPrice(), kind: "bankbuy", ts}, {run, from: "bank", to: S.team, item, qty: 1, kind: "bankbuy", ts});
+    } else if (act === "sell"){
+      if ((inv[item] || 0) < 1){ flash("market", t("notEnough"), true); return; }
+      await txPair({run, from: S.team, to: "bank", item, qty: 1, kind: "banksell", ts}, {run, from: "bank", to: S.team, item: "coins", qty: 2, kind: "banksell", ts});
+    } else {
+      if ((inv[item] || 0) < 1){ flash("market", t("notEnough"), true); return; }
+      await txPair({run, from: S.team, to: "bank", item, qty: 1, kind: "pirate", ts});
+    }
+  }
+});
+
+boot();
+})();
+</script>

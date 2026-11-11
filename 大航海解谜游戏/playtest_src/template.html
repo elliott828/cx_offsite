@@ -1,0 +1,954 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>大航海解谜 Playtest</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Young+Serif&display=swap">
+<style>
+/* Layout: a chart-room console. One reading column, sticky bridge bar on top, puzzle cards grouped by act. */
+:root{
+  --paper:#edf1ee; --panel:#f9fbf8; --ink:#13233a; --muted:#56657a; --line:#d0d8d3; --chip:#e1e8e4;
+  --brass:#9a6b17; --sea:#1d5b6a; --ok:#2b7a4b; --warn:#a8660f; --bad:#ad3528; --okbg:#e2f1e7; --warnbg:#f8ecd6; --badbg:#f6e1dd;
+  --f-display:"Young Serif", Georgia, "Songti SC", "Noto Serif SC", serif;
+  --f-body:"IBM Plex Sans", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --flagR:#c8102e; --flagB:#0b3d91; --flagY:#ffcd00; --flagW:#ffffff; --flagK:#111111;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0e1620; --panel:#152130; --ink:#e4ebf1; --muted:#9aa9b9; --line:#25364a; --chip:#1c2b3c;
+  --brass:#d7a64a; --sea:#6ab7c7; --ok:#62c48d; --warn:#e3a54c; --bad:#ec7f71; --okbg:#173326; --warnbg:#3a2c14; --badbg:#3c1f1b; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0e1620; --panel:#152130; --ink:#e4ebf1; --muted:#9aa9b9; --line:#25364a; --chip:#1c2b3c;
+  --brass:#d7a64a; --sea:#6ab7c7; --ok:#62c48d; --warn:#e3a54c; --bad:#ec7f71; --okbg:#173326; --warnbg:#3a2c14; --badbg:#3c1f1b; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:15px/1.65 var(--f-body);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--panel);border-bottom:1px solid var(--line)}
+.bar-in,.wrap{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar-in{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding-block:10px}
+.brand{font-family:var(--f-display);font-size:18px;margin-right:auto;line-height:1.2}
+.brand small{display:block;font:500 11px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--brass)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--ink);padding:5px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.sync{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--warn);display:inline-block}
+.sync.on i{background:var(--ok)}
+.wrap{padding-block:20px 80px}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(24px,4vw,32px);line-height:1.2}
+h2{font-size:22px;margin:28px 0 10px}
+h3{font-size:17px}
+h4{margin:14px 0 6px;font-size:15px}
+p{margin:6px 0}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:14px}
+.btn.primary{background:var(--sea);border-color:var(--sea);color:var(--panel)}
+.btn.warn{border-color:var(--warn);color:var(--warn)}
+.btn.small{padding:3px 9px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-width:0}
+textarea{width:100%;min-height:70px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.muted,.note{color:var(--muted);font-size:13px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);font-weight:600;margin:0 0 4px}
+.mono{font-family:var(--f-mono)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+th{background:var(--chip);font-weight:600}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.stack{display:grid;gap:12px}
+.gametabs{display:flex;gap:8px;overflow-x:auto;margin:6px 0 14px}
+.gametab{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:10px;padding:8px 14px;text-align:left;min-width:150px}
+.gametab b{display:block;font-family:var(--f-display);font-weight:400;font-size:16px}
+.gametab span{font-size:12px;color:var(--muted)}
+.gametab[aria-pressed="true"]{border-color:var(--sea);box-shadow:inset 0 -3px 0 var(--sea)}
+.live{color:var(--ok);font-weight:600}
+.clock{font-family:var(--f-mono);font-size:22px}
+.clock.over{color:var(--bad)}
+.story{border-left:3px solid var(--brass);padding-left:14px}
+.banner{background:var(--warnbg);border:1px solid var(--warn);color:var(--ink);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start}
+.act{display:flex;align-items:baseline;gap:10px;margin:24px 0 8px}
+.act h3{font-size:18px}
+.act .rule{flex:1;border-top:1px solid var(--line)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:8px;min-width:0}
+.card.solved{border-color:var(--ok)}
+.card.locked{opacity:.7}
+.card-h{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.card-h h3{margin-right:auto}
+.pid{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.chip{font-size:12px;border-radius:999px;padding:1px 9px;background:var(--chip);color:var(--muted);white-space:nowrap}
+.chip.ok{background:var(--okbg);color:var(--ok)}
+.chip.warn{background:var(--warnbg);color:var(--warn)}
+.chip.bad{background:var(--badbg);color:var(--bad)}
+.chip.cross{background:var(--chip);color:var(--sea)}
+.gate{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.gate label{font-size:13px;color:var(--muted);width:100%}
+.gate input{flex:1 1 160px;font-family:var(--f-mono);letter-spacing:.06em;text-transform:uppercase}
+.msg{font-size:13px}
+.msg.bad{color:var(--bad)}
+.reveal{background:var(--okbg);border-radius:8px;padding:10px 12px}
+.hintrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.hint{background:var(--chip);border-radius:8px;padding:6px 10px;font-size:14px}
+.answer{background:var(--warnbg);border-radius:8px;padding:8px 12px;font-size:14px}
+.teampick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.teampick button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:12px;text-align:left}
+.teampick button b{font-family:var(--f-display);font-weight:400;font-size:20px;display:block}
+.teampick button span{display:block;font-size:12px;color:var(--muted)}
+/* puzzle content */
+.clues{padding-left:20px;margin:4px 0}
+.logline{font-family:var(--f-mono);background:var(--chip);border-radius:6px;padding:6px 10px;display:inline-block}
+.flagrow{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
+.flagrow svg{width:56px;height:56px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+.flagchart{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:8px;margin-top:8px}
+.flagchart figure{margin:0;text-align:center;font-family:var(--f-mono);font-size:12px}
+.flagchart svg{width:40px;height:40px;display:block;margin:0 auto 2px}
+details.chart summary{cursor:pointer;color:var(--sea);font-size:14px}
+.chestgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.fragment,.keycard{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;background:var(--panel);min-width:0}
+.encport{font-family:var(--f-mono);font-size:20px;letter-spacing:.12em;margin:6px 0;word-break:break-word}
+.mirror{display:inline-block;transform:scaleX(-1)}
+.halfline{font-style:italic}
+.keyname{font-weight:600;font-size:13px}
+.keytab td,.keytab th{padding:3px 5px;text-align:center;font-family:var(--f-mono);font-size:12px}
+.morsegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:2px 8px;font-size:12px}
+.morsegrid code{font-family:var(--f-mono)}
+.mirrorcard{border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center;background:linear-gradient(135deg,var(--chip),var(--panel))}
+.seal b{font-family:var(--f-display);font-size:20px;color:var(--bad)}
+.letter{font-family:var(--f-display);font-size:16px;line-height:1.7}
+.ledger td{font-size:14px}
+.timeline{padding-left:18px}
+.cutlery{font-size:16px;letter-spacing:.06em}
+.cutlery.big{font-size:30px;letter-spacing:.2em}
+.galleyitems{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.galleyitems > div{border:1px dashed var(--line);border-radius:8px;padding:8px 10px}
+.diary p{margin:6px 0}
+.envelope{font-size:15px}
+.bigletter{font-family:var(--f-display);font-size:44px;color:var(--bad);display:inline-block;margin-left:10px;vertical-align:middle}
+.jig{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-width:560px}
+.jig button{border:2px solid var(--line);border-radius:6px;padding:0;background:var(--panel);color:var(--ink);overflow:hidden}
+.jig button.sel{border-color:var(--sea)}
+.jig table{font-size:11px}
+.jig td,.jig th{height:34px;text-align:center;padding:2px;width:auto}
+.jig .reef{background:repeating-linear-gradient(45deg,var(--chip),var(--chip) 4px,var(--line) 4px,var(--line) 8px)}
+.jig .isle{color:var(--ok);font-weight:600}
+.jig .ship{color:var(--bad);font-weight:600}
+.rack{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;max-width:520px}
+.rack button{border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--ink);padding:10px 6px;font-size:13px}
+.rack button.dust{opacity:.5}
+/* market */
+.inv{display:flex;flex-wrap:wrap;gap:6px}
+.inv span{background:var(--chip);border-radius:8px;padding:3px 9px;font-size:13px}
+.inv span b{font-family:var(--f-mono)}
+.recipe{border:1px solid var(--brass);border-radius:10px;padding:10px 12px}
+.recipe .foot{border-top:1px dashed var(--line);margin-top:8px;padding-top:6px;font-size:13px;color:var(--muted)}
+.mk{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px}
+/* host */
+.board td.cell{text-align:center;white-space:nowrap;cursor:default}
+.board td.cell.ok{background:var(--okbg);color:var(--ok)}
+.board td.cell.warn{background:var(--warnbg);color:var(--warn)}
+.board td.cell.bad{background:var(--badbg);color:var(--bad)}
+.board td.cell.can{cursor:pointer}
+.board td.cell small{display:block;font-size:10px;color:var(--muted)}
+.scorebar{height:10px;border-radius:5px;background:var(--sea)}
+.bestmark{outline:2px solid var(--ok);outline-offset:-2px}
+.lockbox{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lockbox input{width:140px;font-family:var(--f-mono)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:14px}
+.rating{display:flex;gap:4px;flex-wrap:wrap}
+.rating button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.rating button[aria-pressed="true"]{background:var(--sea);color:var(--panel);border-color:var(--sea)}
+.fbgrid{display:grid;gap:10px}
+.fbgrid label{font-size:14px;font-weight:600}
+.fbgrid .scale{font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:520px){ .brand{font-size:16px} .clock{font-size:18px} }
+</style>
+
+<div class="bar"><div class="bar-in">
+  <div class="brand"><small id="brandSmall">Feasibility playtest</small><span id="brandTitle">大航海解谜</span></div>
+  <div class="seg" role="group" aria-label="view">
+    <button id="vTester" aria-pressed="true" type="button">测试员</button>
+    <button id="vHost" aria-pressed="false" type="button">主持人</button>
+  </div>
+  <div class="seg" role="group" aria-label="language">
+    <button id="lZh" aria-pressed="true" type="button">中</button>
+    <button id="lEn" aria-pressed="false" type="button">EN</button>
+  </div>
+  <span class="sync" id="sync"><i></i><span id="syncText">本机模式</span></span>
+</div></div>
+<main class="wrap" id="app"></main>
+
+<script>
+const DATA = __DATA__;
+(function(){
+"use strict";
+// ---------------------------------------------------------------- i18n
+const UI = {
+  brandSmall:["可行性测试","Feasibility playtest"], brand:["大航海解谜","Age of Discovery Puzzles"],
+  tester:["测试员","Tester"], host:["主持人","Host"], local:["本机模式（不共享）","Local only (not shared)"], shared:["已同步","Synced"],
+  pickTitle:["你是几号测试员？","Which tester are you?"],
+  pickLead:["五位测试员各代表一个小组，并且在三局里都是同一个编号。选好后会记在这台设备上。","Each of the five testers stands in for one team and keeps the same number in all three games. Your choice is remembered on this device."],
+  testerN:["测试员","Tester"], change:["换编号","Change"],
+  notStarted:["主持人还没开始这一局","The host hasn't started this game"], running:["进行中","Running"], ended:["已结束","Ended"],
+  testLimit:["测试限时","Test limit"], realLimit:["正式活动","Real event"], min:["分钟","min"],
+  story:["故事","Story"], testNote:["测试说明","Test note"], youAre:["你的身份","You are"],
+  act_intra:["第一幕 · 队内","Act 1 · Intra-team"], act_cross:["第二幕 · 跨队","Act 2 · Cross-team"], act_final:["第三幕 · 终局","Act 3 · Finale"],
+  stage_intra:["队内","Intra"], stage_cross:["跨队","Cross"], stage_final:["终局","Finale"],
+  target:["目标","Target"], solved:["已解","Solved"], open:["未解","Open"], lockedBy:["先完成","Unlocks after"], sharedP:["共同谜题，任何一方提交都算","Shared: any listed team may submit"],
+  submit:["提交","Submit"], wrong:["不对，再想想。","Not right yet."], hint:["提示","Hint"], hintsUsed:["已用提示","Hints used"],
+  answer:["答案","Answer"], solvedBy:["解出","Solved by"], waitingEnv:["等厨房组打开红盒子。","Waiting for the Galley to open the red box."],
+  dust:["罐子后面只有灰尘。","Only dust behind this jar."], swapTip:["点两块交换位置","Tap two pieces to swap"], assembled:["海图拼好了","Chart assembled"],
+  feedback:["这一局的反馈","Feedback on this game"], fbLead:["这一局结束后填写。所有测试员的反馈会汇总到主持人视图，用来选最终方案。","Fill this in when the game ends. All testers' answers feed the host view used to pick the final game."],
+  difficulty:["难度","Difficulty"], diffScale:["1 太简单 · 3 刚好 · 5 太难","1 too easy · 3 just right · 5 too hard"],
+  interactivity:["跨队互动","Cross-team interaction"], interScale:["1 几乎不用和别人说话 · 5 一直在和别人配合","1 barely talked to anyone · 5 constantly working with others"],
+  fun:["好玩程度","Fun"], funScale:["1 无聊 · 5 很想再玩","1 boring · 5 want to play again"],
+  clarity:["规则清晰度","Clarity of rules"], clarScale:["1 经常不知道该干嘛 · 5 一直很清楚","1 often lost · 5 always clear"],
+  idle:["干等 / 闲着的分钟数（估计）","Minutes spent idle or waiting (estimate)"],
+  stuck:["最卡的一步","Where you got most stuck"], none:["没有","None"],
+  realIdle:["换成 5 人团队，你觉得会有几人闲着？","With a real team of 5, how many would sit idle?"],
+  change1:["最想改的一点","One thing you'd change"], comment:["其他意见","Other comments"],
+  saveFb:["保存反馈","Save feedback"], fbSaved:["已保存","Saved"],
+  market:["交易面板","Trading panel"], inventory:["库存","Inventory"], recipeCard:["商行配方卡","House recipe card"],
+  need:["需要","Needs"], complete:["配方已凑齐","Recipe complete"], missing:["还缺","Missing"], wildcard:["藏红花可顶替任意一种","Saffron covers any one spice"],
+  transfer:["转给其他商行","Send to another house"], to:["给","To"], item:["物品","Item"], qty:["数量","Qty"], send:["转出","Send"],
+  bank:["交易所银行","Exchange bank"], buy:["买 1 箱","Buy 1 crate"], sell:["卖 1 箱（得 2 金币）","Sell 1 crate (+2 coins)"], price:["价格","Price"], stock:["剩余库存","Stock left"],
+  needPass:["需要港口通行证（解出 B3）","Needs a Port Pass (solve B3)"], pass:["港口通行证","Port Pass"], marketClosed:["交易所已闭市","The market is closed"],
+  embargo:["荷兰封锁：银行停售肉豆蔻","Dutch blockade: no nutmeg from the bank"], pirateGive:["交 1 箱给海盗","Hand 1 crate to the pirates"],
+  notEnough:["数量不够","Not enough"], score:["当前得分","Current score"],
+  // host
+  hostTitle:["主持人控制台","Host console"], answersLock:["答案","Answers"], pw:["主持人密码","Host password"], unlock:["解锁","Unlock"],
+  pwBad:["密码不对","Wrong password"], unlockedLocal:["已在本机解锁，只有你能看到答案。","Unlocked on this device. Only you can see the answers."],
+  revealAll:["向所有测试员公开答案","Reveal answers to all testers"], hideAll:["收回公开","Hide answers again"],
+  revealedAll:["答案已向所有人公开","Answers are visible to everyone"], ownerOnly:["只有页面所有者能开始局、发事件或公开答案。","Only the page owner can start games, send events or reveal answers."],
+  session:["测试流程","Session"], start:["开始","Start"], restart:["重新开始","Restart"], end:["结束","End"], startedAt:["开始于","Started"],
+  board:["实时进度","Live progress"], boardLead:["格子里是解出用时（分:秒）。绿色在目标内，黄色超时 50% 以内，红色超出更多。点格子可以手动标记为已解（需先解锁答案）。",
+    "Cells show solve time (min:sec). Green is within target, amber up to 50% over, red beyond. Click a cell to mark it solved by hand (unlock the answers first)."],
+  hostMark:["手动标记为已解？","Mark as solved?"], yes:["确认","Confirm"], cancel:["取消","Cancel"],
+  results:["结果对比","Results"], resultsLead:["推荐分 = 互动×2 + 好玩 + 清晰×0.5 − |难度−3|×2 + 按时完成 1 分。分数越高越适合正式活动。",
+    "Score = interaction×2 + fun + clarity×0.5 − |difficulty−3|×2 + 1 if finished in time. Higher fits the real event better."],
+  responses:["份反馈","responses"], finished:["终局用时","Finale time"], hints:["提示","Hints"], wrongs:["错答","Wrong"], recommend:["推荐","Recommended"],
+  noData:["还没有数据","No data yet"], comments:["文字反馈","Written feedback"],
+  marketHost:["交易所（B 局）","Exchange (Game B)"], monsoon:["季风：银行价降到 3","Monsoon: bank price 3"], blockade:["荷兰封锁肉豆蔻","Dutch nutmeg blockade"],
+  pirates:["广播：海盗来袭","Announce: pirate raid"], closeMk:["闭市","Close market"], reopenMk:["重新开市","Reopen market"],
+  broadcast:["广播","Broadcast"], custom:["自定义广播","Custom message"], sendBc:["发送","Send"], clearBc:["清除广播","Clear broadcast"],
+  protocol:["测试安排","Test plan"], prep:["测试前准备","Before the test"], watch:["观察重点","What to watch"], notes:["观察笔记","Observation notes"], saveNotes:["保存笔记","Save notes"],
+  solutions:["完整答案","Full solutions"], lockedAnswers:["输入主持人密码后可见。","Visible after entering the host password."],
+  dismiss:["知道了","Dismiss"], team:["组","Team"], perTeam:["每队","Per team"], inTime:["按时","In time"], overTime:["超时","Over"],
+};
+let lang = "zh";
+const t = k => (UI[k] ? UI[k][lang === "zh" ? 0 : 1] : k);
+const L = o => (o == null ? "" : typeof o === "string" ? o : (o[lang] ?? o.zh ?? ""));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LS = {
+  get(k, d){ try { const v = localStorage.getItem("aod_" + k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem("aod_" + k, JSON.stringify(v)); } catch(e){} }
+};
+
+// ---------------------------------------------------------------- crypto (answers stay encrypted in the source)
+const te = new TextEncoder();
+async function sha(bytes){ return new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)); }
+async function hexHash(s){ return Array.from(await sha(te.encode(s)), b => b.toString(16).padStart(2, "0")).join(""); }
+const decCache = new Map();
+async function dec(pidc, key, b64){
+  const ck = pidc + "|" + key + "|" + b64.slice(0, 24);
+  if (decCache.has(ck)) return decCache.get(ck);
+  let res = null;
+  try {
+    const K = await sha(te.encode("aod|" + pidc + "|" + key));
+    const bin = atob(b64); const ct = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) ct[i] = bin.charCodeAt(i);
+    const out = new Uint8Array(ct.length);
+    for (let b = 0; b * 32 < ct.length; b++){
+      const blk = new Uint8Array(36); blk.set(K);
+      blk[32] = (b >>> 24) & 255; blk[33] = (b >>> 16) & 255; blk[34] = (b >>> 8) & 255; blk[35] = b & 255;
+      const ks = await sha(blk);
+      for (let j = 0; j < 32 && b * 32 + j < ct.length; j++) out[b*32+j] = ct[b*32+j] ^ ks[j];
+    }
+    const s = new TextDecoder().decode(out);
+    if (s.startsWith("OK|")) res = JSON.parse(s.slice(3));
+  } catch(e){ res = null; }
+  decCache.set(ck, res);
+  return res;
+}
+const NUMW = {ZERO:"0",ONE:"1",TWO:"2",THREE:"3",FOUR:"4",FIVE:"5",SIX:"6",SEVEN:"7",EIGHT:"8",NINE:"9","零":"0","一":"1","二":"2","三":"3","四":"4","五":"5","六":"6","七":"7","八":"8","九":"9"};
+const DIRS = {"→":"R","←":"L","↑":"U","↓":"D","右":"R","左":"L","上":"U","下":"D","东":"R","西":"L","北":"U","南":"D"};
+function norm(s, g){
+  s = String(s || "").toUpperCase();
+  if (g && g.dir) s = s.replace(/[→←↑↓右左上下东西北南]/g, c => DIRS[c]);
+  s = s.replace(/[^A-Z0-9一-鿿]/g, "");
+  if (g && g.numwords && NUMW[s]) s = NUMW[s];
+  if (g && g.aliases && g.aliases[s]) s = g.aliases[s];
+  return s;
+}
+
+// ---------------------------------------------------------------- store (shared db, or this device only)
+const S = {
+  view: LS.get("view", "tester"), team: LS.get("team", 0), game: LS.get("game", "A"),
+  session: {runs:{}, current:null}, reveal: null, market: {}, broadcast: null, notes: {},
+  ev: [], tx: [], fb: {}, isOwner: false, mode: "local", solKey: LS.get("solKey", null), sol: null,
+  drafts: {}, msgs: {}, sel: null, dismissedBc: LS.get("dismissedBc", 0), confirm: null,
+};
+lang = LS.get("lang", "zh");
+let db = null;
+const localDocs = LS.get("localdb", {});
+const localSubs = [];
+const SB = DATA.backend || null;           // Supabase (Vercel build); null in the claude.ai build
+let hostToken = LS.get("hostToken", null);
+function localEmit(){ if (!SB) LS.set("localdb", localDocs); localSubs.forEach(f => f()); }
+const sbHdr = () => ({apikey: SB.key, Authorization: "Bearer " + SB.key, "Content-Type": "application/json"});
+async function sbWrite(path, obj){
+  let r;
+  if (path.startsWith("control/")){
+    r = await fetch(SB.url + "/rest/v1/rpc/aod_host_set", {method: "POST", headers: sbHdr(), body: JSON.stringify({p_path: path, p_data: obj, p_token: hostToken || ""})});
+  } else {
+    r = await fetch(SB.url + "/rest/v1/aod_docs", {method: "POST", headers: Object.assign(sbHdr(), {Prefer: "resolution=merge-duplicates,return=minimal"}), body: JSON.stringify({path, data: obj})});
+  }
+  if (!r.ok) throw new Error("save failed (" + r.status + ")");
+}
+let sbSince = null;
+async function sbPoll(){
+  try {
+    let q = SB.url + "/rest/v1/aod_docs?select=path,data,updated_at&order=updated_at.asc&limit=1000";
+    if (sbSince) q += "&updated_at=gt." + encodeURIComponent(new Date(Date.parse(sbSince) - 5000).toISOString());
+    const r = await fetch(q, {headers: sbHdr()});
+    if (!r.ok) throw new Error(r.status);
+    const rows = await r.json(); let changed = false;
+    for (const row of rows){
+      if (JSON.stringify(localDocs[row.path]) !== JSON.stringify(row.data)){ localDocs[row.path] = row.data; changed = true; }
+      if (!sbSince || Date.parse(row.updated_at) > Date.parse(sbSince)) sbSince = row.updated_at;
+    }
+    if (S.mode !== "shared"){ S.mode = "shared"; changed = true; }
+    if (changed) localEmit();
+  } catch(e){ if (S.mode !== "local"){ S.mode = "local"; schedule(); } }
+  setTimeout(sbPoll, 2000);
+}
+const store = {
+  async set(path, obj){
+    if (db) return db.doc(path).set(obj);
+    const prev = localDocs[path];
+    localDocs[path] = JSON.parse(JSON.stringify(obj)); localEmit();
+    if (SB){ try { await sbWrite(path, obj); } catch(e){ if (prev === undefined) delete localDocs[path]; else localDocs[path] = prev; localEmit(); throw e; } }
+  },
+  async del(path){ if (db) return db.doc(path).delete(); delete localDocs[path]; localEmit(); },
+  watchDoc(path, cb){
+    if (db) return db.doc(path).onSnapshot(s => cb(s.exists ? s.data() : null), e => console.warn(path, e));
+    const f = () => cb(localDocs[path] || null); localSubs.push(f); f();
+  },
+  watchCol(col, cb){
+    if (db) return db.collection(col).onSnapshot(s => cb(s.docs.map(d => Object.assign({_id:d.id}, d.data()))), e => console.warn(col, e));
+    const f = () => cb(Object.keys(localDocs).filter(p => p.startsWith(col + "/")).map(p => Object.assign({_id:p.slice(col.length+1)}, localDocs[p])));
+    localSubs.push(f); f();
+  }
+};
+window.addEventListener("storage", e => { if (e.key === "aod_localdb" && !db){ try { Object.assign(localDocs, JSON.parse(e.newValue || "{}")); localSubs.forEach(f => f()); } catch(_){} } });
+
+function subscribeAll(){
+  store.watchDoc("control/session", d => { S.session = d || {runs:{}, current:null}; schedule(); });
+  store.watchDoc("control/reveal", d => { S.reveal = d; loadSolutions(); });
+  store.watchDoc("control/market", d => { S.market = d || {}; schedule(); });
+  store.watchDoc("control/broadcast", d => { S.broadcast = d; schedule(); });
+  store.watchDoc("control/notes", d => { S.notes = d || {}; schedule(); });
+  store.watchCol("ev", rows => { S.ev = rows; schedule(); });
+  store.watchCol("tx", rows => { S.tx = rows; schedule(); });
+  store.watchCol("fb", rows => { const m = {}; rows.forEach(r => m[r._id] = r); S.fb = m; schedule(); });
+}
+
+async function boot(){
+  try {
+    if (window.claude && window.claude.use){
+      const d = await window.claude.use("db");
+      if (d){ db = d; S.mode = "shared"; }
+      const u = await window.claude.use("user");
+      S.isOwner = u ? !!(await u.isOwner()) : false;
+    }
+  } catch(e){ db = null; }
+  if (!db && SB){ S.isOwner = !!hostToken; sbPoll(); }   // Vercel build: host rights come from the host password
+  else if (!db) S.isOwner = true; // this device only: you are your own host
+  subscribeAll();
+  loadSolutions();
+  render();
+}
+
+// ---------------------------------------------------------------- derived state
+const G = id => DATA.games.find(g => g.id === id);
+const runOf = gid => (S.session.runs && S.session.runs[gid]) || {id: gid + "-0", startedAt: null};
+const evRun = gid => S.ev.filter(e => e.run === runOf(gid).id);
+const P = (g, pid) => g.puzzles.find(p => p.id === pid);
+const teamsOf = p => p.teams || [1,2,3,4,5];
+function solveEvent(g, p, team){
+  const evs = evRun(g.id).filter(e => e.type === "solve" && e.pid === p.id);
+  if (p.shared) return evs.sort((a,b) => a.ts - b.ts)[0] || null;
+  return evs.filter(e => e.team === team).sort((a,b) => a.ts - b.ts)[0] || null;
+}
+function isSolved(g, p, team){
+  if (p.envelope) return !!solveEvent(g, P(g, p.from), 5);
+  return !!solveEvent(g, p, team);
+}
+function hintsUsed(g, p, team){ return evRun(g.id).filter(e => e.type === "hint" && e.pid === p.id && e.team === team).map(e => e.level); }
+function wrongCount(g, p, team){ return evRun(g.id).filter(e => e.type === "wrong" && e.pid === p.id && e.team === team).length; }
+function elapsedOf(gid, ts){ const r = runOf(gid); return r.startedAt ? Math.max(0, ts - r.startedAt) : null; }
+const mmss = ms => { if (ms == null) return "–"; const s = Math.round(ms/1000); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); };
+
+// ---------------------------------------------------------------- solutions
+async function loadSolutions(){
+  let key = S.solKey;
+  if (!key && S.reveal && S.reveal.open && S.reveal.key) key = S.reveal.key;
+  S.sol = key ? await dec("SOL#0", key, DATA.sol) : null;
+  schedule();
+}
+const answersVisible = () => !!S.sol;
+const ownSolUnlocked = () => !!(S.solKey && S.sol);
+
+// ---------------------------------------------------------------- writes
+const uid = () => Math.random().toString(36).slice(2, 10);
+async function logEvent(gid, team, pid, type, extra){
+  const run = runOf(gid).id;
+  const id = type === "solve" ? `${run}_s_${team}_${pid}` : type === "hint" ? `${run}_h_${team}_${pid}_${extra.level}` : `${run}_w_${team}_${pid}_${uid()}`;
+  try { await store.set("ev/" + id, Object.assign({run, game: gid, team, pid, type, ts: Date.now()}, extra || {})); }
+  catch(e){ flash(pid, String(e && e.message || e), true); }
+}
+async function grantRewards(g, p, team){
+  if (!p.rewards) return;
+  const run = runOf(g.id).id;
+  const targets = p.shared ? Object.keys(p.rewards).map(Number) : [team];
+  for (const b of targets){
+    for (const [item, qty] of (p.rewards[b] || [])){
+      await store.set(`tx/${run}_rw_${p.id}_${b}_${item}`, {run, from: "game", to: b, item, qty, kind: "reward", ts: Date.now()});
+    }
+  }
+}
+async function openGate(p, team, key){
+  const bt = p.gate.blobs[team] != null ? team : 0;
+  for (const b of p.gate.blobs[bt] || []){ const out = await dec(`${p.id}#${bt}`, key, b); if (out) return out; }
+  return null;
+}
+async function trySubmit(g, p, team, raw){
+  const gate = p.gate; const key = norm(raw, gate);
+  if (!key) return;
+  const out = await openGate(p, team, key);
+  if (out){
+    S.drafts[p.id] = "";
+    await logEvent(g.id, team, p.id, "solve", {key});
+    await grantRewards(g, p, team);
+  } else {
+    await logEvent(g.id, team, p.id, "wrong", {});
+    flash(p.id, t("wrong"), true);
+  }
+}
+function flash(pid, text, bad){ S.msgs[pid] = {text, bad}; schedule(); setTimeout(() => { if (S.msgs[pid] && S.msgs[pid].text === text){ delete S.msgs[pid]; schedule(); } }, 3500); }
+async function revealFor(g, p, team){
+  // returns decrypted reveal for a solved puzzle, using the key in its solve event
+  const ev = p.envelope ? solveEvent(g, P(g, p.from), 5) : solveEvent(g, p, team);
+  if (!ev || !p.gate) return null;
+  return openGate(p, team, ev.key);
+}
+
+// inventory (Game B), computed from a ledger so concurrent trades never overwrite each other
+const ITEMS = ["coins","pepper","cinnamon","clove","nutmeg","anise","saffron"];
+function inventory(team){
+  const run = runOf("B").id; const inv = {coins:10, pepper:0, cinnamon:0, clove:0, nutmeg:0, anise:0, saffron:0, pass:0};
+  S.tx.filter(x => x.run === run).forEach(x => {
+    if (x.to === team) inv[x.item] = (inv[x.item] || 0) + x.qty;
+    if (x.from === team) inv[x.item] = (inv[x.item] || 0) - x.qty;
+  });
+  return inv;
+}
+function recipeStatus(team){
+  const inv = inventory(team); const need = G("B").recipes[team];
+  const miss = need.filter(s => (inv[s] || 0) < 1);
+  return {inv, need, miss, complete: miss.length <= inv.saffron};
+}
+const bankSold = () => S.tx.filter(x => x.run === runOf("B").id && x.kind === "bankbuy" && x.from === "bank").length;
+const bankPrice = () => (S.market.monsoon ? 3 : 4);
+async function txPair(a, b){ await store.set("tx/" + uid() + uid(), a); if (b) await store.set("tx/" + uid() + uid(), b); }
+
+// ---------------------------------------------------------------- render scheduling
+let rq = false;
+function schedule(){ if (!rq){ rq = true; requestAnimationFrame(() => { rq = false; render(); }); } }
+function keepFocus(fn){
+  const a = document.activeElement; const id = a && a.id; let ss = null, se = null;
+  if (id && "selectionStart" in a){ try { ss = a.selectionStart; se = a.selectionEnd; } catch(e){} }
+  fn();
+  if (id){ const n = document.getElementById(id); if (n){ n.focus({preventScroll:true}); if (ss != null){ try { n.setSelectionRange(ss, se); } catch(e){} } } }
+}
+
+// ---------------------------------------------------------------- flags (ICS signal flags, drawn)
+const FC = {R:"var(--flagR)",B:"var(--flagB)",Y:"var(--flagY)",W:"var(--flagW)",K:"var(--flagK)"};
+function flagSVG(L1){
+  const r = (x,y,w,h,c) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${FC[c]}"/>`;
+  const pg = (pts,c) => `<polygon points="${pts}" fill="${FC[c]}"/>`;
+  const sal = c => `<path d="M0 0L30 30M30 0L0 30" stroke="${FC[c]}" stroke-width="6"/>`;
+  const crs = c => r(12,0,6,30,c) + r(0,12,30,6,c);
+  let s = "";
+  switch(L1){
+    case "A": s = r(0,0,15,30,"W") + pg("15,0 30,0 21,15 30,30 15,30","B"); break;
+    case "B": s = pg("0,0 30,0 21,15 30,30 0,30","R"); break;
+    case "C": s = r(0,0,30,6,"B")+r(0,6,30,6,"W")+r(0,12,30,6,"R")+r(0,18,30,6,"W")+r(0,24,30,6,"B"); break;
+    case "D": s = r(0,0,30,30,"Y")+r(0,7.5,30,15,"B"); break;
+    case "E": s = r(0,0,30,15,"B")+r(0,15,30,15,"R"); break;
+    case "F": s = r(0,0,30,30,"W")+pg("15,0 30,15 15,30 0,15","R"); break;
+    case "G": for (let i=0;i<6;i++) s += r(i*5,0,5,30,i%2?"B":"Y"); break;
+    case "H": s = r(0,0,15,30,"W")+r(15,0,15,30,"R"); break;
+    case "I": s = r(0,0,30,30,"Y")+`<circle cx="15" cy="15" r="7" fill="${FC.K}"/>`; break;
+    case "J": s = r(0,0,30,30,"B")+r(0,10,30,10,"W"); break;
+    case "K": s = r(0,0,15,30,"Y")+r(15,0,15,30,"B"); break;
+    case "L": s = r(0,0,15,15,"Y")+r(15,0,15,15,"K")+r(0,15,15,15,"K")+r(15,15,15,15,"Y"); break;
+    case "M": s = r(0,0,30,30,"B")+sal("W"); break;
+    case "N": for (let i=0;i<4;i++) for (let j=0;j<4;j++) s += r(j*7.5,i*7.5,7.5,7.5,(i+j)%2?"W":"B"); break;
+    case "O": s = pg("0,0 0,30 30,30","Y")+pg("0,0 30,0 30,30","R"); break;
+    case "P": s = r(0,0,30,30,"B")+r(10,10,10,10,"W"); break;
+    case "Q": s = r(0,0,30,30,"Y"); break;
+    case "R": s = r(0,0,30,30,"R")+crs("Y"); break;
+    case "S": s = r(0,0,30,30,"W")+r(10,10,10,10,"B"); break;
+    case "T": s = r(0,0,10,30,"R")+r(10,0,10,30,"W")+r(20,0,10,30,"B"); break;
+    case "U": s = r(0,0,15,15,"R")+r(15,0,15,15,"W")+r(0,15,15,15,"W")+r(15,15,15,15,"R"); break;
+    case "V": s = r(0,0,30,30,"W")+sal("R"); break;
+    case "W": s = r(0,0,30,30,"B")+r(6,6,18,18,"W")+r(11,11,8,8,"R"); break;
+    case "X": s = r(0,0,30,30,"W")+crs("B"); break;
+    case "Y": s = r(0,0,30,30,"Y"); for (let k=-30;k<60;k+=8) s += `<path d="M${k} 30L${k+30} 0" stroke="${FC.R}" stroke-width="4"/>`; break;
+    case "Z": s = pg("0,0 30,0 15,15","Y")+pg("30,0 30,30 15,15","B")+pg("0,30 30,30 15,15","R")+pg("0,0 0,30 15,15","K"); break;
+  }
+  return `<svg viewBox="0 0 30 30" role="img" aria-label="flag"><defs><clipPath id="fc"><rect width="30" height="30"/></clipPath></defs><g clip-path="url(#fc)">${s}</g><rect x=".25" y=".25" width="29.5" height="29.5" fill="none" stroke="var(--line)" stroke-width=".5"/></svg>`;
+}
+function hydrate(root){
+  root.querySelectorAll("[data-flags]").forEach(el => { el.innerHTML = el.dataset.flags.split("").map(flagSVG).join(""); });
+  root.querySelectorAll("[data-flagchart]").forEach(el => {
+    el.className = "flagchart";
+    el.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(c => `<figure>${flagSVG(c)}<figcaption>${c}</figcaption></figure>`).join("");
+  });
+}
+
+// ---------------------------------------------------------------- jigsaw (Game C, Cartographers)
+const LAT = ["50°N","40°N","30°N","20°N","10°N","0°"], LON = ["90°W","80°W","70°W","60°W","50°W","40°W"];
+const CELLS = {"0,4":["isle",{zh:"风岛",en:"Wind Isle"}],"1,1":["isle",{zh:"雾岛",en:"Fog Isle"}],"2,3":["isle",{zh:"回声岛",en:"Echo Island"}],
+  "2,5":["isle",{zh:"鲸岛",en:"Whale Isle"}],"3,1":["reef",{zh:"礁",en:"Reef"}],"3,2":["reef",{zh:"礁",en:"Reef"}],
+  "4,1":["ship",{zh:"⛵ 希望号",en:"⛵ Esperança"}],"5,4":["isle",{zh:"龟岛",en:"Turtle Isle"}]};
+function pieceHTML(pi){
+  const pr = Math.floor(pi/2), pc = pi % 2; let h = "<table>";
+  if (pr === 0) h += "<tr>" + (pc === 0 ? "<th></th>" : "") + [0,1,2].map(c => `<th>${LON[pc*3+c]}</th>`).join("") + "</tr>";
+  for (let rr = 0; rr < 2; rr++){
+    const R = pr*2 + rr; h += "<tr>" + (pc === 0 ? `<th>${LAT[R]}</th>` : "");
+    for (let cc = 0; cc < 3; cc++){ const C = pc*3 + cc; const v = CELLS[R+","+C]; h += v ? `<td class="${v[0]}">${esc(L(v[1]))}</td>` : "<td></td>"; }
+    h += "</tr>";
+  }
+  return h + "</table>";
+}
+function jigsawHTML(g, team){
+  const solved = isSolved(g, P(g,"C2a"), team);
+  const ord = solved ? [0,1,2,3,4,5] : LS.get("jig_" + runOf("C").id, [4,2,5,0,3,1]);
+  return `<p class="note">${solved ? t("assembled") : t("swapTip")}</p><div class="jig">` + ord.map((pi, pos) =>
+    `<button type="button" data-jig="${pos}" class="${S.sel === pos ? "sel" : ""}" ${solved ? "disabled" : ""}>${pieceHTML(pi)}</button>`).join("") + "</div>";
+}
+async function jigClick(pos){
+  const k = "jig_" + runOf("C").id; const ord = LS.get(k, [4,2,5,0,3,1]);
+  if (S.sel == null){ S.sel = pos; schedule(); return; }
+  const a = S.sel; S.sel = null;
+  if (a !== pos){ [ord[a], ord[pos]] = [ord[pos], ord[a]]; LS.set(k, ord); }
+  schedule();
+  if (ord.every((v, i) => v === i)) await logEvent("C", S.team, "C2a", "solve", {key: "MAP"});
+}
+
+// ---------------------------------------------------------------- rack (Game C, Galley)
+const RACK = {salt:{zh:"盐",en:"Salt"},sugar:{zh:"糖",en:"Sugar"},pepper:{zh:"黑胡椒",en:"Black pepper"},anise:{zh:"八角",en:"Star anise"},
+  cinnamon:{zh:"肉桂",en:"Cinnamon"},chili:{zh:"辣椒粉",en:"Chili powder"},cumin:{zh:"孜然",en:"Cumin"},sichuan:{zh:"花椒",en:"Sichuan pepper"}};
+function rackHTML(g, p, team){
+  const solved = isSolved(g, p, team); const dust = LS.get("dust_" + runOf("C").id, []);
+  return `<div class="rack">` + p.choice.map(c => `<button type="button" data-rack="${c}" class="${dust.includes(c) ? "dust" : ""}" ${solved ? "disabled" : ""}>${esc(L(RACK[c]))}</button>`).join("") + "</div>";
+}
+
+// ---------------------------------------------------------------- tester view
+function teamPicker(){
+  return `<section class="stack"><h1>${t("pickTitle")}</h1><p class="muted">${t("pickLead")}</p><div class="teampick">` +
+    [1,2,3,4,5].map(n => `<button type="button" data-team="${n}"><b>${t("testerN")} ${n}</b>` +
+      DATA.games.map(g => `<span>${g.id} · ${esc(L(g.roles[n]))}</span>`).join("") + "</button>").join("") + "</div></section>";
+}
+function gameTabs(){
+  return `<nav class="gametabs">` + DATA.games.map(g => {
+    const r = runOf(g.id); const live = S.session.current === g.id && r.startedAt && !r.endedAt;
+    return `<button type="button" class="gametab" data-game="${g.id}" aria-pressed="${S.game === g.id}"><b>${g.id} · ${esc(L(g.name))}</b><span>${esc(L(g.mode))}${live ? ` · <span class="live">● ${t("running")}</span>` : ""}</span></button>`;
+  }).join("") + "</nav>";
+}
+function clockHTML(g){
+  const r = runOf(g.id);
+  if (!r.startedAt) return `<span class="muted">${t("notStarted")}</span>`;
+  const end = r.endedAt || Date.now(); const ms = end - r.startedAt; const over = ms > g.testMinutes * 60000;
+  return `<span class="clock ${over ? "over" : ""}" id="clock" data-g="${g.id}">${mmss(ms)}</span> <span class="muted">/ ${g.testMinutes}:00 ${r.endedAt ? "· " + t("ended") : ""}</span>`;
+}
+function bannerHTML(){
+  const b = S.broadcast; if (!b || !b.ts || b.ts <= S.dismissedBc) return "";
+  return `<div class="banner" role="status"><div style="flex:1"><p class="eyebrow">${t("broadcast")}</p><p>${esc(L(b.text))}</p></div><button class="btn small" type="button" data-act="dismissBc">${t("dismiss")}</button></div>`;
+}
+function hintBlock(g, p, team){
+  const used = hintsUsed(g, p, team); const hs = (p.hints || []).filter(h => L(h));
+  if (!hs.length) return "";
+  const next = used.length < hs.length ? used.length + 1 : 0;
+  let h = `<div class="hintrow">`;
+  [...used].sort().forEach(l => { h += `<div class="hint"><b>${t("hint")} ${l}</b> · ${esc(L(hs[l-1]))}</div>`; });
+  if (next) h += `<button class="btn small" type="button" data-hint="${p.id}" data-level="${next}">${t("hint")} ${next} / ${hs.length}</button>`;
+  return h + "</div>";
+}
+function answerFor(p, team){
+  if (!S.sol || !S.sol.keys[p.id]) return null;
+  const k = S.sol.keys[p.id]; return k[team] ?? k[0] ?? null;
+}
+function cardHTML(g, p, team){
+  const vis = teamsOf(p).includes(team) || p.envelope;
+  if (!vis) return "";
+  const req = p.requires ? P(g, p.requires) : null;
+  const locked = req && !isSolved(g, req, team);
+  const solved = isSolved(g, p, team);
+  const ev = p.envelope ? null : solveEvent(g, p, team);
+  const time = ev ? elapsedOf(g.id, ev.ts) : null;
+  const chips = [`<span class="chip ${p.stage === "cross" ? "cross" : ""}">${t("stage_" + p.stage)}</span>`, `<span class="chip">${t("target")} ${p.target} ${t("min")}</span>`];
+  if (solved) chips.push(`<span class="chip ok">✓ ${t("solved")}${time != null ? " " + mmss(time) : ""}</span>`);
+  let h = `<article class="card ${solved ? "solved" : ""} ${locked ? "locked" : ""}" id="card-${p.id}"><div class="card-h"><span class="pid">${p.id}</span><h3>${esc(L(p.title))}</h3>${chips.join("")}</div>`;
+  if (locked){ return h + `<p class="muted">${t("lockedBy")} ${req.id} · ${esc(L(req.title))}</p></article>`; }
+  if (p.shared && teamsOf(p).length > 1) h += `<p class="note">${t("sharedP")}: ${teamsOf(p).map(n => esc(L(g.roles[n]))).join(" · ")}</p>`;
+  const body = p.body[team] || p.body[0];
+  h += `<div class="body">${L(body)}</div>`;
+  if (p.jigsaw) h += `<div data-jigwrap></div>`;
+  if (p.choice) h += `<div data-rackwrap="${p.id}"></div>`;
+  if (p.envelope){
+    h += `<div data-reveal="${p.id}">${solved ? "" : `<p class="muted">${t("waitingEnv")}</p>`}</div>`;
+    return h + "</article>";
+  }
+  if (p.gate && !solved && !p.choice){
+    const g2 = p.gate; const val = S.drafts[p.id] || "";
+    h += `<form class="gate" data-gate="${p.id}"><label for="in-${p.id}">${esc(L(g2.label))}</label><input id="in-${p.id}" autocomplete="off" spellcheck="false" placeholder="${esc(L(g2.ph))}" value="${esc(val)}"><button class="btn primary" type="submit">${t("submit")}</button></form>`;
+  }
+  const m = S.msgs[p.id]; if (m) h += `<p class="msg ${m.bad ? "bad" : ""}">${esc(m.text)}</p>`;
+  if (solved && p.gate) h += `<div class="reveal" data-reveal="${p.id}"></div>`;
+  if (!solved) h += hintBlock(g, p, team);
+  const ans = answerFor(p, team);
+  if (ans && answersVisible()) h += `<div class="answer"><b>${t("answer")}</b> · <span class="mono">${esc(ans)}</span></div>`;
+  return h + "</article>";
+}
+function marketHTML(team){
+  const g = G("B"); const st = recipeStatus(team); const inv = st.inv; const foot = g.foot[team];
+  const closed = !!S.market.closed; const price = bankPrice(); const stock = Math.max(0, 3 - bankSold());
+  const name = it => esc(L(DATA.itemNames[it]));
+  const score = (st.complete ? 10 : 0) + inv.coins;
+  let h = `<section class="panel stack" id="market"><div class="card-h"><h3>${t("market")} · ${esc(L(g.roles[team]))}</h3><span class="chip">${t("score")} ${score}</span>${closed ? `<span class="chip bad">${t("marketClosed")}</span>` : ""}</div><div class="mk">`;
+  h += `<div><p class="eyebrow">${t("inventory")}</p><div class="inv">` + ITEMS.map(it => `<span>${name(it)} <b>${inv[it] || 0}</b></span>`).join("") +
+       (inv.pass ? `<span>✓ ${t("pass")}</span>` : "") + `</div></div>`;
+  h += `<div class="recipe"><p class="eyebrow">${t("recipeCard")}</p><p>${t("need")}: ` + st.need.map(s => `${(inv[s]||0) >= 1 ? "✓" : "○"} ${name(s)}`).join(" · ") + `</p>` +
+       `<p class="${st.complete ? "" : "muted"}">${st.complete ? "✓ " + t("complete") : t("missing") + " " + st.miss.length + " · " + t("wildcard")}</p>` +
+       `<p class="foot">${foot.num} · ${esc(L(foot.text))} <span class="seal"><b>${foot.seal}</b></span></p></div>`;
+  h += `</div><div class="mk"><form class="stack" data-act="transfer"><p class="eyebrow">${t("transfer")}</p><div class="row">` +
+       `<select id="tf-to" aria-label="${t("to")}">` + [1,2,3,4,5].filter(n => n !== team).map(n => `<option value="${n}" ${String(S.drafts["tf-to"]) === String(n) ? "selected" : ""}>${esc(L(g.roles[n]))}</option>`).join("") + `</select>` +
+       `<select id="tf-item" aria-label="${t("item")}">` + ITEMS.map(it => `<option value="${it}" ${S.drafts["tf-item"] === it ? "selected" : ""}>${name(it)}</option>`).join("") + `</select>` +
+       `<input id="tf-qty" type="number" min="1" value="${esc(S.drafts["tf-qty"] || 1)}" style="width:70px" aria-label="${t("qty")}">` +
+       `<button class="btn primary" type="submit" ${closed ? "disabled" : ""}>${t("send")}</button></div></form>`;
+  h += `<div class="stack"><p class="eyebrow">${t("bank")} · ${t("price")} ${price} · ${t("stock")} ${stock}</p>` +
+       (S.market.embargo ? `<p class="note">${t("embargo")}</p>` : "") +
+       (inv.pass ? "" : `<p class="note">${t("needPass")}</p>`) +
+       `<div class="row"><select id="bk-item" aria-label="${t("item")}">` + DATA.spices.map(s => `<option value="${s}" ${S.drafts["bk-item"] === s ? "selected" : ""}>${name(s)}</option>`).join("") + `</select>` +
+       `<button class="btn" type="button" data-act="buy" ${(!inv.pass || closed) ? "disabled" : ""}>${t("buy")}</button>` +
+       `<button class="btn" type="button" data-act="sell" ${(!inv.pass || closed) ? "disabled" : ""}>${t("sell")}</button>` +
+       `<button class="btn warn" type="button" data-act="pirate">${t("pirateGive")}</button></div></div></div>`;
+  const m = S.msgs.market; if (m) h += `<p class="msg ${m.bad ? "bad" : ""}">${esc(m.text)}</p>`;
+  return h + "</section>";
+}
+function feedbackHTML(g, team){
+  const id = `${g.id}_${team}`; const saved = S.fb[id] || {};
+  const d = S.drafts["fb_" + id] || (S.drafts["fb_" + id] = Object.assign({}, saved));
+  const scale = (field, label, sc) => `<div><label>${t(label)}</label><div class="scale">${t(sc)}</div><div class="rating">` +
+    [1,2,3,4,5].map(n => `<button type="button" data-fb="${field}" data-v="${n}" aria-pressed="${Number(d[field]) === n}">${n}</button>`).join("") + "</div></div>";
+  const opts = [`<option value="">${t("none")}</option>`].concat(g.puzzles.filter(p => teamsOf(p).includes(team) && !p.envelope).map(p => `<option value="${p.id}" ${d.stuck === p.id ? "selected" : ""}>${p.id} · ${esc(L(p.title))}</option>`)).join("");
+  return `<section class="panel stack" id="feedback"><h2 style="margin:0">${t("feedback")}</h2><p class="muted">${t("fbLead")}</p><form class="fbgrid" data-act="fb" data-fbid="${id}">` +
+    scale("difficulty","difficulty","diffScale") + scale("interactivity","interactivity","interScale") + scale("fun","fun","funScale") + scale("clarity","clarity","clarScale") +
+    `<div><label for="fb-idle-${id}">${t("idle")}</label><br><input id="fb-idle-${id}" data-fbf="idle" type="number" min="0" style="width:90px" value="${esc(d.idle ?? "")}"></div>` +
+    `<div><label for="fb-real-${id}">${t("realIdle")}</label><br><input id="fb-real-${id}" data-fbf="realIdle" type="number" min="0" max="5" style="width:90px" value="${esc(d.realIdle ?? "")}"></div>` +
+    `<div><label for="fb-stuck-${id}">${t("stuck")}</label><br><select id="fb-stuck-${id}" data-fbf="stuck">${opts}</select></div>` +
+    `<div><label for="fb-change-${id}">${t("change1")}</label><textarea id="fb-change-${id}" data-fbf="change">${esc(d.change || "")}</textarea></div>` +
+    `<div><label for="fb-comment-${id}">${t("comment")}</label><textarea id="fb-comment-${id}" data-fbf="comment">${esc(d.comment || "")}</textarea></div>` +
+    `<div class="row"><button class="btn primary" type="submit">${t("saveFb")}</button>${saved.ts ? `<span class="chip ok">✓ ${t("fbSaved")}</span>` : ""}</div></form></section>`;
+}
+function testerView(){
+  if (!S.team) return teamPicker();
+  const g = G(S.game) || DATA.games[0]; const team = S.team;
+  let h = `<div class="row" style="justify-content:space-between"><p class="eyebrow" style="margin:0">${t("testerN")} ${team} · ${DATA.games.map(x => x.id + " " + esc(L(x.roles[team]))).join(" · ")}</p><button class="btn small" type="button" data-act="changeTeam">${t("change")}</button></div>`;
+  h += gameTabs() + bannerHTML();
+  h += `<section class="panel stack"><div class="card-h"><h1>${esc(L(g.name))}</h1><div>${clockHTML(g)}</div></div>` +
+       `<p class="eyebrow">${t("youAre")}: ${esc(L(g.roleWord))} · ${esc(L(g.roles[team]))}</p>` +
+       `<div class="story">${L(g.story)}</div><p class="note"><b>${t("testNote")}</b> · ${L(g.testNote)}</p>` +
+       `<p class="note">${t("testLimit")} ${g.testMinutes} ${t("min")} · ${t("realLimit")} ${g.realMinutes} ${t("min")}</p></section>`;
+  if (g.market) h += "<div style='height:12px'></div>" + marketHTML(team);
+  ["intra","cross","final"].forEach(stage => {
+    const cards = g.puzzles.filter(p => p.stage === stage).map(p => cardHTML(g, p, team)).filter(Boolean);
+    if (!cards.length) return;
+    h += `<div class="act"><h3>${t("act_" + stage)}</h3><div class="rule"></div></div><div class="stack">${cards.join("")}</div>`;
+  });
+  if (answersVisible()) h += `<h2>${t("solutions")}</h2><div class="panel">${L(S.sol.games[g.id])}</div>`;
+  h += "<div style='height:20px'></div>" + feedbackHTML(g, team);
+  return h;
+}
+
+// ---------------------------------------------------------------- host view
+function lockBox(){
+  let h = `<section class="panel stack"><div class="card-h"><h3>${t("answersLock")}</h3>${answersVisible() ? `<span class="chip ok">✓</span>` : ""}${S.reveal && S.reveal.open ? `<span class="chip warn">${t("revealedAll")}</span>` : ""}</div>`;
+  if (!ownSolUnlocked()){
+    h += `<form class="lockbox" data-act="unlock"><label for="pw" class="muted">${t("pw")}</label><input id="pw" type="password" autocomplete="off" value="${esc(S.drafts.pw || "")}"><button class="btn primary" type="submit">${t("unlock")}</button></form>`;
+    const m = S.msgs.pw; if (m) h += `<p class="msg bad">${esc(m.text)}</p>`;
+  } else {
+    h += `<p class="muted">${t("unlockedLocal")}</p><div class="row">` +
+      (S.reveal && S.reveal.open ? `<button class="btn" type="button" data-act="hideAll" ${S.isOwner ? "" : "disabled"}>${t("hideAll")}</button>` :
+       `<button class="btn warn" type="button" data-act="revealAll" ${S.isOwner ? "" : "disabled"}>${t("revealAll")}</button>`) + `</div>`;
+  }
+  if (!S.isOwner) h += `<p class="note">${t("ownerOnly")}</p>`;
+  return h + "</section>";
+}
+function sessionBox(){
+  let h = `<section class="panel stack"><h3>${t("session")}</h3><div class="tw"><table><tr><th></th><th>${t("startedAt")}</th><th></th><th></th></tr>`;
+  DATA.games.forEach(g => {
+    const r = runOf(g.id); const live = S.session.current === g.id && r.startedAt && !r.endedAt;
+    h += `<tr><td><b>${g.id}</b> ${esc(L(g.name))}</td><td>${r.startedAt ? new Date(r.startedAt).toLocaleTimeString() + (live ? ` · <span class="live">● ${t("running")}</span>` : r.endedAt ? " · " + t("ended") : "") : "–"}</td>` +
+      `<td>${r.startedAt ? `<span class="mono">${mmss((r.endedAt || Date.now()) - r.startedAt)}</span> / ${g.testMinutes}:00` : ""}</td>` +
+      `<td class="row"><button class="btn small primary" type="button" data-start="${g.id}" ${S.isOwner ? "" : "disabled"}>${r.startedAt ? t("restart") : t("start")}</button>` +
+      `<button class="btn small" type="button" data-end="${g.id}" ${S.isOwner && live ? "" : "disabled"}>${t("end")}</button></td></tr>`;
+  });
+  return h + "</table></div></section>";
+}
+function cellClass(g, p, team){
+  if (!teamsOf(p).includes(team) && !p.envelope) return {cls:"", txt:""};
+  const ev = p.envelope ? solveEvent(g, P(g, p.from), 5) : solveEvent(g, p, team);
+  const hs = hintsUsed(g, p, team).length; const w = wrongCount(g, p, team);
+  const extra = (hs || w) ? `<small>${hs ? "H" + hs : ""}${hs && w ? " " : ""}${w ? "✕" + w : ""}</small>` : "";
+  if (!ev) return {cls: "", txt: "·" + extra, open: true};
+  const ms = elapsedOf(g.id, ev.ts); if (ms == null) return {cls:"ok", txt:"✓" + extra};
+  const ratio = ms / (p.target * 60000);
+  // targets are per puzzle; the comparison uses the cumulative clock, so scale by the sum of targets up to this puzzle
+  const cum = g.puzzles.slice(0, g.puzzles.indexOf(p) + 1).filter(q => teamsOf(q).includes(team) || q.envelope).reduce((a, q) => a + q.target, 0) * 60000;
+  const r2 = ms / cum;
+  return {cls: r2 <= 1 ? "ok" : r2 <= 1.5 ? "warn" : "bad", txt: mmss(ms) + extra};
+}
+function boardBox(){
+  let h = `<section class="panel stack"><h3>${t("board")}</h3><p class="note">${t("boardLead")}</p>`;
+  DATA.games.forEach(g => {
+    h += `<h4>${g.id} · ${esc(L(g.name))}</h4><div class="tw"><table class="board"><tr><th>${t("team")}</th>` + g.puzzles.map(p => `<th title="${esc(L(p.title))}">${p.id}<br><span class="muted">${p.target}′</span></th>`).join("") + "</tr>";
+    [1,2,3,4,5].forEach(team => {
+      h += `<tr><td>${team} ${esc(L(g.roles[team]))}</td>` + g.puzzles.map(p => {
+        const c = cellClass(g, p, team); const can = c.open && ownSolUnlocked() && S.isOwner && !p.envelope && (teamsOf(p).includes(team));
+        return `<td class="cell ${c.cls} ${can ? "can" : ""}" ${can ? `data-mark="${g.id}|${p.id}|${team}"` : ""}>${c.txt}</td>`;
+      }).join("") + "</tr>";
+    });
+    h += "</table></div>";
+  });
+  if (S.confirm){
+    const [gid, pid, team] = S.confirm.split("|");
+    h += `<div class="banner"><div style="flex:1">${t("hostMark")} <b>${gid} · ${pid}</b> · ${t("team")} ${team}</div><button class="btn small primary" type="button" data-act="markYes">${t("yes")}</button><button class="btn small" type="button" data-act="markNo">${t("cancel")}</button></div>`;
+  }
+  return h + "</section>";
+}
+function gameStats(g){
+  const fbs = [1,2,3,4,5].map(n => S.fb[`${g.id}_${n}`]).filter(Boolean);
+  const avg = f => { const v = fbs.map(x => Number(x[f])).filter(n => n > 0); return v.length ? v.reduce((a,b) => a+b, 0) / v.length : null; };
+  const evs = evRun(g.id);
+  const finale = g.puzzles.filter(p => p.stage === "final" && !p.envelope).pop();
+  const fe = finale ? evs.filter(e => e.type === "solve" && e.pid === finale.id).sort((a,b) => a.ts - b.ts)[0] : null;
+  const ftime = fe ? elapsedOf(g.id, fe.ts) : null;
+  const inTime = ftime != null && ftime <= g.testMinutes * 60000;
+  const s = {n: fbs.length, diff: avg("difficulty"), inter: avg("interactivity"), fun: avg("fun"), clar: avg("clarity"), idle: avg("idle"), realIdle: avg("realIdle"),
+    hints: evs.filter(e => e.type === "hint").length, wrong: evs.filter(e => e.type === "wrong").length, ftime, inTime, fbs};
+  s.score = (s.inter == null) ? null : s.inter * 2 + (s.fun || 0) + (s.clar || 0) * 0.5 - Math.abs((s.diff || 3) - 3) * 2 + (inTime ? 1 : 0);
+  return s;
+}
+function resultsBox(){
+  const stats = DATA.games.map(g => [g, gameStats(g)]);
+  const best = stats.filter(([,s]) => s.score != null).sort((a,b) => b[1].score - a[1].score)[0];
+  const f = v => v == null ? "–" : v.toFixed(1);
+  let h = `<section class="panel stack"><h3>${t("results")}</h3><p class="note">${t("resultsLead")}</p><div class="tw"><table><tr><th></th>` +
+    stats.map(([g]) => `<th class="${best && best[0] === g ? "bestmark" : ""}">${g.id} · ${esc(L(g.name))}${best && best[0] === g ? ` <span class="chip ok">${t("recommend")}</span>` : ""}</th>`).join("") + "</tr>";
+  const row = (label, fn) => { h += `<tr><td>${label}</td>` + stats.map(([g, s]) => `<td>${fn(s, g)}</td>`).join("") + "</tr>"; };
+  row(t("responses"), s => s.n);
+  row(t("difficulty"), s => f(s.diff)); row(t("interactivity"), s => f(s.inter)); row(t("fun"), s => f(s.fun)); row(t("clarity"), s => f(s.clar));
+  row(t("idle"), s => f(s.idle)); row(t("realIdle"), s => f(s.realIdle));
+  row(t("finished"), (s, g) => s.ftime == null ? "–" : `${mmss(s.ftime)} <span class="chip ${s.inTime ? "ok" : "bad"}">${s.inTime ? t("inTime") : t("overTime")}</span>`);
+  row(t("hints"), s => s.hints); row(t("wrongs"), s => s.wrong);
+  const maxS = Math.max(1, ...stats.map(([,s]) => s.score || 0));
+  row("<b>Score</b>", s => s.score == null ? "–" : `<b>${s.score.toFixed(1)}</b><div class="scorebar" style="width:${Math.max(4, (s.score / maxS) * 100)}%"></div>`);
+  h += "</table></div>";
+  h += `<h4>${t("comments")}</h4>`;
+  stats.forEach(([g, s]) => {
+    const items = s.fbs.filter(x => x.change || x.comment || x.stuck);
+    if (!items.length) return;
+    h += `<p class="eyebrow">${g.id} · ${esc(L(g.name))}</p><ul>` + items.map(x => `<li><b>${t("testerN")} ${esc(x.team)}</b>${x.stuck ? ` · ${t("stuck")}: ${esc(x.stuck)}` : ""}${x.change ? ` · ${esc(x.change)}` : ""}${x.comment ? ` · ${esc(x.comment)}` : ""}</li>`).join("") + "</ul>";
+  });
+  if (!stats.some(([,s]) => s.n)) h += `<p class="muted">${t("noData")}</p>`;
+  return h + "</section>";
+}
+function marketHostBox(){
+  const g = G("B");
+  let h = `<section class="panel stack"><h3>${t("marketHost")}</h3><div class="row">` +
+    `<button class="btn ${S.market.monsoon ? "primary" : ""}" type="button" data-mk="monsoon" ${S.isOwner ? "" : "disabled"}>${t("monsoon")}</button>` +
+    `<button class="btn ${S.market.embargo ? "primary" : ""}" type="button" data-mk="embargo" ${S.isOwner ? "" : "disabled"}>${t("blockade")}</button>` +
+    `<button class="btn warn" type="button" data-act="bcPirate" ${S.isOwner ? "" : "disabled"}>${t("pirates")}</button>` +
+    `<button class="btn" type="button" data-mk="closed" ${S.isOwner ? "" : "disabled"}>${S.market.closed ? t("reopenMk") : t("closeMk")}</button></div>`;
+  h += `<p class="note">${t("bank")} · ${t("price")} ${bankPrice()} · ${t("stock")} ${Math.max(0, 3 - bankSold())}</p><div class="tw"><table><tr><th>${t("team")}</th>` +
+    ITEMS.map(it => `<th>${esc(L(DATA.itemNames[it]))}</th>`).join("") + `<th>${t("pass")}</th><th>${t("recipeCard")}</th><th>${t("score")}</th></tr>`;
+  [1,2,3,4,5].forEach(n => {
+    const st = recipeStatus(n); const inv = st.inv;
+    h += `<tr><td>${n} ${esc(L(g.roles[n]))}</td>` + ITEMS.map(it => `<td>${inv[it] || 0}</td>`).join("") + `<td>${inv.pass ? "✓" : ""}</td><td>${st.complete ? "✓" : t("missing") + " " + st.miss.length}</td><td><b>${(st.complete ? 10 : 0) + inv.coins}</b></td></tr>`;
+  });
+  return h + "</table></div></section>";
+}
+function broadcastBox(){
+  return `<section class="panel stack"><h3>${t("broadcast")}</h3><form class="row" data-act="bcCustom"><input id="bc-text" style="flex:1 1 220px" value="${esc(S.drafts["bc-text"] || "")}" placeholder="${t("custom")}"><button class="btn primary" type="submit" ${S.isOwner ? "" : "disabled"}>${t("sendBc")}</button><button class="btn" type="button" data-act="bcClear" ${S.isOwner ? "" : "disabled"}>${t("clearBc")}</button></form>` +
+    (S.broadcast && S.broadcast.ts ? `<p class="note">${esc(L(S.broadcast.text))}</p>` : "") + `</section>`;
+}
+function protocolBox(){
+  const P2 = DATA.protocol;
+  let h = `<section class="panel stack"><h3>${t("protocol")}</h3>${L(P2.schedule)}<h4>${t("prep")}</h4>${L(P2.prep)}<h4>${t("watch")}</h4><div class="tw"><table><tr>` +
+    DATA.games.map(g => `<th>${g.id} · ${esc(L(g.name))}</th>`).join("") + "</tr><tr>" +
+    DATA.games.map(g => `<td><ul>${L(g.watch).map(w => `<li>${esc(w)}</li>`).join("")}</ul></td>`).join("") + "</tr></table></div>";
+  h += `<h4>${t("notes")}</h4><form class="stack" data-act="notes"><textarea id="notes-text">${esc(S.drafts["notes-text"] ?? (S.notes.text || ""))}</textarea><div class="row"><button class="btn" type="submit" ${S.isOwner ? "" : "disabled"}>${t("saveNotes")}</button></div></form>`;
+  return h + "</section>";
+}
+function solutionsBox(){
+  let h = `<section class="panel stack"><h3>${t("solutions")}</h3>`;
+  if (!answersVisible()) return h + `<p class="muted">${t("lockedAnswers")}</p></section>`;
+  DATA.games.forEach(g => { h += `<h4>${g.id} · ${esc(L(g.name))}</h4><div class="tw">${L(S.sol.games[g.id])}</div>`; });
+  return h + "</section>";
+}
+function hostView(){
+  return `<div class="stack"><h1>${t("hostTitle")}</h1>${bannerHTML()}${lockBox()}${sessionBox()}${boardBox()}${resultsBox()}${marketHostBox()}${broadcastBox()}${protocolBox()}${solutionsBox()}</div>`;
+}
+
+// ---------------------------------------------------------------- render
+async function fillReveals(root){
+  if (S.view !== "tester" || !S.team) return;
+  const g = G(S.game);
+  for (const el of root.querySelectorAll("[data-reveal]")){
+    const p = P(g, el.dataset.reveal); if (!isSolved(g, p, S.team)) continue;
+    const r = await revealFor(g, p, S.team);
+    if (r && el.isConnected) el.innerHTML = L(r);
+  }
+}
+function render(){
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  document.getElementById("brandSmall").textContent = t("brandSmall");
+  document.getElementById("brandTitle").textContent = t("brand");
+  document.getElementById("vTester").textContent = t("tester"); document.getElementById("vHost").textContent = t("host");
+  document.getElementById("vTester").setAttribute("aria-pressed", S.view === "tester"); document.getElementById("vHost").setAttribute("aria-pressed", S.view === "host");
+  document.getElementById("lZh").setAttribute("aria-pressed", lang === "zh"); document.getElementById("lEn").setAttribute("aria-pressed", lang === "en");
+  const sy = document.getElementById("sync"); sy.classList.toggle("on", S.mode === "shared"); document.getElementById("syncText").textContent = S.mode === "shared" ? t("shared") : t("local");
+  const app = document.getElementById("app");
+  keepFocus(() => { app.innerHTML = S.view === "host" ? hostView() : testerView(); });
+  hydrate(app);
+  if (S.view === "tester" && S.team){
+    const g = G(S.game);
+    const jw = app.querySelector("[data-jigwrap]"); if (jw) jw.innerHTML = jigsawHTML(g, S.team);
+    app.querySelectorAll("[data-rackwrap]").forEach(el => { el.innerHTML = rackHTML(g, P(g, el.dataset.rackwrap), S.team); });
+  }
+  fillReveals(app);
+}
+setInterval(() => {
+  const c = document.getElementById("clock"); if (c){ const g = G(c.dataset.g); const r = runOf(g.id); if (r.startedAt && !r.endedAt){ const ms = Date.now() - r.startedAt; c.textContent = mmss(ms); c.classList.toggle("over", ms > g.testMinutes * 60000); } }
+  if (S.view === "host" && S.session.current && runOf(S.session.current).startedAt && !runOf(S.session.current).endedAt && !document.activeElement?.matches("input,textarea,select")) schedule();
+}, 1000);
+
+// ---------------------------------------------------------------- events
+document.getElementById("vTester").onclick = () => { S.view = "tester"; LS.set("view", "tester"); render(); };
+document.getElementById("vHost").onclick = () => { S.view = "host"; LS.set("view", "host"); render(); };
+document.getElementById("lZh").onclick = () => { lang = "zh"; LS.set("lang", lang); render(); };
+document.getElementById("lEn").onclick = () => { lang = "en"; LS.set("lang", lang); render(); };
+const app = document.getElementById("app");
+app.addEventListener("input", e => {
+  const el = e.target;
+  if (el.id && el.id.startsWith("in-")) S.drafts[el.id.slice(3)] = el.value;
+  else if (el.dataset.fbf){ const f = el.closest("form"); S.drafts["fb_" + f.dataset.fbid][el.dataset.fbf] = el.value; }
+  else if (el.id) S.drafts[el.id] = el.value;
+});
+app.addEventListener("change", e => {
+  const el = e.target;
+  if (el.dataset.fbf){ const f = el.closest("form"); S.drafts["fb_" + f.dataset.fbid][el.dataset.fbf] = el.value; }
+  else if (el.id) S.drafts[el.id] = el.value;
+});
+app.addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = e.target;
+  if (f.dataset.gate){ const g = G(S.game); const p = P(g, f.dataset.gate); const v = f.querySelector("input").value; await trySubmit(g, p, S.team, v); return; }
+  const act = f.dataset.act;
+  if (act === "unlock"){
+    const v = norm(f.querySelector("input").value); const ksol = await hexHash("aod-sol|" + v); const sol = await dec("SOL#0", ksol, DATA.sol);
+    if (sol){
+      S.solKey = ksol; LS.set("solKey", ksol); S.drafts.pw = ""; S.sol = sol;
+      if (SB){ hostToken = await hexHash("aod-host|" + v); LS.set("hostToken", hostToken); S.isOwner = true; }
+      render();
+    } else flash("pw", t("pwBad"), true);
+  } else if (act === "fb"){
+    const id = f.dataset.fbid; const d = S.drafts["fb_" + id] || {}; const [gid, team] = id.split("_");
+    await store.set("fb/" + id, Object.assign({}, d, {game: gid, team: Number(team), ts: Date.now()}));
+  } else if (act === "transfer"){
+    const to = Number(document.getElementById("tf-to").value); const item = document.getElementById("tf-item").value; const qty = Math.max(1, parseInt(document.getElementById("tf-qty").value, 10) || 1);
+    const inv = inventory(S.team);
+    if ((inv[item] || 0) < qty){ flash("market", t("notEnough"), true); return; }
+    await txPair({run: runOf("B").id, from: S.team, to, item, qty, kind: "trade", ts: Date.now()});
+  } else if (act === "bcCustom"){
+    const v = document.getElementById("bc-text").value.trim(); if (!v) return;
+    await store.set("control/broadcast", {text: {zh: v, en: v}, ts: Date.now()}); S.drafts["bc-text"] = "";
+  } else if (act === "notes"){
+    await store.set("control/notes", {text: document.getElementById("notes-text").value, ts: Date.now()});
+  }
+});
+app.addEventListener("click", async e => {
+  const b = e.target.closest("button, td[data-mark]"); if (!b) return;
+  const d = b.dataset;
+  if (d.team){ S.team = Number(d.team); LS.set("team", S.team); render(); return; }
+  if (d.game){ S.game = d.game; LS.set("game", d.game); render(); window.scrollTo({top:0}); return; }
+  if (d.hint){ await logEvent(S.game, S.team, d.hint, "hint", {level: Number(d.level)}); return; }
+  if (d.jig != null && d.jig !== undefined && b.closest(".jig")){ await jigClick(Number(d.jig)); return; }
+  if (d.rack){
+    const g = G("C"); const p = P(g, "C5a");
+    const out = await openGate(p, S.team, d.rack.toUpperCase());
+    if (out){ await logEvent("C", S.team, "C5a", "solve", {key: d.rack.toUpperCase()}); }
+    else { const k = "dust_" + runOf("C").id; const dust = LS.get(k, []); if (!dust.includes(d.rack)) dust.push(d.rack); LS.set(k, dust); await logEvent("C", S.team, "C5a", "wrong", {}); flash("C5a", t("dust"), true); }
+    return;
+  }
+  if (d.fb){ const f = b.closest("form"); S.drafts["fb_" + f.dataset.fbid][d.fb] = Number(d.v); render(); return; }
+  if (d.start){
+    const gid = d.start; const runs = Object.assign({}, S.session.runs || {}); runs[gid] = {id: gid + "-" + Date.now(), startedAt: Date.now()};
+    await store.set("control/session", {runs, current: gid}); return;
+  }
+  if (d.end){ const gid = d.end; const runs = Object.assign({}, S.session.runs || {}); runs[gid] = Object.assign({}, runs[gid], {endedAt: Date.now()}); await store.set("control/session", {runs, current: S.session.current}); return; }
+  if (d.mark){ S.confirm = d.mark; render(); return; }
+  if (d.mk){ const m = Object.assign({}, S.market); m[d.mk] = !m[d.mk]; await store.set("control/market", m);
+    if (d.mk === "monsoon" && m.monsoon) await store.set("control/broadcast", {text: DATA.events.monsoon, ts: Date.now()});
+    if (d.mk === "embargo" && m.embargo) await store.set("control/broadcast", {text: DATA.events.embargo, ts: Date.now()});
+    if (d.mk === "closed" && m.closed) await store.set("control/broadcast", {text: DATA.events.closed, ts: Date.now()});
+    return; }
+  const act = d.act;
+  if (act === "changeTeam"){ S.team = 0; LS.set("team", 0); render(); }
+  else if (act === "dismissBc"){ S.dismissedBc = S.broadcast.ts; LS.set("dismissedBc", S.dismissedBc); render(); }
+  else if (act === "revealAll"){ await store.set("control/reveal", {open: true, key: S.solKey, ts: Date.now()}); }
+  else if (act === "hideAll"){ await store.set("control/reveal", {open: false, ts: Date.now()}); }
+  else if (act === "markNo"){ S.confirm = null; render(); }
+  else if (act === "markYes"){
+    const [gid, pid, team] = S.confirm.split("|"); S.confirm = null; const g = G(gid); const p = P(g, pid); const tn = Number(team);
+    const k = S.sol.keys[pid]; const key = p.jigsaw ? "MAP" : (k[tn] ?? k[0]);
+    await logEvent(gid, tn, pid, "solve", {key, by: "host"}); await grantRewards(g, p, tn); render();
+  }
+  else if (act === "bcPirate"){ await store.set("control/broadcast", {text: DATA.events.pirates, ts: Date.now()}); }
+  else if (act === "bcClear"){ await store.set("control/broadcast", {text: "", ts: 0}); }
+  else if (act === "buy" || act === "sell" || act === "pirate"){
+    const item = document.getElementById("bk-item").value; const inv = inventory(S.team); const run = runOf("B").id; const ts = Date.now();
+    if (act === "buy"){
+      if (S.market.embargo && item === "nutmeg"){ flash("market", t("embargo"), true); return; }
+      if (3 - bankSold() <= 0 || inv.coins < bankPrice()){ flash("market", t("notEnough"), true); return; }
+      await txPair({run, from: S.team, to: "bank", item: "coins", qty: bankPrice(), kind: "bankbuy", ts}, {run, from: "bank", to: S.team, item, qty: 1, kind: "bankbuy", ts});
+    } else if (act === "sell"){
+      if ((inv[item] || 0) < 1){ flash("market", t("notEnough"), true); return; }
+      await txPair({run, from: S.team, to: "bank", item, qty: 1, kind: "banksell", ts}, {run, from: "bank", to: S.team, item: "coins", qty: 2, kind: "banksell", ts});
+    } else {
+      if ((inv[item] || 0) < 1){ flash("market", t("notEnough"), true); return; }
+      await txPair({run, from: S.team, to: "bank", item, qty: 1, kind: "pirate", ts});
+    }
+  }
+});
+
+boot();
+})();
+</script>

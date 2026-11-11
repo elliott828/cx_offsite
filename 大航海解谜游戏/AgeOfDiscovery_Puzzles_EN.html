@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Age of Discovery Puzzles</title>
+<style>
+:root{
+  --bg:#f4eee2;--paper:#fffdf8;--ink:#2a2118;--muted:#6b5d4f;--line:#e2d6c2;
+  --accent:#9c3d1f;--navy:#1f3a5f;--gold:#a8781f;
+  --intra:#2f6b4f;--cross:#1f4f8f;--final:#9c3d1f;--soft:#f7f1e6;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15120e;--paper:#1f1b16;--ink:#efe6d8;--muted:#b3a691;--line:#3a3228;
+    --accent:#e07a52;--navy:#9dbde6;--gold:#d9a94a;
+    --intra:#4f9e7a;--cross:#4f86c9;--final:#c9643f;--soft:#262019;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15120e;--paper:#1f1b16;--ink:#efe6d8;--muted:#b3a691;--line:#3a3228;
+  --accent:#e07a52;--navy:#9dbde6;--gold:#d9a94a;
+  --intra:#4f9e7a;--cross:#4f86c9;--final:#c9643f;--soft:#262019;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px 80px}
+header{padding:48px 0 24px;border-bottom:1px solid var(--line)}
+header .kicker{color:var(--gold);letter-spacing:.2em;font-size:13px;font-weight:600}
+h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(28px,5vw,42px);line-height:1.2;margin:8px 0 12px}
+h2{font-family:Georgia,"Times New Roman",serif;font-size:clamp(22px,3.6vw,30px);margin:40px 0 8px;line-height:1.3}
+h3{font-size:19px;margin:32px 0 10px;color:var(--navy)}
+h4{font-size:17px;margin:0}
+p{margin:8px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:2px 12px;font-size:13px;color:var(--muted)}
+nav.tabs{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:12px 0;border-bottom:1px solid var(--line)}
+nav.tabs button{flex:0 0 auto;font:inherit;font-size:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:6px 14px;cursor:pointer}
+nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+section.tab{display:none}
+section.tab.active{display:block}
+.story{background:var(--paper);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:16px 20px;margin:16px 0}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0;background:var(--paper)}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--soft);font-weight:600}
+.tw{overflow-x:auto}
+.tw td:first-child{min-width:4.5em}
+.puzzle{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+.ph{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:8px}
+.tag{font-size:12px;font-weight:700;border-radius:6px;padding:1px 8px;color:#fff}
+.tag.intra{background:var(--intra)}.tag.cross{background:var(--cross)}.tag.final{background:var(--final)}
+.time{font-size:13px;color:var(--muted);margin-left:auto}
+.label{font-weight:700;color:var(--muted);font-size:13px;margin-top:10px;letter-spacing:.05em;text-transform:uppercase}
+.prop{background:var(--soft);border:1px dashed var(--line);border-radius:8px;padding:10px 14px;margin:6px 0;font-family:Georgia,"Times New Roman",serif}
+.mono{font-family:ui-monospace,Consolas,monospace;letter-spacing:.08em}
+details{border:1px solid var(--line);border-radius:8px;margin:8px 0;background:var(--soft)}
+details summary{cursor:pointer;padding:6px 12px;font-weight:600;color:var(--accent)}
+details > div{padding:4px 14px 10px}
+ul,ol{padding-left:22px;margin:6px 0}
+.note{font-size:14px;color:var(--muted)}
+.grid-map td{width:16.6%;text-align:center;height:44px;font-size:13px}
+.reef{background:repeating-linear-gradient(45deg,var(--soft),var(--soft) 6px,var(--line) 6px,var(--line) 12px)}
+.isle{font-weight:700;color:var(--intra)}
+.ship{font-weight:700;color:var(--accent)}
+.mirror{display:inline-block;transform:scaleX(-1)}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:14px;margin:8px 0}
+.flow span{background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:2px 10px}
+.flow b{color:var(--muted)}
+footer{color:var(--muted);font-size:13px;margin-top:48px;border-top:1px solid var(--line);padding-top:16px}
+.theme-toggle{float:right;font:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:4px 10px;cursor:pointer}
+@media print{
+  nav.tabs,.theme-toggle{display:none}
+  section.tab{display:block!important;page-break-before:always}
+  section.tab:first-of-type{page-break-before:auto}
+  .puzzle{break-inside:avoid}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <button class="theme-toggle" id="themeBtn" type="button">Dark / Light</button>
+  <div class="kicker">AGE OF DISCOVERY · TEAM PUZZLE HANDBOOK</div>
+  <h1>Age of Discovery Puzzle Game: Three Storylines, Fully Designed</h1>
+  <p>For hosts and planners. Each storyline comes with complete puzzles, answers, hints, a timeline and a props list. Pick one and start making materials.</p>
+  <div class="chips"><span class="chip">25 players</span><span class="chip">5 teams × 5</span><span class="chip">≤ 60 min</span><span class="chip">Restaurant venue</span><span class="chip">Video opening</span><span class="chip">Game ends → dinner</span></div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-t="ov" aria-selected="true">Overview &amp; Common Rules</button>
+  <button role="tab" data-t="a" aria-selected="false">A · The Five Fragments</button>
+  <button role="tab" data-t="b" aria-selected="false">B · The Seville Spice Exchange</button>
+  <button role="tab" data-t="c" aria-selected="false">C · The Last Voyage</button>
+</nav>
+
+<!-- ============ OVERVIEW ============ -->
+<section class="tab active" id="ov">
+<h2>Comparing the three options</h2>
+<div class="tw"><table>
+<tr><th></th><th>A The Five Fragments</th><th>B The Seville Spice Exchange</th><th>C The Last Voyage</th></tr>
+<tr><td>Team dynamic</td><td>Pure cooperation: 5 ships rebuild one map</td><td>Compete, then cooperate: 5 trading houses race for spices</td><td>Total interdependence: 5 departments of one ship</td></tr>
+<tr><td>Cross-team mechanic</td><td>Key ring: each team's decoder sits in the next team's chest</td><td>Open trading + double-lock chests + pirate intel + random events</td><td>Dependency chain: every department both gives and waits for clues</td></tr>
+<tr><td>Puzzle count</td><td>3 intra + 5 cross + 1 finale</td><td>3 intra + 3 cross contracts + 1 finale</td><td>5 intra + 6 hand-offs + 1 finale</td></tr>
+<tr><td>Final code</td><td class="mono">FEAST</td><td class="mono">SPICE</td><td class="mono">TABLE</td></tr>
+<tr><td>Link to dinner</td><td>5 ports = 5 courses</td><td>Royal recipe = main course</td><td>The Captain appears and opens dinner</td></tr>
+<tr><td>Staff</td><td>1 host + 1 helper</td><td>1 host + 2 exchange clerks</td><td>1 host + 1 helper + 1 "Captain" (ideally the boss)</td></tr>
+<tr><td>Build effort</td><td>Low</td><td>Medium</td><td>Medium-high</td></tr>
+</table></div>
+
+<h2>Common rules (all options)</h2>
+<h3>Teams</h3>
+<ul>
+  <li>5 teams × 5 players. Mix people who don't usually work together; cross-team talk works better that way.</li>
+  <li>One dining table per team serves as its "ship" or "trading house". Put a name card on it; keep all props in one tray or box, covered until the start.</li>
+  <li>Each team picks a "captain" who requests hints and submits answers. Everyone else self-organises.</li>
+</ul>
+<h3>Hints</h3>
+<ul>
+  <li>3 free hints per team (3 "message in a bottle" cards). After that, each hint costs a 2-minute penalty (in Option B: 2 coins).</li>
+  <li>Every puzzle has 3 hint levels: <b>① direction</b> → <b>② method</b> → <b>③ nearly the answer</b>. Always start at ①.</li>
+  <li>If a team is stuck for more than 5 minutes, the host may offer a free level-① hint.</li>
+</ul>
+<h3>Pacing</h3>
+<div class="tw"><table>
+<tr><th>Time</th><th>Segment</th><th>Host action</th></tr>
+<tr><td>0–5'</td><td>Opening video</td><td>Play video, read rules (1 min), announce "Set sail!"</td></tr>
+<tr><td>5–25'</td><td>Act 1: intra-team puzzles</td><td>Roam, give hints; at 20' announce "5 minutes to Act 2"</td></tr>
+<tr><td>25–45'</td><td>Act 2: cross-team</td><td>Push interaction; trigger events (Option B)</td></tr>
+<tr><td>45–55'</td><td>Act 3: finale</td><td>Gather everyone at the centre for the last chest</td></tr>
+<tr><td>55–60'</td><td>Awards + dinner</td><td>Agree a serving cue with the kitchen in advance</td></tr>
+</table></div>
+<p class="note">Each option fine-tunes these times on its own tab. Hard rule: Act 3 must start before 50'. If you're behind, escalate the hints.</p>
+<h3>Restaurant checklist</h3>
+<ul>
+  <li>One day before, confirm: number of tables, places to hide props (kitchen door, bar, under the head table), and how long service takes.</li>
+  <li>Agree a cue with the kitchen (e.g. the host rings a bell); the first dish should come out within 2–3 minutes.</li>
+  <li>Keep props away from cutlery and food. Don't lay cutlery before the game, or cover it with a cloth.</li>
+  <li>Option B uses real spices: smell only, never taste. Put them in opaque jars with pierced lids, and ask about allergies beforehand.</li>
+</ul>
+<h3>What the opening video must establish</h3>
+<ul>
+  <li>Era and place (the Age of Discovery, around 1500)</li>
+  <li>Who the players are (a fleet / trading houses / a crew)</li>
+  <li>Goal and deadline ("before dawn", "before the King's banquet", "before the water runs out")</li>
+  <li>One line hinting at cooperation, to set up the finale twist</li>
+</ul>
+</section>
+
+<!-- ============ OPTION A ============ -->
+<section class="tab" id="a">
+<h2>A · The Five Fragments</h2>
+<div class="story">
+<p><b>Story:</b> In 1519 a fleet of five ships prepares to leave Lisbon in search of the legendary Spice Islands. The old Admiral dies the night before departure. Fearing a traitor who wants the route for himself, he tears the only chart into five pieces and locks one in each ship's captain's chest.</p>
+<p>Tonight the five ships regroup in a harbour: this restaurant. They must rebuild the full route before dawn, or the supplies run out and the fleet disbands.</p>
+<p><b>Suggested closing line for the video:</b> "No fragment is complete. And no key is on its own ship."</p>
+</div>
+
+<h3>Team setup</h3>
+<div class="tw"><table>
+<tr><th>Team</th><th>Ship</th><th>Fragment held</th><th>Also inside its captain's chest</th></tr>
+<tr><td>1</td><td>Sea Hawk</td><td>Fragment 1 (Lisbon leg)</td><td>Key card for Fragment 5 + seal <b>T</b></td></tr>
+<tr><td>2</td><td>Polaris</td><td>Fragment 2 (Cape leg)</td><td>Key card for Fragment 1 + seal <b>F</b></td></tr>
+<tr><td>3</td><td>Trade Wind</td><td>Fragment 3 (Goa leg)</td><td>Key card for Fragment 2 + seal <b>E</b></td></tr>
+<tr><td>4</td><td>Coral</td><td>Fragment 4 (Malacca leg)</td><td>Key card for Fragment 3 + seal <b>A</b></td></tr>
+<tr><td>5</td><td>Morning Star</td><td>Fragment 5 (Moluccas leg)</td><td>Key card for Fragment 4 + seal <b>S</b></td></tr>
+</table></div>
+<p class="note">Pattern: Team n's fragment is decoded with the key in Team n+1's chest (Team 5 uses Team 1's). The seal letter travels with the key.</p>
+
+<h3>Timeline</h3>
+<div class="flow"><span>0–5' video</span><b>→</b><span>5–25' Act 1: open the captain's chest</span><b>→</b><span>25–45' Act 2: the fleet regroups, keys are swapped</span><b>→</b><span>45–55' Act 3: assemble the map + final chest</span><b>→</b><span>55' landfall, dinner</span></div>
+
+<h3>Act 1 · Intra-team: open the captain's chest (5–25')</h3>
+<p>Each chest has a <b>3-digit lock</b>. Each of the three puzzles gives one digit, in the order A1-A2-A3.</p>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">Intra</span><h4>A1 · Signal flags</h4><span class="time">~6 min · digit 1</span></div>
+<p>The captain left a string of small coloured flags on the table, next to an international maritime signal flag chart.</p>
+<div class="label">Props</div>
+<ul><li>A printed flag string per team (3–4 flags)</li><li>International signal flag chart, one flag per letter A–Z (the public-domain chart on Wikipedia prints well)</li></ul>
+<div class="label">Player text</div>
+<div class="prop">"The flags on the mast are your first number."</div>
+<div class="label">Flags per team</div>
+<div class="tw"><table><tr><th>Team</th><th>Flags spell</th><th>Digit</th></tr>
+<tr><td>1 Sea Hawk</td><td class="mono">S-I-X</td><td>6</td></tr>
+<tr><td>2 Polaris</td><td class="mono">O-N-E</td><td>1</td></tr>
+<tr><td>3 Trade Wind</td><td class="mono">N-I-N-E</td><td>9</td></tr>
+<tr><td>4 Coral</td><td class="mono">T-W-O</td><td>2</td></tr>
+<tr><td>5 Morning Star</td><td class="mono">F-I-V-E</td><td>5</td></tr></table></div>
+<details><summary>Hints</summary><div><ol><li>Each flag stands for one letter.</li><li>Look up each flag on the chart; together they spell an English word.</li><li>The word is a number.</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">Intra</span><h4>A2 · The crew roster (logic grid)</h4><span class="time">~8 min · digit 2</span></div>
+<p>All five teams get the same puzzle. Best for 2–3 people working a grid together.</p>
+<div class="label">Player text</div>
+<div class="prop">
+Four sailors (Pedro, Juan, Diego and Luis) sleep in bunks 1–4. Their jobs are navigator, cook, carpenter and gunner (one each).<br>
+① The navigator sleeps in bunk 1.<br>
+② The cook's bunk number is exactly one higher than Juan's.<br>
+③ Luis sleeps in the last bunk.<br>
+④ Diego is neither the carpenter nor the cook.<br>
+⑤ The gunner and the carpenter are not in adjacent bunks.<br>
+<b>Q: Which bunk does the cook sleep in?</b>
+</div>
+<details><summary>Answer: 3</summary><div>
+<p>Luis = 4 (③). If Diego is the navigator, he's in bunk 1, and Juan and Pedro take bunks 2 and 3. If Juan = 3, the cook is in bunk 4 (Luis), and Juan (3) and Pedro (2) would be carpenter and gunner in adjacent bunks, which breaks ⑤. So Juan = 2, and Pedro is in bunk 3 as the cook. If Diego were the gunner, every arrangement puts the gunner next to the carpenter, so that's ruled out.</p>
+<p><b>The cook is Pedro, in bunk 3.</b> (Whether Juan or Luis is the carpenter can't be determined, and it doesn't affect the answer.)</p>
+</div></details>
+<details><summary>Hints</summary><div><ol><li>Draw a 4×4 grid and fill in what's certain.</li><li>Start from ③ and ①, then test each possible job for Diego.</li><li>Diego is the navigator; Juan is in bunk 2.</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">Intra</span><h4>A3 · Compass turns</h4><span class="time">~5 min · digit 3</span></div>
+<div class="label">Props</div>
+<ul><li>Compass card with a digit on each of 8 directions: N=1, NE=2, E=3, SE=4, S=5, SW=6, W=7, NW=8</li><li>A "logbook" card per team with three turns</li></ul>
+<div class="label">Player text</div>
+<div class="prop">"The bow points north. Follow the three turns in the log. The direction you end up facing is the last digit."</div>
+<div class="tw"><table><tr><th>Team</th><th>Log</th><th>Heading</th><th>Digit</th></tr>
+<tr><td>1</td><td>Right 90° → Right 45° → Left 180°</td><td>NW</td><td>8</td></tr>
+<tr><td>2</td><td>Left 45° → Left 90° → Right 45°</td><td>W</td><td>7</td></tr>
+<tr><td>3</td><td>Right 135° → Left 45° → Right 90°</td><td>S</td><td>5</td></tr>
+<tr><td>4</td><td>Right 180° → Left 45° → Left 90°</td><td>NE</td><td>2</td></tr>
+<tr><td>5</td><td>Right 90° → Right 90° → Left 45°</td><td>SE</td><td>4</td></tr></table></div>
+<details><summary>Hints</summary><div><ol><li>Have someone stand up and physically turn.</li><li>Right = clockwise. 45° is one step on the compass.</li><li>Tell them which way they face after the first turn.</li></ol></div></details>
+</article>
+
+<div class="tw"><table><tr><th>Team</th><th>Chest code</th></tr>
+<tr><td>1 Sea Hawk</td><td class="mono">6 3 8</td></tr><tr><td>2 Polaris</td><td class="mono">1 3 7</td></tr><tr><td>3 Trade Wind</td><td class="mono">9 3 5</td></tr><tr><td>4 Coral</td><td class="mono">2 3 2</td></tr><tr><td>5 Morning Star</td><td class="mono">5 3 4</td></tr></table></div>
+
+<h3>Act 2 · Cross-team: the fleet regroups (25–45')</h3>
+<p>Each team opens its chest and finds two things: the port name on its own fragment is encrypted, and the chest also holds a key card and a seal that aren't theirs. The host announces: <b>"Every key card names its ship on the back. Send out your messengers!"</b></p>
+<p class="note">Messenger rule (optional, to get people moving): each team may have only one messenger away from its table at a time. Key cards may be shown but not handed over, so the other team has to copy them or decode on the spot.</p>
+
+<article class="puzzle">
+<div class="ph"><span class="tag cross">Cross-team</span><h4>A4 · Five fragments, five ciphers</h4><span class="time">~12 min</span></div>
+<div class="tw"><table>
+<tr><th>Fragment</th><th>Encrypted port name</th><th>Key card (held by)</th><th>Decodes to</th></tr>
+<tr><td>1 Sea Hawk</td><td class="mono">OLVERQ</td><td>Caesar wheel fixed at "+3" (Polaris)</td><td class="mono">LISBON</td></tr>
+<tr><td>2 Polaris</td><td class="mono">3 · 1 · 16 · 5</td><td>A=1…Z=26 table (Trade Wind)</td><td class="mono">CAPE (of Good Hope)</td></tr>
+<tr><td>3 Trade Wind</td><td><span class="mono mirror">GOA</span> (mirror writing)</td><td>Mirror card + note "the truth is in the reflection" (Coral)</td><td class="mono">GOA</td></tr>
+<tr><td>4 Coral</td><td class="mono">-- .- .-.. .- -.-. -.-. .-</td><td>Morse code chart (Morning Star)</td><td class="mono">MALACCA</td></tr>
+<tr><td>5 Morning Star</td><td class="mono">NLOFXXZH</td><td>Atbash table A↔Z, B↔Y… (Sea Hawk)</td><td class="mono">MOLUCCAS</td></tr>
+</table></div>
+<p>Each fragment also carries half a sentence and a segment of the route. When a team decodes its port, the host checks it and hands over a "port badge".</p>
+<details><summary>Hints</summary><div><ol><li>The ship's name is on the back of the key card. Go find that ship.</li><li>(Caesar) shift each letter back 3; (Atbash) fold the alphabet in half.</li><li>Give them the first letter.</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag cross">Cross-team</span><h4>A5 · The route order</h4><span class="time">~5 min</span></div>
+<p>Once all five ports are decoded, the whole room has to agree the order. The coastlines on the fragment edges fit together, or players can reason from geography: leave Lisbon, round Africa's southern tip, reach India, pass through the Strait of Malacca, arrive at the Spice Islands.</p>
+<div class="prop">Correct order: Lisbon → Cape → Goa → Malacca → Moluccas</div>
+<p>The five half-sentences in order read: <b>"Follow the scent of spice / through the Cape of Storms / across the monsoon sea / past the narrow strait / the feast waits at the end."</b> The last fragment marks an "X" labelled "kitchen door" (or whatever hiding spot you choose).</p>
+</article>
+
+<h3>Act 3 · Finale: the Spice Islands (45–55')</h3>
+<article class="puzzle">
+<div class="ph"><span class="tag final">Finale</span><h4>A6 · The Admiral's last chest</h4><span class="time">~6 min</span></div>
+<p>The final chest sits at the X with a <b>5-letter word lock</b>. Its lid reads: <span class="prop" style="display:inline-block">"Stamp each port's seal, in the order of the voyage."</span></p>
+<p>Each seal names its port on the back. Because seals travel with the keys, each team's seal belongs to the previous ship's port:</p>
+<div class="tw"><table><tr><th>Port</th><th>Lisbon</th><th>Cape</th><th>Goa</th><th>Malacca</th><th>Moluccas</th></tr>
+<tr><td>Seal</td><td>F</td><td>E</td><td>A</td><td>S</td><td>T</td></tr></table></div>
+<details><summary>Answer: FEAST</summary><div>
+<p>Inside: the Admiral's letter + a "Spice Islands landing certificate". Suggested letter:</p>
+<div class="prop">"I tore the chart into five not because I distrusted you, but because I knew only five ships together could reach this place. Welcome to the Spice Islands. Tonight's feast belongs to the whole fleet."</div>
+<p>The host rings the bell and the kitchen starts serving.</p>
+</div></details>
+</article>
+
+<h3>Into dinner: 5 ports = 5 courses</h3>
+<div class="tw"><table><tr><th>Port</th><th>Dish ideas</th></tr>
+<tr><td>Lisbon</td><td>Pastéis de nata / grilled sardines / seafood rice</td></tr>
+<tr><td>Cape</td><td>Grilled meat platter</td></tr>
+<tr><td>Goa</td><td>Curry</td></tr>
+<tr><td>Malacca</td><td>Laksa / Nyonya dishes</td></tr>
+<tr><td>Moluccas</td><td>A dessert flavoured with nutmeg or clove</td></tr></table></div>
+<p class="note">Print the menu as a ship's log. As each course arrives, the host announces "The fleet reaches ___".</p>
+
+<h3>Props list</h3>
+<ul>
+<li>5 boxes with 3-digit locks (captain's chests) + 1 box with a 5-letter word lock (final chest)</li>
+<li>Signal flag strings ×5, flag charts ×5</li>
+<li>Crew roster cards ×5, compass cards ×5, logbook cards ×5</li>
+<li>One chart printed at A3 and cut into 5 vertical strips (each with an encrypted port and half a sentence)</li>
+<li>Key cards: Caesar wheel (paper is fine), A1Z26 table, mirror card (mirror sticker), Morse chart, Atbash table</li>
+<li>Seal letter cards F/E/A/S/T (wax-seal style if you like), port badges ×5</li>
+<li>3 hint cards per team</li>
+</ul>
+<h3>Host notes</h3>
+<ul>
+<li>The usual sticking points are the Atbash cipher and the mirror writing in A4. Offer a level-② Atbash hint at 35'.</li>
+<li>Fast teams will finish Act 1 early. Tell them to "check whether other ships need help" so they move into cross-team mode early.</li>
+<li>For the finale, have the five captains stamp their seals onto the chest in order. It makes a nice ceremony.</li>
+</ul>
+</section>
+
+<!-- ============ OPTION B ============ -->
+<section class="tab" id="b">
+<h2>B · The Seville Spice Exchange</h2>
+<div class="story">
+<p><b>Story:</b> Seville, 1520s, when spice is worth more than gold. The King announces that the first trading house to present every spice in the "Royal Banquet Recipe" wins the royal charter for the next great voyage.</p>
+<p>Five trading houses crowd into the Exchange. Each controls the source of only one spice, so none can complete its recipe alone. There will be trades, alliances, betrayals… and pirates.</p>
+<p><b>Twist:</b> in the end, everyone discovers the King's recipe needs the seals of all five houses.<br><b>Suggested closing line for the video:</b> "In this Exchange there are no permanent rivals, only deals not yet made."</p>
+</div>
+
+<h3>Houses &amp; economy</h3>
+<div class="tw"><table>
+<tr><th>Team</th><th>House</th><th>Home spice (origin)</th><th>Own recipe needs</th><th>Goods received during Act 1</th></tr>
+<tr><td>1</td><td>House of the Lion</td><td>Black pepper (Malabar, India)</td><td>Pepper · Cinnamon · Clove · Nutmeg</td><td>Pepper ×2 + Star anise ×1</td></tr>
+<tr><td>2</td><td>House of the Eagle</td><td>Cinnamon (Ceylon)</td><td>Cinnamon · Clove · Nutmeg · Star anise</td><td>Cinnamon ×2 + Pepper ×1</td></tr>
+<tr><td>3</td><td>House of the Dolphin</td><td>Clove (Moluccas)</td><td>Clove · Nutmeg · Star anise · Pepper</td><td>Clove ×2 + Cinnamon ×1</td></tr>
+<tr><td>4</td><td>House of the Rose</td><td>Nutmeg (Banda Islands)</td><td>Nutmeg · Star anise · Pepper · Cinnamon</td><td>Nutmeg ×2 + Clove ×1</td></tr>
+<tr><td>5</td><td>House of the Star</td><td>Star anise (Canton, China)</td><td>Star anise · Pepper · Cinnamon · Clove</td><td>Star anise ×2 + Nutmeg ×1</td></tr>
+</table></div>
+<ul>
+<li>Each house starts with <b>10 coins</b> (poker chips) and a "house recipe card".</li>
+<li>The one foreign crate each house receives is exactly the spice its own recipe <b>doesn't</b> need, so it has to be traded.</li>
+<li>Supply is deliberately short: only 3 crates of each spice circulate, but 4 houses need it. The gap is filled by saffron from the double-lock chests (a wildcard that counts as any spice) and by the Exchange bank. The competition is real.</li>
+<li><b>Exchange bank</b> (run by a clerk): sells spice at 4 coins per crate (3 crates total available), buys at 2 coins per crate. <b>Only houses holding a Port Pass may trade with the bank.</b></li>
+</ul>
+
+<h3>Timeline</h3>
+<div class="flow"><span>0–5' video</span><b>→</b><span>5–20' Act 1: voyages for goods</span><b>→</b><span>20–42' Act 2: the Exchange opens</span><b>→</b><span>42–52' Act 3: the Royal Recipe</span><b>→</b><span>52' awards, dinner</span></div>
+
+<h3>Act 1 · Intra-team: voyages for goods (5–20')</h3>
+<p>No locks here. Teams submit answers to a clerk, who hands out rewards on the spot.</p>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">Intra</span><h4>B1 · Smell the cargo</h4><span class="time">~6 min · reward: home spice ×2</span></div>
+<div class="label">Props</div>
+<ul><li>5 opaque jars per team (pierced lids), numbered 1–5, holding ground black pepper, cinnamon, clove, nutmeg and star anise</li><li>A "cargo description" card</li></ul>
+<div class="label">Cargo description card</div>
+<div class="prop">
+· <b>Black pepper</b>: the "black gold" of India's Malabar Coast. One sniff and you'll sneeze.<br>
+· <b>Cinnamon</b>: the inner bark of a Ceylon tree, sweet and warm.<br>
+· <b>Clove</b>: a flower bud from the Moluccas, shaped like a tiny nail; smell it long enough and your tongue goes numb.<br>
+· <b>Nutmeg</b>: the seed of a Banda Islands fruit. The Dutch reportedly traded Manhattan to the English for an island of it.<br>
+· <b>Star anise</b>: an eight-pointed star from southern China that smells of liquorice.<br>
+"Write down what each jar contains."
+</div>
+<div class="label">Jar numbers per team (shuffled so teams can't copy)</div>
+<div class="tw"><table><tr><th>Team</th><th>Pepper</th><th>Cinnamon</th><th>Clove</th><th>Nutmeg</th><th>Star anise</th></tr>
+<tr><td>1</td><td>3</td><td>1</td><td>5</td><td>2</td><td>4</td></tr>
+<tr><td>2</td><td>2</td><td>4</td><td>1</td><td>5</td><td>3</td></tr>
+<tr><td>3</td><td>5</td><td>3</td><td>2</td><td>4</td><td>1</td></tr>
+<tr><td>4</td><td>1</td><td>5</td><td>4</td><td>3</td><td>2</td></tr>
+<tr><td>5</td><td>4</td><td>2</td><td>3</td><td>1</td><td>5</td></tr></table></div>
+<p class="note">All correct: give 2 crates of the home spice. If any are wrong, the clerk only says "not quite" without saying which, and they smell again.</p>
+<details><summary>Hints</summary><div><ol><li>Start with the easy ones: star anise (liquorice) and cinnamon (sweet).</li><li>Clove numbs the nose and tongue; nutmeg is the most "muted".</li><li>Tell them what two of the jars are.</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">Intra</span><h4>B2 · The Roman-numeral ledger</h4><span class="time">~5 min · reward: 5 coins</span></div>
+<div class="label">Player text (Team 1 version)</div>
+<div class="prop">
+"The treasurer stole money and doctored the ledger. Find which line was altered, and how much he took."<br>
+<span class="mono">I. Pepper     XII sacks × III coins = XXXVI<br>
+II. Cinnamon  VIII sacks × V coins = XL<br>
+III. Clove    XV sacks × IV coins = LX<br>
+IV. Nutmeg    VI sacks × IX coins = LIV<br>
+V. Star anise X sacks × VII coins = <b>LXXX</b><br>
+Total       CCLXX</span>
+</div>
+<div class="label">Altered line per team (all other lines as above; every total reads CCLXX = 270)</div>
+<div class="tw"><table><tr><th>Team</th><th>Altered line</th><th>Written</th><th>Correct</th><th>Stolen</th></tr>
+<tr><td>1</td><td>V Star anise</td><td>LXXX (80)</td><td>LXX (70)</td><td>X = 10</td></tr>
+<tr><td>2</td><td>II Cinnamon</td><td>L (50)</td><td>XL (40)</td><td>10</td></tr>
+<tr><td>3</td><td>III Clove</td><td>LXX (70)</td><td>LX (60)</td><td>10</td></tr>
+<tr><td>4</td><td>IV Nutmeg</td><td>LXIV (64)</td><td>LIV (54)</td><td>10</td></tr>
+<tr><td>5</td><td>I Pepper</td><td>XLVI (46)</td><td>XXXVI (36)</td><td>10</td></tr></table></div>
+<details><summary>Hints</summary><div><ol><li>Convert the Roman numerals to ordinary numbers first.</li><li>I=1, V=5, X=10, L=50, C=100; a smaller numeral on the left is subtracted.</li><li>Multiply line by line and see which one doesn't match.</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">Intra</span><h4>B3 · Four currencies</h4><span class="time">~5 min · reward: foreign spice ×1 + Port Pass</span></div>
+<div class="label">Player text (Team 1 version)</div>
+<div class="prop">
+"Rates: 1 ducat = 2 cruzados; 1 cruzado = 3 florins; 1 florin = 4 reales.<br>
+The same sack of goods is quoted in four ports. Where is it cheapest?"<br>
+Lisbon: 3 cruzados · Antwerp: 8 florins · Seville: 1 ducat + 10 reales · Venice: 35 reales
+</div>
+<p class="note">In reales: 1 ducat = 24, 1 cruzado = 12, 1 florin = 4.</p>
+<div class="tw"><table><tr><th>Team</th><th>Lisbon</th><th>Antwerp</th><th>Seville</th><th>Venice</th><th>Answer</th></tr>
+<tr><td>1</td><td>3 cr (36)</td><td>8 fl (32)</td><td>1 d + 10 r (34)</td><td>35 r</td><td>Antwerp</td></tr>
+<tr><td>2</td><td>3 cr (36)</td><td>10 fl (40)</td><td>1 d + 14 r (38)</td><td>37 r</td><td>Lisbon</td></tr>
+<tr><td>3</td><td>4 cr (48)</td><td>11 fl (44)</td><td>1 d + 18 r (42)</td><td>45 r</td><td>Seville</td></tr>
+<tr><td>4</td><td>4 cr (48)</td><td>11 fl (44)</td><td>1 d + 22 r (46)</td><td>43 r</td><td>Venice</td></tr>
+<tr><td>5</td><td>2 cr (24)</td><td>5 fl (20)</td><td>1 d (24)</td><td>22 r</td><td>Antwerp</td></tr></table></div>
+<details><summary>Hints</summary><div><ol><li>Convert every price into the same currency.</li><li>The smallest unit, the real, is easiest.</li><li>1 ducat = 24 reales.</li></ol></div></details>
+</article>
+
+<h3>Act 2 · Cross-team: the Exchange opens (20–42')</h3>
+<p>The host rings the bell to open the market. A central "Exchange" table is staffed by the clerks, with three <b>contracts</b> and current prices posted on a wall or whiteboard. Houses may trade freely: spice for spice, spice for coins, alliances and credit are all allowed.</p>
+
+<article class="puzzle">
+<div class="ph"><span class="tag cross">Cross contract</span><h4>B4 · Double-lock chests (two of them)</h4><span class="time">~8 min · reward: saffron ×1 per house</span></div>
+<p>Two chests sit on the Exchange table, each with a 3-digit lock and 2 crates of saffron (wildcard) inside. The two halves of each clue are held by two different houses.</p>
+<div class="tw"><table>
+<tr><th>Chest</th><th>"Event card" held by</th><th>"Timeline" held by</th><th>Order on the event card</th><th>Code</th></tr>
+<tr><td>α</td><td>Lion</td><td>Eagle</td><td>Da Gama reaches India → Dias rounds the Cape → Magellan's fleet departs</td><td class="mono">889</td></tr>
+<tr><td>β</td><td>Dolphin</td><td>Rose</td><td>Columbus reaches the Americas → Zheng He's first voyage → Cabral reaches Brazil</td><td class="mono">250</td></tr>
+</table></div>
+<div class="label">The event card says</div>
+<div class="prop">"In the order of the events below, take the last digit of each event's year." (followed by the three event names)</div>
+<div class="label">The timeline (years and picture clues only, no event names)</div>
+<div class="prop">
+1405 · A colossal treasure ship flying a Ming banner<br>
+1488 · The "Cape of Storms" at Africa's southern tip<br>
+1492 · Three ships, a Spanish flag, "the Indies"<br>
+1498 · The port of Calicut, Indian pepper<br>
+1500 · A South American coast reached by accident<br>
+1519 · Five ships leave to sail around the world
+</div>
+<details><summary>Hints</summary><div><ol><li>You only have half the information. Find the other house.</li><li>Match each event to a picture on the timeline.</li><li>Da Gama = 1498.</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag cross">Cross contract</span><h4>B5 · The pirate hideout</h4><span class="time">Before 38' · reward: 2 coins per house involved, and the pirate event is cancelled</span></div>
+<p>The intel is split across three houses and only works combined. Report the correct square to the Exchange before 38' and the pirate raid is cancelled.</p>
+<div class="tw"><table><tr><th>Held by</th><th>Intel</th></tr>
+<tr><td>Star</td><td>A 4×4 chart (columns A–D, rows 1–4) with islands at A2, B4, C1, C3, D2. "The pirates always hide on an island."</td></tr>
+<tr><td>Eagle</td><td>"The pirates are not in column C or D."</td></tr>
+<tr><td>Dolphin</td><td>"The pirates' row number is greater than 2."</td></tr></table></div>
+<details><summary>Answer: B4</summary><div>Islands in columns A–B: A2, B4. Row > 2 leaves B4.</div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag cross">Random events</span><h4>B6 · Exchange announcements (host reads)</h4><span class="time">25' / 32' / 38'</span></div>
+<div class="tw"><table><tr><th>Time</th><th>Event</th><th>Effect</th></tr>
+<tr><td>25'</td><td>The monsoon arrives</td><td>Bank price drops to 3 coins per crate for 5 minutes</td></tr>
+<tr><td>32'</td><td>Dutch blockade of the Banda Islands</td><td>The bank stops selling nutmeg; the Rose house can raise its price, which livens things up</td></tr>
+<tr><td>38'</td><td>Pirate raid</td><td>If B5 isn't solved, every house hands one crate (its choice) to the Exchange. If it is, announce "The Royal Navy has driven off the pirates"</td></tr></table></div>
+</article>
+
+<h3>Act 3 · Finale: the Royal Recipe (42–52')</h3>
+<article class="puzzle">
+<div class="ph"><span class="tag final">Finale</span><h4>B7 · The King's banquet</h4><span class="time">~8 min</span></div>
+<p>At 42' the host closes the market and each house scores: +10 for a completed recipe, +1 per remaining coin.</p>
+<p>Then the King's envoy (the host) arrives and reads a decree:</p>
+<div class="prop">"The King will accept only one recipe. It has been split into five parts, written at the foot of the five house recipe cards."</div>
+<p>The foot of each recipe card carries a sentence fragment numbered in Roman numerals, plus a seal letter:</p>
+<div class="tw"><table><tr><th>House</th><th>Fragment</th><th>Seal</th></tr>
+<tr><td>Rose</td><td>I · The King's feast</td><td>S</td></tr>
+<tr><td>Lion</td><td>II · belongs to</td><td>P</td></tr>
+<tr><td>Star</td><td>III · no single house</td><td>I</td></tr>
+<tr><td>Dolphin</td><td>IV · but to</td><td>C</td></tr>
+<tr><td>Eagle</td><td>V · all who sailed home</td><td>E</td></tr></table></div>
+<p>Lined up I–V, the cards read "<b>The King's feast belongs to no single house, but to all who sailed home</b>". The seals spell <b class="mono">SPICE</b>, which opens the royal chest (5-letter word lock).</p>
+<details><summary>What's inside the royal chest</summary><div>
+<ul><li>A royal charter granted to "all five houses together"</li><li>A card: "Deliver all your spices to the royal kitchen." The five captains carry their crates to the kitchen door together, the chef takes them and brings out the main course</li><li>Individual awards: <b>Best Captain</b> (highest score at 42') and <b>Most Generous Merchant</b> (voted by the other houses)</li></ul>
+</div></details>
+</article>
+
+<h3>Into dinner</h3>
+<p>Agree a "royal spice dish" with the kitchen as the main course, e.g. spiced roast chicken, curry, biryani or five-spice beef, ideally using all five spices. Print on the menu: "Royal Banquet Recipe: pepper, cinnamon, clove, nutmeg, star anise".</p>
+
+<h3>Props list</h3>
+<ul>
+<li>25 spice jars (5 teams × 5 spices) + the five ground spices</li>
+<li>Spice "crate" cards: 3 per spice in circulation + 3 bank reserve + 4 saffron (coloured cards or small matchboxes)</li>
+<li>About 100 coins (poker chips)</li>
+<li>Ledger cards ×5 (different altered line per team), currency cards ×5, cargo description cards ×5</li>
+<li>House recipe cards ×5 (fragment and seal letter printed at the foot), Port Passes ×5</li>
+<li>Double-lock chests ×2 (3-digit locks), royal chest ×1 (5-letter word lock)</li>
+<li>Event cards ×6, timelines ×2, pirate chart ×1 + intel cards ×2</li>
+<li>A small bell (open / close / announcements), a whiteboard for live prices</li>
+</ul>
+<h3>Host notes</h3>
+<ul>
+<li>The clerks make or break this option: one runs the bank and checks answers, the other hands out rewards and keeps score.</li>
+<li>A house may hoard and refuse to sell. Don't stop it; the 32' blockade will get goods moving. If things go quiet, bring the 38' pirate raid forward.</li>
+<li>Don't hint at "cooperation" before the twist. Let them genuinely compete. The twist only lands if the competition came first.</li>
+</ul>
+</section>
+
+<!-- ============ OPTION C ============ -->
+<section class="tab" id="c">
+<h2>C · The Last Voyage</h2>
+<div class="story">
+<p><b>Story:</b> The ocean-going ship <i>Esperança</i> wakes after a night of storms. The Captain is missing, the ship is off course, and there is only an hour of fresh water left.</p>
+<p>All 25 players are crew on the same ship, split into five departments. Each department holds only part of the picture. To find the Captain and the way home, every department needs the others.</p>
+<p><b>The truth:</b> the Captain staged his own disappearance as a test.<br><b>Suggested closing line for the video:</b> "The Captain left one message: 'When you find each other, you will find me.'"</p>
+</div>
+
+<h3>Departments</h3>
+<div class="tw"><table>
+<tr><th>Team</th><th>Department</th><th>Starts with</th><th>Must give</th><th>Must wait for</th></tr>
+<tr><td>1</td><td>Navigators</td><td>Longitude puzzle, sextant record (date washed out)</td><td>Coordinates → Cartographers</td><td>Date ← Surgeons; declination ← Galley</td></tr>
+<tr><td>2</td><td>Cartographers</td><td>A torn chart (6 pieces)</td><td>Route directions → Galley</td><td>Coordinates ← Navigators</td></tr>
+<tr><td>3</td><td>Quartermasters</td><td>Hold manifest, 9 numbered envelopes</td><td>Decoded message → Galley</td><td>Password ECHO ← Surgeons</td></tr>
+<tr><td>4</td><td>Surgeons</td><td>5 crew diary pages (page 5 in cutlery symbols)</td><td>Date → Navigators; ECHO → Quartermasters</td><td>Cutlery key ← Galley</td></tr>
+<tr><td>5</td><td>Galley</td><td>Spice-rack riddle, kitchen calendar (nautical almanac), cutlery key, the Captain's stew recipe</td><td>Declination → Navigators; cutlery key → Surgeons</td><td>Decoding ← Quartermasters; directions ← Cartographers</td></tr>
+</table></div>
+<p class="note">Design principle: every department gives at least one clue and waits for at least one, so nobody sits it out. The Galley and the Surgeons can hand over what they hold from the start, so the chain can never deadlock.</p>
+
+<h3>Dependency chain</h3>
+<div class="flow"><span>Galley → Surgeons: cutlery key</span><b>→</b><span>Surgeons → Quartermasters: ECHO</span><b>→</b><span>Quartermasters ⇄ Galley: decode the recipe</span></div>
+<div class="flow"><span>Surgeons → Navigators: date 21 June</span><b>+</b><span>Galley → Navigators: declination +23°</span><b>→</b><span>Navigators → Cartographers: 30°N 60°W</span><b>→</b><span>Cartographers → Galley: →→↑↑</span><b>→</b><span>Red box opens</span></div>
+
+<h3>Timeline</h3>
+<div class="flow"><span>0–5' video</span><b>→</b><span>5–20' Act 1: departments check their stations</span><b>→</b><span>20–45' Act 2: the chain</span><b>→</b><span>45–52' Act 3: the Captain's truth</span><b>→</b><span>52' the Captain appears, dinner</span></div>
+
+<h3>Act 1 · Intra-team: departments check their stations (5–20')</h3>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">Navigators</span><h4>C1 · Longitude from a clock</h4><span class="time">~6 min</span></div>
+<div class="prop">
+"Our home port lies on the 0° meridian. The ship's clock always keeps home-port time.<br>
+Today, when the sun reached its highest point (local noon), the clock read <b>16:00</b>.<br>
+The Earth turns 15° every hour and the sun moves east to west. Are we east or west of home, and by how many degrees?"
+</div>
+<details><summary>Answer: 60° West (60°W)</summary><div>Local noon is 4 hours behind home → 4 × 15° = 60°, to the west.</div></details>
+<div class="label">Also received (can't be solved yet)</div>
+<div class="prop">Sextant record: "Noon on ____: sun altitude 83°." (the date is washed out by seawater)<br>Formula card: latitude = 90° − sun altitude + the sun's declination that day</div>
+<details><summary>Hints</summary><div><ol><li>When it's noon here, it's already afternoon at home, so home is to the east.</li><li>Multiply the hour difference by 15°.</li><li>16 − 12 = 4 hours.</li></ol></div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">Cartographers</span><h4>C2 · Rebuild the chart</h4><span class="time">~8 min</span></div>
+<p>Print the chart below on A4 and cut it into 6 irregular pieces. Put the latitude/longitude labels only on the edges, so the grid only appears once it's assembled.</p>
+<div class="tw"><table class="grid-map">
+<tr><th></th><th>90°W</th><th>80°W</th><th>70°W</th><th>60°W</th><th>50°W</th><th>40°W</th></tr>
+<tr><th>50°N</th><td></td><td></td><td></td><td></td><td class="isle">Wind Isle</td><td></td></tr>
+<tr><th>40°N</th><td></td><td class="isle">Fog Isle</td><td></td><td></td><td></td><td></td></tr>
+<tr><th>30°N</th><td></td><td></td><td></td><td class="isle">Echo Island</td><td></td><td class="isle">Whale Isle</td></tr>
+<tr><th>20°N</th><td></td><td class="reef">Reef</td><td class="reef">Reef</td><td></td><td></td><td></td></tr>
+<tr><th>10°N</th><td></td><td class="ship">⛵ Esperança</td><td></td><td></td><td></td><td></td></tr>
+<tr><th>0°</th><td></td><td></td><td></td><td></td><td class="isle">Turtle Isle</td><td></td></tr>
+</table></div>
+<div class="label">Note in the chart's corner</div>
+<div class="prop">"The ship moves one square at a time, horizontally or vertically. It may not enter a reef and must take the shortest route."</div>
+<p class="note">Once assembled, the Cartographers know where the ship is and which islands exist, but not which island to sail for. That has to wait for the Navigators' coordinates.</p>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">Quartermasters</span><h4>C3 · The overweight barrel</h4><span class="time">~6 min</span></div>
+<div class="prop">
+"One barrel in the hold weighs wrong."<br>
+Unit weights: fresh water 1 kg/L · biscuits 0.5 kg/pack · salt pork 2.5 kg/piece · wine 1 kg/L · gunpowder 1.5 kg/bag · rope 3 kg/coil · rice, beans, salt by the kg
+</div>
+<div class="tw"><table><tr><th>Barrel</th><th>Manifest</th><th>Weighed</th></tr>
+<tr><td>1</td><td>Fresh water 40 L</td><td>40 kg</td></tr><tr><td>2</td><td>Biscuits 20 packs</td><td>10 kg</td></tr><tr><td>3</td><td>Salt pork 8 pieces</td><td>20 kg</td></tr>
+<tr><td>4</td><td>Wine 30 L</td><td>30 kg</td></tr><tr><td>5</td><td>Gunpowder 12 bags</td><td>18 kg</td></tr><tr><td>6</td><td>Rope 6 coils</td><td>18 kg</td></tr>
+<tr><td>7</td><td>Rice 25 kg</td><td><b>37 kg</b></td></tr><tr><td>8</td><td>Beans 16 kg</td><td>16 kg</td></tr><tr><td>9</td><td>Salt 10 kg</td><td>10 kg</td></tr></table></div>
+<details><summary>Answer: Barrel 7</summary><div>
+<p>Barrel 7 is 12 kg too heavy. Envelope 7 holds a codebook with a <b>4-letter word lock</b>. The other eight envelopes contain jokes like "Just beans. Really." and "Stop digging, it's salt."</p>
+<p>The codebook's code is <b class="mono">ECHO</b>, which has to come from the Surgeons.</p>
+</div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">Surgeons</span><h4>C4 · The crew diaries</h4><span class="time">~7 min</span></div>
+<div class="prop">
+<b>Boatswain:</b> "21 June. At 22:00 the Captain was still at the helm. At 22:30 I went below to sleep."<br>
+<b>Gunner:</b> "At 23:00 the Captain inspected the powder room, left after ten minutes, said he was going to 'find something to eat'."<br>
+<b>Cabin boy:</b> "At 23:20 I passed the Captain on the stairs. He was heading down, carrying a red box."<br>
+<b>Navigator's mate:</b> "At 23:30 I was on watch at the stern. Saw no one."<br>
+<b>Cook</b> (page 5, written entirely in cutlery symbols): "<span class="mono">🥄🍴🔪☕</span>"
+</div>
+<p>Team task: order the entries by time and work out where the Captain went last. The answer is <b>the galley</b> (looking for food + heading down + the cook kept a diary). Page 5 is unreadable until they get the "cutlery key" from the Galley.</p>
+<details><summary>Full page 5 and answer</summary><div>
+<p>Full text (written in symbols): "23:40. The Captain came into the galley, hid the red box behind the spice rack, and whispered one word: 🥄🍴🔪☕"</p>
+<p>Cutlery key (held by the Galley): 🥄=E 🍴=C 🔪=H ☕=O 🍷=A 🧂=S 🍞=R 🫖=T… (add a few decoys)</p>
+<p>It decodes to <b class="mono">ECHO</b> → give to the Quartermasters for the codebook. "21 June" from the diaries → give to the Navigators.</p>
+</div></details>
+</article>
+
+<article class="puzzle">
+<div class="ph"><span class="tag intra">Galley</span><h4>C5 · The red box behind the spice rack</h4><span class="time">~4 min</span></div>
+<p>Borrow a real spice rack with 8 jars from the restaurant for the Galley's table.</p>
+<div class="prop">The Captain's note: "I hid what matters most behind something neither salty nor sweet, from the East, with eight points."</div>
+<details><summary>Answer: behind the star anise jar</summary><div>
+<p>Behind the star anise jar is the <b>red box</b>, fitted with a directional lock (up/down/left/right). It needs the route from the Cartographers.</p>
+<p>Three "useless-looking" items also lie on the Galley's table, waiting for someone to ask:</p>
+<ul>
+<li><b>Kitchen calendar (nautical almanac):</b> 21 Mar declination 0° · 21 May +20° · <b>21 Jun +23°</b> · 21 Aug +12° · 21 Sep 0°</li>
+<li><b>Cutlery key</b></li>
+<li><b>The Captain's secret stew:</b> flour 21 g · butter 33 g · salt 5 pinches · eggs 12 · sugar 50 spoons. The quantities are absurd, and that's the clue</li>
+</ul>
+</div></details>
+</article>
+
+<h3>Act 2 · Cross-team: the dependency chain (20–45')</h3>
+<p>Host announces: "Forty minutes of water left. Every department, send out your runners!"</p>
+
+<article class="puzzle">
+<div class="ph"><span class="tag cross">Cross-team</span><h4>C6 · Six hand-offs</h4><span class="time">~20 min</span></div>
+<div class="tw"><table>
+<tr><th>#</th><th>From → To</th><th>What passes</th><th>What it unlocks</th></tr>
+<tr><td>①</td><td>Galley → Surgeons</td><td>Cutlery key</td><td>Diary page 5 = ECHO</td></tr>
+<tr><td>②</td><td>Surgeons → Quartermasters</td><td>ECHO</td><td>Opens the codebook</td></tr>
+<tr><td>③</td><td>Quartermasters ⇄ Galley</td><td>Codebook × stew recipe</td><td>21 red box · 33 lock · 05 equals · 12 Echo Island · 50 route → <b>"The red box's lock = the route to Echo Island"</b></td></tr>
+<tr><td>④</td><td>Surgeons + Galley → Navigators</td><td>Date 21 June + almanac declination +23°</td><td>Latitude = 90 − 83 + 23 = <b>30°N</b>; with longitude: <b>30°N 60°W</b></td></tr>
+<tr><td>⑤</td><td>Navigators → Cartographers</td><td>30°N 60°W</td><td>Locate Echo Island and plot the shortest route</td></tr>
+<tr><td>⑥</td><td>Cartographers → Galley</td><td>Route directions</td><td>Opens the red box</td></tr>
+</table></div>
+<div class="label">Codebook (with decoys)</div>
+<div class="prop mono">03 storm · 05 equals · 09 captain · 12 Echo Island · 17 galley · 21 red box · 26 fresh water · 33 lock · 41 star · 50 route</div>
+<details><summary>Route answer: → → ↑ ↑</summary><div>
+<p>From <i>Esperança</i> (10°N, 80°W) to Echo Island (30°N, 60°W) is 2 squares north and 2 east. Going north first hits the reef at 20°N 80°W; one step east then north hits the reef at 20°N 70°W. The only shortest route is <b>East, East, North, North</b>, i.e. "right, right, up, up" on the directional lock.</p>
+</div></details>
+<details><summary>Hints (by sticking point)</summary><div>
+<ul>
+<li>Surgeons stuck on page 5 → "Cutlery… who on this ship handles cutlery all day?"</li>
+<li>Navigators can't get latitude → "Whose diaries have dates in them? Which kind of calendar would list declination?"</li>
+<li>Quartermasters open the codebook but don't know what to do → "Which department is sitting on a pile of strange numbers?"</li>
+<li>Galley holding the red box, stuck → "A direction lock needs directions. Who has the chart?"</li>
+</ul>
+</div></details>
+</article>
+
+<h3>Act 3 · Finale: the Captain's truth (45–52')</h3>
+<article class="puzzle">
+<div class="ph"><span class="tag final">Finale</span><h4>C7 · The letter in the red box</h4><span class="time">~6 min</span></div>
+<p>Inside the red box are the Captain's letter and 5 small envelopes, one per department, each with a single letter. The Galley reads the letter aloud:</p>
+<div class="prop">
+"To the whole crew of the <i>Esperança</i>,<br>
+No storm could ever take me from this ship. I only wanted to see whether, with the Captain gone, you would find each other.<br>
+The navigators read the sky. The cartographers read the land. The quartermasters kept the hold. The surgeons read the heart. The cooks kept the taste of home.<br>
+No single department could have reached Echo Island alone.<br>
+Open the last lock in the order of the ship's watch: <b>steer, chart, count, heal, feed</b>.<br>
+— Your Captain"
+</div>
+<div class="tw"><table><tr><th>Order</th><th>Steer</th><th>Chart</th><th>Count</th><th>Heal</th><th>Feed</th></tr>
+<tr><td>Dept.</td><td>Navigators</td><td>Cartographers</td><td>Quartermasters</td><td>Surgeons</td><td>Galley</td></tr>
+<tr><td>Letter</td><td>T</td><td>A</td><td>B</td><td>L</td><td>E</td></tr></table></div>
+<details><summary>Answer: TABLE</summary><div>
+<p>The Captain's cabin chest (5-letter word lock) holds a card: "The New World isn't on any chart. It's right here at this table. Dinner is served!"</p>
+<p>Now the <b>"Captain"</b> (ideally the boss or a senior leader in a tricorn hat) walks out from the kitchen door, gives a short toast and opens dinner.</p>
+</div></details>
+</article>
+
+<h3>Into dinner</h3>
+<p>The kitchen is the destination: the Captain "prepared a feast for the crew". Call the first course "The Captain's Secret Stew" to echo the recipe card.</p>
+
+<h3>Props list</h3>
+<ul>
+<li>Longitude card, sextant record, formula card (Navigators)</li>
+<li>Chart printed on A4 and cut into 6 pieces (Cartographers)</li>
+<li>Hold manifest, unit-weight card, 9 numbered envelopes, codebook with 4-letter word lock (Quartermasters)</li>
+<li>5 diary pages, page 5 written in cutlery symbols (Surgeons)</li>
+<li>Spice rack + 8 jars (borrowed from the restaurant), kitchen calendar, cutlery key, stew recipe card (Galley)</li>
+<li>Red box + directional lock, Captain's cabin chest + 5-letter word lock, the Captain's letter + 5 department envelopes</li>
+<li>Tricorn hat / captain's coat for the "Captain"</li>
+</ul>
+<h3>Host notes</h3>
+<ul>
+<li>The risk in a chain is one link stalling. Do a sweep at 25' and 35' and push using the sticking-point hints above.</li>
+<li>The real critical path is two parallel lines: ① → ② → ③ and ④ → ⑤ → ⑥. If both are flowing by 40', the finale will fit.</li>
+<li>Hide the "Captain" in the kitchen beforehand; they walk out only after the host reads out TABLE.</li>
+<li>A 4-letter word lock set to RRUU (Right Right Up Up) works as well as a directional lock and is cheaper.</li>
+</ul>
+</section>
+
+<footer>Age of Discovery Puzzle Handbook · English edition · Final codes are FEAST / SPICE / TABLE. Double-check every lock code before making materials.</footer>
+</div>
+<script>
+(function(){
+  var btns=document.querySelectorAll('nav.tabs button');
+  function show(id){
+    document.querySelectorAll('section.tab').forEach(function(s){s.classList.toggle('active',s.id===id)});
+    btns.forEach(function(b){b.setAttribute('aria-selected',b.dataset.t===id?'true':'false')});
+    try{history.replaceState(null,'','#'+id)}catch(e){}
+  }
+  btns.forEach(function(b){b.addEventListener('click',function(){show(b.dataset.t);window.scrollTo({top:0})})});
+  var h=(location.hash||'').slice(1); if(h&&document.getElementById(h)) show(h);
+  var root=document.documentElement;
+  document.getElementById('themeBtn').addEventListener('click',function(){
+    var dark=root.dataset.theme?root.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme=dark?'light':'dark';
+  });
+  window.addEventListener('beforeprint',function(){document.querySelectorAll('details').forEach(function(d){d.open=true})});
+})();
+</script>
+</body>
+</html>
