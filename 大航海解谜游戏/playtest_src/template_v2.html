@@ -1,0 +1,739 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>五片航海图 v2 测试</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Young+Serif&display=swap">
+<style>
+/* Layout: chart-room console. Sticky bridge bar; one reading column; puzzle cards grouped by act; the host console stacks panels by what the host touches most during a run. */
+:root{
+  --paper:#edf1ee; --panel:#f9fbf8; --ink:#13233a; --muted:#56657a; --line:#d0d8d3; --chip:#e1e8e4;
+  --brass:#9a6b17; --sea:#1d5b6a; --ok:#2b7a4b; --warn:#a8660f; --bad:#ad3528; --okbg:#e2f1e7; --warnbg:#f8ecd6; --badbg:#f6e1dd;
+  --f-display:"Young Serif", Georgia, "Songti SC", "Noto Serif SC", serif;
+  --f-body:"IBM Plex Sans", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --flagR:#c8102e; --flagB:#0b3d91; --flagY:#ffcd00; --flagW:#ffffff; --flagK:#111111; --starInk:#13233a;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0e1620; --panel:#152130; --ink:#e4ebf1; --muted:#9aa9b9; --line:#25364a; --chip:#1c2b3c;
+  --brass:#d7a64a; --sea:#6ab7c7; --ok:#62c48d; --warn:#e3a54c; --bad:#ec7f71; --okbg:#173326; --warnbg:#3a2c14; --badbg:#3c1f1b; --starInk:#ffd98a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0e1620; --panel:#152130; --ink:#e4ebf1; --muted:#9aa9b9; --line:#25364a; --chip:#1c2b3c;
+  --brass:#d7a64a; --sea:#6ab7c7; --ok:#62c48d; --warn:#e3a54c; --bad:#ec7f71; --okbg:#173326; --warnbg:#3a2c14; --badbg:#3c1f1b; --starInk:#ffd98a; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:15px/1.65 var(--f-body);margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--panel);border-bottom:1px solid var(--line)}
+.bar-in,.wrap{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar-in{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding-block:10px}
+.brand{font-family:var(--f-display);font-size:18px;margin-right:auto;line-height:1.2}
+.brand small{display:block;font:500 11px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--brass)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--ink);padding:5px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.sync{font-size:12px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--warn);display:inline-block}
+.sync.on i{background:var(--ok)}
+.wrap{padding-block:20px 80px}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0}
+h1{font-size:clamp(23px,4vw,30px);line-height:1.2}
+h2{font-size:21px;margin:26px 0 10px}
+h3{font-size:17px}
+h4{margin:12px 0 6px;font-size:14px}
+p{margin:6px 0}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:14px}
+.btn.primary{background:var(--sea);border-color:var(--sea);color:var(--panel)}
+.btn.warn{border-color:var(--warn);color:var(--warn)}
+.btn.small{padding:3px 9px;font-size:13px}
+.btn[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:var(--panel)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:6px 10px;min-width:0}
+textarea{width:100%;min-height:64px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.muted,.note{color:var(--muted);font-size:13px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass);font-weight:600;margin:0 0 4px}
+.mono{font-family:var(--f-mono)}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+th{background:var(--chip);font-weight:600}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.stack{display:grid;gap:12px}
+.clock{font-family:var(--f-mono);font-size:22px}
+.clock.over{color:var(--bad)}
+.live{color:var(--ok);font-weight:600}
+.story{border-left:3px solid var(--brass);padding-left:14px}
+.banner{background:var(--warnbg);border:1px solid var(--warn);border-radius:10px;padding:10px 14px;display:flex;gap:10px;align-items:flex-start}
+.act{display:flex;align-items:baseline;gap:10px;margin:24px 0 8px}
+.act h3{font-size:18px}
+.act .rule{flex:1;border-top:1px solid var(--line)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;display:grid;gap:8px;min-width:0}
+.card.solved{border-color:var(--ok)}
+.card.locked{opacity:.7}
+.card-h{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.card-h h3{margin-right:auto}
+.pid{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.chip{font-size:12px;border-radius:999px;padding:1px 9px;background:var(--chip);color:var(--muted);white-space:nowrap}
+.chip.ok{background:var(--okbg);color:var(--ok)}
+.chip.warn{background:var(--warnbg);color:var(--warn)}
+.chip.bad{background:var(--badbg);color:var(--bad)}
+.chip.cross{color:var(--sea)}
+.gate{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.gate label{font-size:13px;color:var(--muted);width:100%}
+.gate input{flex:1 1 160px;font-family:var(--f-mono);letter-spacing:.06em;text-transform:uppercase}
+.msg{font-size:13px}.msg.bad{color:var(--bad)}
+.reveal{background:var(--okbg);border-radius:8px;padding:10px 12px}
+.hintrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.hint{background:var(--chip);border-radius:8px;padding:6px 10px;font-size:14px}
+.answer{background:var(--warnbg);border-radius:8px;padding:8px 12px;font-size:14px}
+.teampick{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.teampick button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:14px;text-align:left;border-left:6px solid var(--c)}
+.teampick button b{font-family:var(--f-display);font-weight:400;font-size:20px;display:block}
+.teampick button span{display:block;font-size:12px;color:var(--muted)}
+.shipdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);vertical-align:middle;margin-right:6px;border:1px solid var(--line)}
+.coins{font-family:var(--f-mono);font-size:20px;color:var(--brass)}
+/* puzzle content */
+.clues{padding-left:20px;margin:4px 0}
+.logline{font-family:var(--f-mono);background:var(--chip);border-radius:6px;padding:6px 10px;display:inline-block}
+.flagrow{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0}
+.flagrow svg{width:56px;height:56px}
+.flagchart{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:8px;margin-top:8px}
+.flagchart figure{margin:0;text-align:center;font-family:var(--f-mono);font-size:12px}
+.flagchart svg{width:40px;height:40px;display:block;margin:0 auto 2px}
+details.chart summary{cursor:pointer;color:var(--sea);font-size:14px}
+.chestgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.fragment,.keycard{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.encport{font-family:var(--f-mono);font-size:20px;letter-spacing:.12em;margin:6px 0;word-break:break-word}
+.halfline{font-style:italic}
+.keyname{font-weight:600;font-size:13px}
+.keytab td,.keytab th{padding:3px 5px;text-align:center;font-family:var(--f-mono);font-size:12px}
+.morsegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:2px 8px;font-size:12px}
+.morsegrid code{font-family:var(--f-mono)}
+.letter{font-family:var(--f-display);font-size:16px;line-height:1.7}
+.ports{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.port{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:4px}
+.port.done{border-color:var(--ok);background:var(--okbg)}
+.port .stamp{font-family:var(--f-display);font-size:28px;color:var(--bad);line-height:1}
+.port .step{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.quizq{font-family:var(--f-display);font-size:19px}
+.starbox{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.starbox svg{width:min(260px,80vw);height:auto;background:var(--chip);border-radius:10px}
+.bottles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.bottle{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:6px}
+.bottle.won{border-style:solid;border-color:var(--ok)}
+/* host */
+.board td.cell{text-align:center;white-space:nowrap}
+.board td.cell.ok{background:var(--okbg);color:var(--ok)}
+.board td.cell.warn{background:var(--warnbg);color:var(--warn)}
+.board td.cell.bad{background:var(--badbg);color:var(--bad)}
+.board td.cell small{display:block;font-size:10px;color:var(--muted)}
+.pm td{text-align:center}
+.lockbox{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.lockbox input{width:140px;font-family:var(--f-mono)}
+.rating{display:flex;gap:4px;flex-wrap:wrap}
+.rating button{width:34px;height:34px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.rating button[aria-pressed="true"]{background:var(--sea);color:var(--panel);border-color:var(--sea)}
+.fbgrid{display:grid;gap:10px}
+.fbgrid label{font-size:14px;font-weight:600}
+.scale{font-size:12px;color:var(--muted)}
+.scorebar{height:8px;border-radius:4px;background:var(--brass)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="bar"><div class="bar-in">
+  <div class="brand"><small id="brandSmall">v2 测试</small><span id="brandTitle">五片航海图</span></div>
+  <div class="seg" role="group" aria-label="view"><button id="vTester" type="button" aria-pressed="true">测试员</button><button id="vHost" type="button" aria-pressed="false">主持人</button></div>
+  <div class="seg" role="group" aria-label="language"><button id="lZh" type="button" aria-pressed="true">中</button><button id="lEn" type="button" aria-pressed="false">EN</button></div>
+  <span class="sync" id="sync"><i></i><span id="syncText">本机模式</span></span>
+</div></div>
+<main class="wrap" id="app"></main>
+
+<script>
+const DATA = __DATA__;
+(function(){
+"use strict";
+const UI = {
+  brandSmall:["方案 A v2 · 可行性测试","Option A v2 · playtest"], brand:["五片航海图","The Five Fragments"],
+  tester:["测试员","Tester"], host:["主持人","Host"], local:["本机模式（不共享）","Local only"], shared:["已同步","Synced"],
+  pickTitle:["你代表哪条船？","Which ship are you?"], pickLead:["四位测试员各代表一条船。选好后会记在这台设备上。","Each of the four testers plays one ship. Your choice is remembered on this device."],
+  players:["名玩家","players"], tokens:["张提示券","hint tokens"], change:["换船","Change ship"],
+  notStarted:["主持人还没开始","The host hasn't started"], running:["进行中","Running"], ended:["已结束","Ended"],
+  story:["故事","Story"], youAre:["你的船","Your ship"], doubloons:["金币","Doubloons"], hintLeft:["剩余提示券","Hint tokens left"],
+  act_intra:["第一幕 · 船上","Act 1 · On board"], act_cross:["第二幕 · 远航","Act 2 · The voyage"], act_fleet:["第三幕 · 夜航","Act 3 · Night sailing"], act_final:["终局","Finale"], act_side:["漂流瓶支线","Bottle side quests"],
+  target:["目标","Target"], min:["分钟","min"], solved:["已解","Solved"], lockedBy:["先完成","Unlocks after"], sharedP:["全舰队共同谜题，任何一条船提交都算","Fleet puzzle: any ship may submit"],
+  submit:["提交","Submit"], wrong:["不对，再想想。","Not right yet."], hint:["提示","Hint"], hintCost:["（提示券用完，每次扣 1 金币）","(no tokens left: costs 1 doubloon)"],
+  answer:["答案","Answer"], save:["保存","Save"], saved:["已保存","Saved"],
+  circuit:["巡航顺序","Your circuit"], stampWait:["等港务长盖章","Waiting for the Port Master"], home:["母港","Home"],
+  quizIdle:["抢答还没开始。","The quiz hasn't started."], quizNow:["第 %n 题","Question %n"], quizWon:["答对的船","Won by"],
+  placeChart:["把我们的星图放上桌","Place our chart on the table"], placed:["已放上桌","On the table"], waitingCharts:["等其他船放星图：","Waiting for charts from:"], yourChart:["你们的星图","Your chart"], fleetChart:["全舰队的星图","The fleet's chart"],
+  bottlesClosed:["漂流瓶还没冲上岸。","No bottles have washed ashore yet."], bottle:["漂流瓶","Bottle"], wonBy:["已被领走：","Claimed by:"],
+  feedback:["反馈","Feedback"], fbLead:["测试结束后填写，主持人视图会汇总。","Fill in after the run; the host view collects everyone's answers."],
+  difficulty:["难度","Difficulty"], diffScale:["1 太简单 · 3 刚好 · 5 太难","1 too easy · 3 just right · 5 too hard"],
+  interactivity:["跨队互动","Cross-team interaction"], interScale:["1 几乎不和别人说话 · 5 一直在配合","1 barely talked · 5 constantly working with others"],
+  fun:["好玩程度","Fun"], funScale:["1 无聊 · 5 很想再玩","1 boring · 5 want to play again"],
+  clarity:["规则清晰度","Clarity"], clarScale:["1 经常不知道该干嘛 · 5 一直很清楚","1 often lost · 5 always clear"],
+  pace:["整体节奏","Pace"], paceScale:["1 太赶 · 3 刚好 · 5 有空档","1 rushed · 3 right · 5 too much idle time"],
+  favorite:["最喜欢的环节","Favourite part"], stuck:["最卡的一步","Where you got stuck"], none:["没有","None"],
+  change1:["最想改的一点","One thing you'd change"], comment:["其他意见","Other comments"], saveFb:["保存反馈","Save feedback"],
+  fav_chest:["开船长箱","Opening the chest"], fav_ports:["港口巡航","Port circuit"], fav_press:["抓壮丁","Press gang"], fav_quiz:["暴风雨抢答","Storm quiz"], fav_stars:["星图叠合","Star chart"], fav_bottles:["漂流瓶","Bottles"], fav_final:["终局","Finale"],
+  // host
+  hostTitle:["主持人控制台","Host console"], answersLock:["答案与主持人权限","Answers and host rights"], pw:["主持人密码","Host password"], unlock:["解锁","Unlock"], pwBad:["密码不对","Wrong password"],
+  unlockedLocal:["已在本机解锁。","Unlocked on this device."], revealAll:["向所有测试员公开答案","Reveal answers to all testers"], hideAll:["收回公开","Hide answers again"], revealedAll:["答案已公开","Answers are public"],
+  needHost:["先输入主持人密码，才能开始、广播和打分。","Enter the host password to start, broadcast and score."],
+  session:["计时","Clock"], start:["开始","Start"], restart:["重新开始（清零）","Restart (clear)"], end:["结束","End"],
+  broadcast:["广播","Broadcast"], b_press:["抓壮丁（26′）","Press gang (26′)"], b_storm:["暴风雨（34′）","Storm (34′)"], b_stars:["放星图（39′）","Star chart (39′)"], b_wave1:["漂流瓶第 1 批（16′）","Bottles wave 1 (16′)"], b_wave2:["漂流瓶第 2 批（30′）","Bottles wave 2 (30′)"],
+  custom:["自定义广播","Custom message"], send:["发送","Send"], clearBc:["清除","Clear"], dismiss:["知道了","Dismiss"],
+  pmTitle:["港务长打分","Port Masters"], pmLead:["船到港完成挑战后点 2（通过）或 3（出色）；点 0 撤销。","When a ship finishes a challenge, tap 2 (pass) or 3 (excellent); 0 clears it."],
+  quizTitle:["暴风雨抢答","Storm quiz"], prev:["上一题","Previous"], next:["下一题","Next"], openQuiz:["开始抢答","Start quiz"], closeQuiz:["结束抢答","End quiz"], award:["这题谁答对","Who got it"], nobody:["没人","Nobody"],
+  board:["实时进度","Live progress"], boardLead:["格子里是解出用时（分:秒）。绿色在累计目标内，黄色超时 50% 以内，红色超出更多。H = 用了几次提示，✕ = 错答次数。","Cells show solve time. Green within cumulative target, amber up to 50% over, red beyond. H = hints, ✕ = wrong tries."],
+  coinsTitle:["金币榜","Doubloons"], coinsLead:["正式活动里金币要保密，晚宴才公布。","In the real event, keep this secret until dinner."],
+  c_chest:["开箱","Chest"], c_decode:["解港","Decode"], c_help:["帮人","Helping"], c_ports:["港口","Ports"], c_quiz:["抢答","Quiz"], c_bottles:["漂流瓶","Bottles"], c_final:["终局","Finale"], c_hints:["超额提示","Extra hints"], c_total:["合计","Total"],
+  results:["反馈汇总","Feedback summary"], responses:["份反馈","responses"], finished:["终局用时","Finale time"], inTime:["按时","In time"], overTime:["超时","Over"], noData:["还没有反馈","No feedback yet"], comments:["文字反馈","Written feedback"],
+  protocol:["测试安排","Test plan"], prep:["准备","Before the test"], watch:["观察重点","What to watch"], solutions:["完整答案","Full solutions"], lockedAnswers:["输入主持人密码后可见。","Visible after entering the host password."],
+  team:["船","Ship"], notes:["观察笔记","Notes"], saveNotes:["保存笔记","Save notes"],
+};
+let lang = "zh";
+const t = k => (UI[k] ? UI[k][lang === "zh" ? 0 : 1] : k);
+const L = o => (o == null ? "" : typeof o === "string" ? o : (o[lang] ?? o.zh ?? ""));
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LS = {
+  get(k, d){ try { const v = localStorage.getItem("aod2_" + k); return v == null ? d : JSON.parse(v); } catch(e){ return d; } },
+  set(k, v){ try { localStorage.setItem("aod2_" + k, JSON.stringify(v)); } catch(e){} }
+};
+lang = LS.get("lang", "zh");
+
+// ---------------------------------------------------------------- crypto
+const te = new TextEncoder();
+async function sha(b){ return new Uint8Array(await crypto.subtle.digest("SHA-256", b)); }
+async function hexHash(s){ return Array.from(await sha(te.encode(s)), b => b.toString(16).padStart(2, "0")).join(""); }
+const decCache = new Map();
+async function dec(pidc, key, b64){
+  const ck = pidc + "|" + key + "|" + b64.slice(0, 24);
+  if (decCache.has(ck)) return decCache.get(ck);
+  let res = null;
+  try {
+    const K = await sha(te.encode("aod|" + pidc + "|" + key));
+    const bin = atob(b64); const ct = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) ct[i] = bin.charCodeAt(i);
+    const out = new Uint8Array(ct.length);
+    for (let b = 0; b * 32 < ct.length; b++){
+      const blk = new Uint8Array(36); blk.set(K); blk[32]=(b>>>24)&255; blk[33]=(b>>>16)&255; blk[34]=(b>>>8)&255; blk[35]=b&255;
+      const ks = await sha(blk);
+      for (let j = 0; j < 32 && b*32+j < ct.length; j++) out[b*32+j] = ct[b*32+j] ^ ks[j];
+    }
+    const s = new TextDecoder().decode(out);
+    if (s.startsWith("OK|")) res = JSON.parse(s.slice(3));
+  } catch(e){ res = null; }
+  decCache.set(ck, res); return res;
+}
+const NUMW = {ZERO:"0",ONE:"1",TWO:"2",THREE:"3",FOUR:"4",FIVE:"5",SIX:"6",SEVEN:"7",EIGHT:"8",NINE:"9","零":"0","一":"1","二":"2","三":"3","四":"4","五":"5","六":"6","七":"7","八":"8","九":"9"};
+const DIRS = {"→":"R","←":"L","↑":"U","↓":"D","右":"R","左":"L","上":"U","下":"D","东":"R","西":"L","北":"U","南":"D"};
+function norm(s, g){
+  s = String(s || "").toUpperCase();
+  if (g && g.dir) s = s.replace(/[→←↑↓右左上下东西北南]/g, c => DIRS[c]);
+  s = s.replace(/[^A-Z0-9一-鿿]/g, "");
+  if (g && g.numwords && NUMW[s]) s = NUMW[s];
+  return s;
+}
+async function openBlobs(pidc, blobs, key){ for (const b of blobs || []){ const o = await dec(pidc, key, b); if (o) return o; } return null; }
+
+// ---------------------------------------------------------------- store
+const S = {view: LS.get("view","tester"), team: LS.get("team",0), session:{}, reveal:null, broadcast:null, quiz:{}, bottlesWave:0, notes:{},
+  ev:[], fb:{}, isHost:false, mode:"local", solKey: LS.get("solKey", null), sol:null, drafts:{}, msgs:{}, dismissedBc: LS.get("dismissedBc", 0)};
+const SB = DATA.backend || null; const PFX = SB ? (SB.prefix || "") : "";
+let hostToken = LS.get("hostToken", null);
+const docs = SB ? {} : LS.get("localdb", {});
+const subs = [];
+const emit = () => { if (!SB) LS.set("localdb", docs); subs.forEach(f => f()); };
+const toRemote = p => { const i = p.indexOf("/"); return p.slice(0, i + 1) + PFX + p.slice(i + 1); };
+const fromRemote = p => { const i = p.indexOf("/"); const rest = p.slice(i + 1); return rest.startsWith(PFX) ? p.slice(0, i + 1) + rest.slice(PFX.length) : null; };
+const hdr = () => ({apikey: SB.key, Authorization: "Bearer " + SB.key, "Content-Type": "application/json"});
+async function remoteSet(path, obj){
+  const rp = toRemote(path); let r;
+  if (path.startsWith("control/")) r = await fetch(SB.url + "/rest/v1/rpc/aod_host_set", {method:"POST", headers:hdr(), body: JSON.stringify({p_path: rp, p_data: obj, p_token: hostToken || ""})});
+  else r = await fetch(SB.url + "/rest/v1/aod_docs", {method:"POST", headers: Object.assign(hdr(), {Prefer:"resolution=merge-duplicates,return=minimal"}), body: JSON.stringify({path: rp, data: obj})});
+  if (!r.ok) throw new Error("save failed (" + r.status + ")");
+}
+let since = null;
+async function poll(){
+  try {
+    let q = SB.url + "/rest/v1/aod_docs?select=path,data,updated_at&order=updated_at.asc&limit=1000";
+    if (since) q += "&updated_at=gt." + encodeURIComponent(new Date(Date.parse(since) - 5000).toISOString());
+    const r = await fetch(q, {headers: hdr()}); if (!r.ok) throw new Error(r.status);
+    const rows = await r.json(); let changed = false;
+    for (const row of rows){
+      if (!since || Date.parse(row.updated_at) > Date.parse(since)) since = row.updated_at;
+      const p = fromRemote(row.path); if (!p) continue;
+      if (JSON.stringify(docs[p]) !== JSON.stringify(row.data)){ docs[p] = row.data; changed = true; }
+    }
+    if (S.mode !== "shared"){ S.mode = "shared"; changed = true; }
+    if (changed) emit();
+  } catch(e){ if (S.mode !== "local"){ S.mode = "local"; schedule(); } }
+  setTimeout(poll, 2000);
+}
+const store = {
+  async set(path, obj){
+    const prev = docs[path]; docs[path] = JSON.parse(JSON.stringify(obj)); emit();
+    if (SB){ try { await remoteSet(path, obj); } catch(e){ if (prev === undefined) delete docs[path]; else docs[path] = prev; emit(); throw e; } }
+  },
+  watchDoc(path, cb){ const f = () => cb(docs[path] || null); subs.push(f); f(); },
+  watchCol(col, cb){ const f = () => cb(Object.keys(docs).filter(p => p.startsWith(col + "/")).map(p => Object.assign({_id: p.slice(col.length + 1)}, docs[p]))); subs.push(f); f(); }
+};
+window.addEventListener("storage", e => { if (!SB && e.key === "aod2_localdb"){ try { Object.assign(docs, JSON.parse(e.newValue || "{}")); subs.forEach(f => f()); } catch(_){} } });
+function subscribeAll(){
+  store.watchDoc("control/session", d => { S.session = d || {}; schedule(); });
+  store.watchDoc("control/reveal", d => { S.reveal = d; loadSol(); });
+  store.watchDoc("control/broadcast", d => { S.broadcast = d; schedule(); });
+  store.watchDoc("control/quiz", d => { S.quiz = d || {}; schedule(); });
+  store.watchDoc("control/bottles", d => { S.bottlesWave = (d && d.wave) || 0; schedule(); });
+  store.watchDoc("control/notes", d => { S.notes = d || {}; schedule(); });
+  store.watchCol("ev", rows => { S.ev = rows; schedule(); });
+  store.watchCol("fb", rows => { const m = {}; rows.forEach(r => m[r._id] = r); S.fb = m; schedule(); });
+}
+
+// ---------------------------------------------------------------- derived
+const run = () => S.session.id || "run0";
+const started = () => S.session.startedAt || null;
+const evs = () => S.ev.filter(e => e.run === run());
+const P = id => DATA.puzzles.find(p => p.id === id);
+const teamsOf = p => p.teams || DATA.teams;
+function solveEv(pid, team, shared){
+  const list = evs().filter(e => e.type === "solve" && e.pid === pid).sort((a,b) => a.ts - b.ts);
+  return shared ? (list[0] || null) : (list.find(e => e.team === team) || null);
+}
+const isSolved = (p, team) => !!solveEv(p.id, team, p.shared);
+const elapsed = ts => started() ? Math.max(0, ts - started()) : null;
+const mmss = ms => { if (ms == null) return "–"; const s = Math.round(ms/1000); return Math.floor(s/60) + ":" + String(s%60).padStart(2,"0"); };
+const hintsUsed = (pid, team) => evs().filter(e => e.type === "hint" && e.pid === pid && e.team === team).map(e => e.level);
+const totalHints = team => evs().filter(e => e.type === "hint" && e.team === team).length;
+const wrongs = (pid, team) => evs().filter(e => e.type === "wrong" && e.pid === pid && e.team === team).length;
+const portScore = (team, port) => { const e = docs["ev/" + run() + "_port_" + team + "_" + port]; return e ? (e.score || 0) : 0; };
+const charted = team => !!docs["ev/" + run() + "_chart_" + team];
+const quizWinner = i => { const e = docs["ev/" + run() + "_quiz_" + i]; return e ? e.team : 0; };
+const bottleEv = id => solveEv(id, 0, true);
+const ship = n => L(DATA.ships[n]);
+
+function coins(team){
+  const c = {chest:0, decode:0, help:0, ports:0, quiz:0, bottles:0, final:0, hints:0};
+  const chestOrder = DATA.teams.map(n => [n, solveEv("A-chest", n, false)]).filter(x => x[1]).sort((a,b) => a[1].ts - b[1].ts).map(x => x[0]);
+  const place = chestOrder.indexOf(team);
+  if (place >= 0) c.chest = 2 + ([3,2,1][place] || 0);
+  if (solveEv("B1", team, false)) c.decode = 2;
+  DATA.teams.forEach(n => { if (String(DATA.keyholder[n]) === String(team) && solveEv("B1", n, false)) c.help += 2; });
+  DATA.ports.forEach(p => c.ports += portScore(team, p));
+  DATA.quiz.forEach((_, i) => { if (quizWinner(i) === team) c.quiz += 1; });
+  DATA.bottles.forEach(b => { const e = bottleEv(b.id); if (e && e.team === team) c.bottles += 1; });
+  const fe = solveEv("D1", 0, true);
+  if (fe){ if (fe.team === team) c.final += 2; const el = elapsed(fe.ts); if (el != null && el <= DATA.onTime * 60000) c.final += 3; }
+  c.hints = -Math.max(0, totalHints(team) - (DATA.hintTokens[team] || 0));
+  c.total = Object.values(c).reduce((a,b) => a + b, 0);
+  return c;
+}
+
+// ---------------------------------------------------------------- solutions
+async function loadSol(){
+  let key = S.solKey; if (!key && S.reveal && S.reveal.open) key = S.reveal.key;
+  S.sol = key ? await dec("SOL#0", key, DATA.sol) : null; schedule();
+}
+const answersVisible = () => !!S.sol;
+const hostUnlocked = () => !!(S.solKey && S.sol);
+S.isHost = SB ? !!hostToken : true;
+
+// ---------------------------------------------------------------- writes
+const uid = () => Math.random().toString(36).slice(2, 10);
+async function logEv(team, pid, type, extra){
+  const id = type === "solve" ? `${run()}_s_${team}_${pid}` : type === "hint" ? `${run()}_h_${team}_${pid}_${extra.level}` : `${run()}_w_${team}_${pid}_${uid()}`;
+  try { await store.set("ev/" + id, Object.assign({run: run(), team, pid, type, ts: Date.now()}, extra || {})); } catch(e){ flash(pid, e.message, true); }
+}
+async function setEv(id, obj){ try { await store.set("ev/" + run() + "_" + id, Object.assign({run: run(), ts: Date.now()}, obj)); } catch(e){ flash("host", e.message, true); } }
+async function control(name, obj){ try { await store.set("control/" + name, obj); } catch(e){ flash("host", lang === "zh" ? "需要主持人密码" : "Host password needed", true); } }
+function flash(k, text, bad){ S.msgs[k] = {text, bad}; schedule(); setTimeout(() => { if (S.msgs[k] && S.msgs[k].text === text){ delete S.msgs[k]; schedule(); } }, 3500); }
+async function submitGate(p, team, raw){
+  const key = norm(raw, p.gate); if (!key) return;
+  const bt = p.gate.blobs[team] != null ? team : 0;
+  const out = await openBlobs(`${p.id}#${bt}`, p.gate.blobs[bt], key);
+  if (out){ S.drafts[p.id] = ""; await logEv(p.shared ? team : team, p.id, "solve", {key}); }
+  else { await logEv(team, p.id, "wrong", {}); flash(p.id, t("wrong"), true); }
+}
+async function submitBottle(b, team, raw){
+  const key = norm(raw, {numwords:true}); if (!key) return;
+  const out = await openBlobs(`${b.id}#0`, b.blobs, key);
+  if (out){ S.drafts[b.id] = ""; await logEv(team, b.id, "solve", {key}); } else { await logEv(team, b.id, "wrong", {}); flash(b.id, t("wrong"), true); }
+}
+async function revealOf(p, team){
+  const e = solveEv(p.id, team, p.shared); if (!e || !p.gate) return null;
+  const bt = p.gate.blobs[team] != null ? team : 0;
+  return openBlobs(`${p.id}#${bt}`, p.gate.blobs[bt], e.key);
+}
+
+// ---------------------------------------------------------------- render helpers
+let rq = false;
+function schedule(){ if (!rq){ rq = true; requestAnimationFrame(() => { rq = false; render(); }); } }
+function keepFocus(fn){
+  const a = document.activeElement; const id = a && a.id; let ss = null, se = null;
+  if (id && "selectionStart" in a){ try { ss = a.selectionStart; se = a.selectionEnd; } catch(e){} }
+  fn();
+  if (id){ const n = document.getElementById(id); if (n){ n.focus({preventScroll:true}); if (ss != null){ try { n.setSelectionRange(ss, se); } catch(e){} } } }
+}
+const FC = {R:"var(--flagR)",B:"var(--flagB)",Y:"var(--flagY)",W:"var(--flagW)",K:"var(--flagK)"};
+function flagSVG(c){
+  const r = (x,y,w,h,k) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${FC[k]}"/>`, pg = (p,k) => `<polygon points="${p}" fill="${FC[k]}"/>`;
+  const sal = k => `<path d="M0 0L30 30M30 0L0 30" stroke="${FC[k]}" stroke-width="6"/>`, crs = k => r(12,0,6,30,k) + r(0,12,30,6,k);
+  let s = "";
+  switch(c){
+    case "A": s = r(0,0,15,30,"W") + pg("15,0 30,0 21,15 30,30 15,30","B"); break;
+    case "B": s = pg("0,0 30,0 21,15 30,30 0,30","R"); break;
+    case "C": s = r(0,0,30,6,"B")+r(0,6,30,6,"W")+r(0,12,30,6,"R")+r(0,18,30,6,"W")+r(0,24,30,6,"B"); break;
+    case "D": s = r(0,0,30,30,"Y")+r(0,7.5,30,15,"B"); break;
+    case "E": s = r(0,0,30,15,"B")+r(0,15,30,15,"R"); break;
+    case "F": s = r(0,0,30,30,"W")+pg("15,0 30,15 15,30 0,15","R"); break;
+    case "G": for (let i=0;i<6;i++) s += r(i*5,0,5,30,i%2?"B":"Y"); break;
+    case "H": s = r(0,0,15,30,"W")+r(15,0,15,30,"R"); break;
+    case "I": s = r(0,0,30,30,"Y")+`<circle cx="15" cy="15" r="7" fill="${FC.K}"/>`; break;
+    case "J": s = r(0,0,30,30,"B")+r(0,10,30,10,"W"); break;
+    case "K": s = r(0,0,15,30,"Y")+r(15,0,15,30,"B"); break;
+    case "L": s = r(0,0,15,15,"Y")+r(15,0,15,15,"K")+r(0,15,15,15,"K")+r(15,15,15,15,"Y"); break;
+    case "M": s = r(0,0,30,30,"B")+sal("W"); break;
+    case "N": for (let i=0;i<4;i++) for (let j=0;j<4;j++) s += r(j*7.5,i*7.5,7.5,7.5,(i+j)%2?"W":"B"); break;
+    case "O": s = pg("0,0 0,30 30,30","Y")+pg("0,0 30,0 30,30","R"); break;
+    case "P": s = r(0,0,30,30,"B")+r(10,10,10,10,"W"); break;
+    case "Q": s = r(0,0,30,30,"Y"); break;
+    case "R": s = r(0,0,30,30,"R")+crs("Y"); break;
+    case "S": s = r(0,0,30,30,"W")+r(10,10,10,10,"B"); break;
+    case "T": s = r(0,0,10,30,"R")+r(10,0,10,30,"W")+r(20,0,10,30,"B"); break;
+    case "U": s = r(0,0,15,15,"R")+r(15,0,15,15,"W")+r(0,15,15,15,"W")+r(15,15,15,15,"R"); break;
+    case "V": s = r(0,0,30,30,"W")+sal("R"); break;
+    case "W": s = r(0,0,30,30,"B")+r(6,6,18,18,"W")+r(11,11,8,8,"R"); break;
+    case "X": s = r(0,0,30,30,"W")+crs("B"); break;
+    case "Y": s = r(0,0,30,30,"Y"); for (let k=-30;k<60;k+=8) s += `<path d="M${k} 30L${k+30} 0" stroke="${FC.R}" stroke-width="4"/>`; break;
+    case "Z": s = pg("0,0 30,0 15,15","Y")+pg("30,0 30,30 15,15","B")+pg("0,30 30,30 15,15","R")+pg("0,0 0,30 15,15","K"); break;
+  }
+  return `<svg viewBox="0 0 30 30" role="img" aria-label="flag ${c}"><defs><clipPath id="fc${c}"><rect width="30" height="30"/></clipPath></defs><g clip-path="url(#fc${c})">${s}</g><rect x=".25" y=".25" width="29.5" height="29.5" fill="none" stroke="var(--line)" stroke-width=".5"/></svg>`;
+}
+function hydrate(root){
+  root.querySelectorAll("[data-flags]").forEach(el => { el.innerHTML = el.dataset.flags.split("").map(flagSVG).join(""); });
+  root.querySelectorAll("[data-flagchart]").forEach(el => { el.className = "flagchart"; el.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(c => `<figure>${flagSVG(c)}<figcaption>${c}</figcaption></figure>`).join(""); });
+}
+function starSVG(list){
+  const pts = []; list.forEach(n => { const s = DATA.stars[n]; s.stars.concat(s.decoy).forEach(p => pts.push(p)); });
+  const star = ([x,y]) => { const cx = 15 + x*25, cy = 15 + y*25; return `<path d="M${cx} ${cy-7}L${cx+2} ${cy-2}L${cx+7} ${cy}L${cx+2} ${cy+2}L${cx} ${cy+7}L${cx-2} ${cy+2}L${cx-7} ${cy}L${cx-2} ${cy-2}Z" fill="var(--starInk)"/>`; };
+  return `<svg viewBox="0 0 230 230" role="img" aria-label="star chart">${pts.map(star).join("")}</svg>`;
+}
+
+// ---------------------------------------------------------------- tester view
+function picker(){
+  return `<section class="stack"><h1>${t("pickTitle")}</h1><p class="muted">${t("pickLead")}</p><div class="teampick">` +
+    DATA.teams.map(n => `<button type="button" data-team="${n}" style="--c:${DATA.colors[n]}"><b>${esc(ship(n))}</b><span>${DATA.players[n]} ${t("players")} · ${DATA.hintTokens[n]} ${t("tokens")}</span><span>${t("home")}: ${esc(L(DATA.portName[DATA.home[n]]))}</span></button>`).join("") + "</div></section>";
+}
+function clockHTML(){
+  if (!started()) return `<span class="muted">${t("notStarted")}</span>`;
+  const end = S.session.endedAt || Date.now(); const ms = end - started();
+  return `<span class="clock ${ms > DATA.minutes*60000 ? "over" : ""}" id="clock">${mmss(ms)}</span> <span class="muted">/ ${DATA.minutes}:00${S.session.endedAt ? " · " + t("ended") : ""}</span>`;
+}
+function bannerHTML(){
+  const b = S.broadcast; if (!b || !b.ts || b.ts <= S.dismissedBc) return "";
+  return `<div class="banner" role="status"><div style="flex:1"><p class="eyebrow">${t("broadcast")}</p><p>${esc(L(b.text))}</p></div><button class="btn small" type="button" data-act="dismissBc">${t("dismiss")}</button></div>`;
+}
+function hintBlock(p, team){
+  if (!p.hints) return "";
+  const used = hintsUsed(p.id, team); const next = used.length < p.hints.length ? used.length + 1 : 0;
+  const left = Math.max(0, (DATA.hintTokens[team] || 0) - totalHints(team));
+  let h = `<div class="hintrow">`;
+  [...used].sort().forEach(l => { h += `<div class="hint"><b>${t("hint")} ${l}</b> · ${esc(L(p.hints[l-1]))}</div>`; });
+  if (next) h += `<button class="btn small" type="button" data-hint="${p.id}" data-level="${next}">${t("hint")} ${next}/${p.hints.length}${left ? "" : " " + t("hintCost")}</button>`;
+  return h + "</div>";
+}
+function answerFor(p, team){ if (!S.sol || !S.sol.keys[p.id]) return null; const k = S.sol.keys[p.id]; return k[team] ?? k[0] ?? null; }
+function gateHTML(p){
+  const v = S.drafts[p.id] || "";
+  return `<form class="gate" data-gate="${p.id}"><label for="in-${p.id}">${esc(L(p.gate.label))}</label><input id="in-${p.id}" autocomplete="off" spellcheck="false" placeholder="${esc(L(p.gate.ph))}" value="${esc(v)}"><button class="btn primary" type="submit">${t("submit")}</button></form>`;
+}
+function portsHTML(team){
+  const order = []; const i0 = DATA.ports.indexOf(DATA.home[team]);
+  for (let k = 0; k < 4; k++) order.push(DATA.ports[(i0 + k) % 4]);
+  return `<p class="eyebrow">${t("circuit")}</p><div class="ports">` + order.map((port, k) => {
+    const sc = portScore(team, port);
+    return `<div class="port ${sc ? "done" : ""}"><div class="row" style="justify-content:space-between"><span class="step">${k+1} · ${esc(L(DATA.portName[port]))}${k === 0 ? " · " + t("home") : ""}</span>${sc ? `<span class="stamp">${DATA.portLetter[port]}</span>` : ""}</div>` +
+      `<div class="note">${L(DATA.portChallenge[port])}</div>${sc ? `<span class="chip ok">+${sc} ${t("doubloons")}</span>` : `<span class="chip">${t("stampWait")}</span>`}</div>`;
+  }).join("") + "</div>";
+}
+function quizHTML(){
+  const q = S.quiz || {};
+  if (!q.open) return `<p class="muted">${t("quizIdle")}</p>`;
+  const i = q.idx || 0; const w = quizWinner(i);
+  return `<p class="eyebrow">${t("quizNow").replace("%n", i + 1)} / ${DATA.quiz.length}</p><p class="quizq">${esc(L(DATA.quiz[i]))}</p>${w ? `<p class="chip ok">${t("quizWon")}: ${esc(ship(w))}</p>` : ""}`;
+}
+function starsHTML(team){
+  const all = DATA.teams.every(charted); const missing = DATA.teams.filter(n => !charted(n));
+  let h = `<div class="starbox"><div><p class="eyebrow">${t("yourChart")}</p>${starSVG([team])}</div>`;
+  if (all) h += `<div><p class="eyebrow">${t("fleetChart")}</p>${starSVG(DATA.teams)}<p class="note">${lang === "zh" ? "第五枚印章" : "the fifth seal"}</p></div>`;
+  h += `</div>`;
+  h += charted(team) ? `<span class="chip ok">✓ ${t("placed")}</span>` : `<button class="btn primary" type="button" data-act="chart">${t("placeChart")}</button>`;
+  if (!all) h += `<p class="note">${t("waitingCharts")} ${missing.map(n => esc(ship(n))).join(" · ")}</p>`;
+  return h;
+}
+function cardHTML(p, team){
+  if (!teamsOf(p).includes(team)) return "";
+  const req = p.requires ? P(p.requires) : null;
+  const locked = req && !isSolved(req, team);
+  const ev = p.gate ? solveEv(p.id, team, p.shared) : null; const solved = !!ev;
+  const chips = [`<span class="chip ${p.stage === "cross" || p.stage === "fleet" ? "cross" : ""}">${t("act_" + p.stage)}</span>`, `<span class="chip">${t("target")} ${p.target} ${t("min")}</span>`];
+  if (solved) chips.push(`<span class="chip ok">✓ ${t("solved")} ${mmss(elapsed(ev.ts))}</span>`);
+  let h = `<article class="card ${solved ? "solved" : ""} ${locked ? "locked" : ""}" id="card-${p.id}"><div class="card-h"><span class="pid">${p.id}</span><h3>${esc(L(p.title))}</h3>${chips.join("")}</div>`;
+  if (locked) return h + `<p class="muted">${t("lockedBy")} ${req.id} · ${esc(L(req.title))}</p></article>`;
+  if (p.shared) h += `<p class="note">${t("sharedP")}</p>`;
+  h += `<div>${L(p.body[team] || p.body[0])}</div>`;
+  if (p.kind === "chant"){
+    const cur = docs["ev/" + run() + "_chant_" + team];
+    const v = S.drafts.chant ?? (cur ? cur.text : "");
+    h += `<form class="gate" data-act="chant"><input id="in-chant" style="text-transform:none" maxlength="60" value="${esc(v)}"><button class="btn" type="submit">${t("save")}</button>${cur ? `<span class="chip ok">✓ ${t("saved")}</span>` : ""}</form>`;
+  }
+  if (p.kind === "ports") h += portsHTML(team);
+  if (p.kind === "quiz") h += quizHTML();
+  if (p.kind === "stars") h += starsHTML(team);
+  if (p.gate && !solved) h += gateHTML(p);
+  const m = S.msgs[p.id]; if (m) h += `<p class="msg ${m.bad ? "bad" : ""}">${esc(m.text)}</p>`;
+  if (solved) h += `<div class="reveal" data-reveal="${p.id}"></div>`;
+  if (p.gate && !solved) h += hintBlock(p, team);
+  const ans = answerFor(p, team); if (ans && answersVisible()) h += `<div class="answer"><b>${t("answer")}</b> · <span class="mono">${esc(ans)}</span></div>`;
+  return h + "</article>";
+}
+function bottlesHTML(team){
+  const wave = S.bottlesWave || 0;
+  const open = DATA.bottles.filter(b => b.wave <= wave);
+  if (!open.length) return `<p class="muted">${t("bottlesClosed")}</p>`;
+  return `<div class="bottles">` + open.map((b, i) => {
+    const e = bottleEv(b.id); const n = DATA.bottles.indexOf(b) + 1;
+    let h = `<div class="bottle ${e ? "won" : ""}" id="card-${b.id}"><p class="eyebrow">${t("bottle")} ${n}</p><p>${esc(L(b.riddle))}</p>`;
+    if (e) h += `<span class="chip ok">${t("wonBy")} ${esc(ship(e.team))}</span>`;
+    else h += `<form class="gate" data-bottle="${b.id}"><input id="in-${b.id}" autocomplete="off" value="${esc(S.drafts[b.id] || "")}"><button class="btn" type="submit">${t("submit")}</button></form>`;
+    const m = S.msgs[b.id]; if (m) h += `<p class="msg bad">${esc(m.text)}</p>`;
+    if (answersVisible() && S.sol.keys[b.id]) h += `<div class="answer mono">${esc(S.sol.keys[b.id][0])}</div>`;
+    return h + "</div>";
+  }).join("") + "</div>";
+}
+function feedbackHTML(team){
+  const id = "A2_" + team; const saved = S.fb[id] || {};
+  const d = S.drafts["fb"] || (S.drafts["fb"] = Object.assign({}, saved));
+  const scale = (f, sc) => `<div><label>${t(f)}</label><div class="scale">${t(sc)}</div><div class="rating">` + [1,2,3,4,5].map(n => `<button type="button" data-fb="${f}" data-v="${n}" aria-pressed="${Number(d[f]) === n}">${n}</button>`).join("") + "</div></div>";
+  const favs = ["chest","ports","press","quiz","stars","bottles","final"];
+  const stuckOpts = [`<option value="">${t("none")}</option>`].concat(DATA.puzzles.filter(p => teamsOf(p).includes(team)).map(p => `<option value="${p.id}" ${d.stuck === p.id ? "selected" : ""}>${p.id} · ${esc(L(p.title))}</option>`)).join("");
+  return `<section class="panel stack" id="feedback"><h2 style="margin:0">${t("feedback")}</h2><p class="muted">${t("fbLead")}</p><form class="fbgrid" data-act="fb">` +
+    scale("difficulty","diffScale") + scale("interactivity","interScale") + scale("fun","funScale") + scale("clarity","clarScale") + scale("pace","paceScale") +
+    `<div><label for="fb-fav">${t("favorite")}</label><br><select id="fb-fav" data-fbf="favorite"><option value=""></option>${favs.map(f => `<option value="${f}" ${d.favorite === f ? "selected" : ""}>${t("fav_" + f)}</option>`).join("")}</select></div>` +
+    `<div><label for="fb-stuck">${t("stuck")}</label><br><select id="fb-stuck" data-fbf="stuck">${stuckOpts}</select></div>` +
+    `<div><label for="fb-change">${t("change1")}</label><textarea id="fb-change" data-fbf="change">${esc(d.change || "")}</textarea></div>` +
+    `<div><label for="fb-comment">${t("comment")}</label><textarea id="fb-comment" data-fbf="comment">${esc(d.comment || "")}</textarea></div>` +
+    `<div class="row"><button class="btn primary" type="submit">${t("saveFb")}</button>${saved.ts ? `<span class="chip ok">✓ ${t("saved")}</span>` : ""}</div></form></section>`;
+}
+function testerView(){
+  if (!S.team) return picker();
+  const team = S.team; const c = coins(team);
+  const left = Math.max(0, (DATA.hintTokens[team] || 0) - totalHints(team));
+  let h = `<div class="row" style="justify-content:space-between"><p class="eyebrow" style="margin:0"><span class="shipdot" style="--c:${DATA.colors[team]}"></span>${t("youAre")}: ${esc(ship(team))}</p><button class="btn small" type="button" data-act="changeTeam">${t("change")}</button></div>`;
+  h += bannerHTML();
+  h += `<section class="panel stack" style="margin-top:10px"><div class="card-h"><h1>${t("brand")}</h1><div>${clockHTML()}</div></div>` +
+    `<div class="row"><span class="coins">${c.total}</span><span class="muted">${t("doubloons")}</span><span class="chip">${t("hintLeft")} ${left}</span></div>` +
+    `<div class="story">${lang === "zh" ? "1519 年，四艘船准备寻找香料群岛。老船长把航海图撕成四片，锁进四个船长箱，每把钥匙都在另一条船上。开饭前，整支舰队要抵达终点。" : "1519. Four ships set out for the Spice Islands. The Admiral tore the chart into four and locked each piece in a chest whose key sits on another ship. The fleet must reach its destination before dinner."}</div></section>`;
+  ["intra","cross","fleet","final"].forEach(stage => {
+    const cards = DATA.puzzles.filter(p => p.stage === stage).map(p => cardHTML(p, team)).filter(Boolean);
+    if (cards.length) h += `<div class="act"><h3>${t("act_" + stage)}</h3><div class="rule"></div></div><div class="stack">${cards.join("")}</div>`;
+  });
+  h += `<div class="act"><h3>${t("act_side")}</h3><div class="rule"></div></div>${bottlesHTML(team)}`;
+  if (answersVisible()) h += `<h2>${t("solutions")}</h2><div class="panel tw">${L(S.sol.html)}</div>`;
+  h += `<div style="height:20px"></div>` + feedbackHTML(team);
+  return h;
+}
+
+// ---------------------------------------------------------------- host view
+const dis = () => (S.isHost ? "" : "disabled");
+function hostLock(){
+  let h = `<section class="panel stack"><div class="card-h"><h3>${t("answersLock")}</h3>${hostUnlocked() ? `<span class="chip ok">✓</span>` : ""}${S.reveal && S.reveal.open ? `<span class="chip warn">${t("revealedAll")}</span>` : ""}</div>`;
+  if (!hostUnlocked()){
+    h += `<form class="lockbox" data-act="unlock"><label for="pw" class="muted">${t("pw")}</label><input id="pw" type="password" autocomplete="off"><button class="btn primary" type="submit">${t("unlock")}</button></form><p class="note">${t("needHost")}</p>`;
+    const m = S.msgs.pw; if (m) h += `<p class="msg bad">${esc(m.text)}</p>`;
+  } else {
+    h += `<p class="muted">${t("unlockedLocal")}</p><div class="row">` + (S.reveal && S.reveal.open ? `<button class="btn" type="button" data-act="hideAll">${t("hideAll")}</button>` : `<button class="btn warn" type="button" data-act="revealAll">${t("revealAll")}</button>`) + `</div>`;
+  }
+  const m = S.msgs.host; if (m) h += `<p class="msg bad">${esc(m.text)}</p>`;
+  return h + "</section>";
+}
+function hostClock(){
+  return `<section class="panel stack"><div class="card-h"><h3>${t("session")}</h3><div>${clockHTML()}</div></div><div class="row">` +
+    `<button class="btn primary" type="button" data-act="start" ${dis()}>${started() ? t("restart") : t("start")}</button>` +
+    `<button class="btn" type="button" data-act="end" ${started() && !S.session.endedAt ? dis() : "disabled"}>${t("end")}</button></div></section>`;
+}
+function hostBroadcast(){
+  const b = (k, act) => `<button class="btn" type="button" data-bc="${act}" ${dis()}>${t(k)}</button>`;
+  return `<section class="panel stack"><h3>${t("broadcast")}</h3><div class="row">${b("b_wave1","wave1")}${b("b_press","press")}${b("b_wave2","wave2")}${b("b_storm","storm")}${b("b_stars","stars")}</div>` +
+    `<form class="row" data-act="bcCustom"><input id="bc-text" style="flex:1 1 220px" placeholder="${t("custom")}" value="${esc(S.drafts["bc-text"] || "")}"><button class="btn primary" type="submit" ${dis()}>${t("send")}</button><button class="btn" type="button" data-act="bcClear" ${dis()}>${t("clearBc")}</button></form>` +
+    (S.broadcast && S.broadcast.ts ? `<p class="note">${esc(L(S.broadcast.text))}</p>` : "") + `</section>`;
+}
+function hostPorts(){
+  let h = `<section class="panel stack"><h3>${t("pmTitle")}</h3><p class="note">${t("pmLead")}</p><div class="tw"><table class="pm"><tr><th>${t("team")}</th>` + DATA.ports.map(p => `<th>${esc(L(DATA.portName[p]))} · ${DATA.portLetter[p]}</th>`).join("") + `</tr>`;
+  DATA.teams.forEach(n => {
+    h += `<tr><td><span class="shipdot" style="--c:${DATA.colors[n]}"></span>${esc(ship(n))}</td>` + DATA.ports.map(p => {
+      const sc = portScore(n, p);
+      return `<td><div class="row" style="justify-content:center">` + [0,2,3].map(v => `<button class="btn small" type="button" data-port="${n}|${p}|${v}" aria-pressed="${sc === v && v > 0}" ${dis()}>${v}</button>`).join("") + `</div></td>`;
+    }).join("") + `</tr>`;
+  });
+  h += `</table></div>`;
+  if (answersVisible()) h += `<details><summary>${lang === "zh" ? "马六甲判断题答案" : "Malacca answers"}</summary>${L(S.sol.malacca)}</details>`;
+  return h + "</section>";
+}
+function hostQuiz(){
+  const q = S.quiz || {}; const i = q.idx || 0; const w = quizWinner(i);
+  let h = `<section class="panel stack"><div class="card-h"><h3>${t("quizTitle")}</h3><span class="chip">${i+1}/${DATA.quiz.length}</span></div>`;
+  h += `<p class="quizq">${esc(L(DATA.quiz[i]))}</p>`;
+  if (answersVisible()) h += `<p class="answer">${t("answer")}: ${esc(L(S.sol.quiz[i]))}</p>`;
+  h += `<div class="row"><button class="btn" type="button" data-quiz="prev" ${dis()}>${t("prev")}</button><button class="btn" type="button" data-quiz="next" ${dis()}>${t("next")}</button>` +
+    (q.open ? `<button class="btn" type="button" data-quiz="close" ${dis()}>${t("closeQuiz")}</button>` : `<button class="btn primary" type="button" data-quiz="open" ${dis()}>${t("openQuiz")}</button>`) + `</div>`;
+  h += `<p class="eyebrow">${t("award")}</p><div class="row">` + DATA.teams.map(n => `<button class="btn small" type="button" data-qwin="${n}" aria-pressed="${w === n}" ${dis()}>${esc(ship(n))}</button>`).join("") + `<button class="btn small" type="button" data-qwin="0" ${dis()}>${t("nobody")}</button></div>`;
+  return h + "</section>";
+}
+function cellOf(p, team, cum){
+  if (!teamsOf(p).includes(team)) return `<td class="cell"></td>`;
+  let ev = null;
+  if (p.kind === "chant"){ const c = docs["ev/" + run() + "_chant_" + team]; ev = c || null; }
+  else if (p.kind === "ports"){ const done = DATA.ports.filter(x => portScore(team, x)).length; return `<td class="cell ${done === 4 ? "ok" : ""}">${done}/4</td>`; }
+  else if (p.kind === "quiz"){ const n = DATA.quiz.filter((_, i) => quizWinner(i) === team).length; return `<td class="cell">${n}</td>`; }
+  else if (p.kind === "stars" && !p.gate){ ev = null; }
+  else ev = solveEv(p.id, team, p.shared);
+  const hs = hintsUsed(p.id, team).length, w = wrongs(p.id, team);
+  const extra = (hs || w) ? `<small>${hs ? "H" + hs : ""}${hs && w ? " " : ""}${w ? "✕" + w : ""}</small>` : "";
+  if (!ev) return `<td class="cell">·${extra}</td>`;
+  const ms = elapsed(ev.ts); if (ms == null) return `<td class="cell ok">✓${extra}</td>`;
+  const r = ms / (cum * 60000);
+  return `<td class="cell ${r <= 1 ? "ok" : r <= 1.5 ? "warn" : "bad"}">${mmss(ms)}${extra}</td>`;
+}
+function hostBoard(){
+  let h = `<section class="panel stack"><h3>${t("board")}</h3><p class="note">${t("boardLead")}</p><div class="tw"><table class="board"><tr><th>${t("team")}</th>` + DATA.puzzles.map(p => `<th title="${esc(L(p.title))}">${p.id}<br><span class="muted">${p.target}′</span></th>`).join("") + `<th>${t("c_bottles")}</th></tr>`;
+  DATA.teams.forEach(n => {
+    let cum = 3; h += `<tr><td><span class="shipdot" style="--c:${DATA.colors[n]}"></span>${esc(ship(n))}</td>`;
+    DATA.puzzles.forEach(p => { cum += p.target; h += cellOf(p, n, cum); });
+    h += `<td class="cell">${DATA.bottles.filter(b => { const e = bottleEv(b.id); return e && e.team === n; }).length}</td></tr>`;
+  });
+  return h + `</table></div></section>`;
+}
+function hostCoins(){
+  const keys = ["chest","decode","help","ports","quiz","bottles","final","hints","total"];
+  const rows = DATA.teams.map(n => [n, coins(n)]); const max = Math.max(1, ...rows.map(r => r[1].total));
+  let h = `<section class="panel stack"><h3>${t("coinsTitle")}</h3><p class="note">${t("coinsLead")}</p><div class="tw"><table><tr><th>${t("team")}</th>` + keys.map(k => `<th>${t("c_" + k)}</th>`).join("") + `</tr>`;
+  rows.forEach(([n, c]) => { h += `<tr><td><span class="shipdot" style="--c:${DATA.colors[n]}"></span>${esc(ship(n))}</td>` + keys.map(k => k === "total" ? `<td><b>${c.total}</b><div class="scorebar" style="width:${Math.max(4, c.total / max * 100)}%"></div></td>` : `<td>${c[k]}</td>`).join("") + `</tr>`; });
+  return h + `</table></div></section>`;
+}
+function hostResults(){
+  const fbs = DATA.teams.map(n => S.fb["A2_" + n]).filter(Boolean);
+  const avg = f => { const v = fbs.map(x => Number(x[f])).filter(n => n > 0); return v.length ? (v.reduce((a,b) => a+b, 0) / v.length).toFixed(1) : "–"; };
+  const fe = solveEv("D1", 0, true); const ft = fe ? elapsed(fe.ts) : null;
+  let h = `<section class="panel stack"><h3>${t("results")}</h3><div class="tw"><table><tr><th>${t("responses")}</th><th>${t("difficulty")}</th><th>${t("interactivity")}</th><th>${t("fun")}</th><th>${t("clarity")}</th><th>${t("pace")}</th><th>${t("finished")}</th></tr>` +
+    `<tr><td>${fbs.length}</td><td>${avg("difficulty")}</td><td>${avg("interactivity")}</td><td>${avg("fun")}</td><td>${avg("clarity")}</td><td>${avg("pace")}</td><td>${ft == null ? "–" : mmss(ft) + ` <span class="chip ${ft <= DATA.onTime*60000 ? "ok" : "bad"}">${ft <= DATA.onTime*60000 ? t("inTime") : t("overTime")}</span>`}</td></tr></table></div>`;
+  if (!fbs.length) return h + `<p class="muted">${t("noData")}</p></section>`;
+  h += `<h4>${t("comments")}</h4><ul>` + fbs.map(x => `<li><b>${esc(ship(x.team))}</b>${x.favorite ? ` · ${t("favorite")}: ${esc(t("fav_" + x.favorite))}` : ""}${x.stuck ? ` · ${t("stuck")}: ${esc(x.stuck)}` : ""}${x.change ? ` · ${esc(x.change)}` : ""}${x.comment ? ` · ${esc(x.comment)}` : ""}</li>`).join("") + `</ul>`;
+  return h + `</section>`;
+}
+function hostProtocol(){
+  const p = DATA.protocol;
+  return `<section class="panel stack"><h3>${t("protocol")}</h3>${L(p.schedule)}<h4>${t("prep")}</h4>${L(p.prep)}<h4>${t("watch")}</h4><ul>${L(p.watch).map(w => `<li>${esc(w)}</li>`).join("")}</ul>` +
+    `<h4>${t("notes")}</h4><form class="stack" data-act="notes"><textarea id="notes-text">${esc(S.drafts["notes-text"] ?? (S.notes.text || ""))}</textarea><div class="row"><button class="btn" type="submit" ${dis()}>${t("saveNotes")}</button></div></form></section>`;
+}
+function hostSolutions(){
+  return `<section class="panel stack"><h3>${t("solutions")}</h3>${answersVisible() ? `<div class="tw">${L(S.sol.html)}</div>` : `<p class="muted">${t("lockedAnswers")}</p>`}</section>`;
+}
+function hostView(){
+  return `<div class="stack"><h1>${t("hostTitle")}</h1>${bannerHTML()}${hostLock()}${hostClock()}${hostBroadcast()}${hostPorts()}${hostQuiz()}${hostBoard()}${hostCoins()}${hostResults()}${hostProtocol()}${hostSolutions()}</div>`;
+}
+
+// ---------------------------------------------------------------- render
+async function fillReveals(root){
+  if (S.view !== "tester" || !S.team) return;
+  for (const el of root.querySelectorAll("[data-reveal]")){
+    const p = P(el.dataset.reveal); const r = await revealOf(p, S.team);
+    if (r && el.isConnected) el.innerHTML = L(r);
+  }
+}
+function render(){
+  document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
+  document.getElementById("brandSmall").textContent = t("brandSmall"); document.getElementById("brandTitle").textContent = t("brand");
+  document.getElementById("vTester").textContent = t("tester"); document.getElementById("vHost").textContent = t("host");
+  document.getElementById("vTester").setAttribute("aria-pressed", S.view === "tester"); document.getElementById("vHost").setAttribute("aria-pressed", S.view === "host");
+  document.getElementById("lZh").setAttribute("aria-pressed", lang === "zh"); document.getElementById("lEn").setAttribute("aria-pressed", lang === "en");
+  const sy = document.getElementById("sync"); sy.classList.toggle("on", S.mode === "shared"); document.getElementById("syncText").textContent = S.mode === "shared" ? t("shared") : t("local");
+  const app = document.getElementById("app");
+  keepFocus(() => { app.innerHTML = S.view === "host" ? hostView() : testerView(); });
+  hydrate(app); fillReveals(app);
+}
+setInterval(() => {
+  const c = document.getElementById("clock");
+  if (c && started() && !S.session.endedAt){ const ms = Date.now() - started(); c.textContent = mmss(ms); c.classList.toggle("over", ms > DATA.minutes*60000); }
+}, 1000);
+
+// ---------------------------------------------------------------- events
+document.getElementById("vTester").onclick = () => { S.view = "tester"; LS.set("view","tester"); render(); };
+document.getElementById("vHost").onclick = () => { S.view = "host"; LS.set("view","host"); render(); };
+document.getElementById("lZh").onclick = () => { lang = "zh"; LS.set("lang", lang); render(); };
+document.getElementById("lEn").onclick = () => { lang = "en"; LS.set("lang", lang); render(); };
+const app = document.getElementById("app");
+app.addEventListener("input", e => {
+  const el = e.target;
+  if (el.dataset.fbf){ S.drafts.fb[el.dataset.fbf] = el.value; return; }
+  if (el.id === "in-chant"){ S.drafts.chant = el.value; return; }
+  if (el.id && el.id.startsWith("in-")) S.drafts[el.id.slice(3)] = el.value; else if (el.id) S.drafts[el.id] = el.value;
+});
+app.addEventListener("change", e => { const el = e.target; if (el.dataset.fbf) S.drafts.fb[el.dataset.fbf] = el.value; });
+app.addEventListener("submit", async e => {
+  e.preventDefault(); const f = e.target; const team = S.team;
+  if (f.dataset.gate){ await submitGate(P(f.dataset.gate), team, f.querySelector("input").value); return; }
+  if (f.dataset.bottle){ await submitBottle(DATA.bottles.find(b => b.id === f.dataset.bottle), team, f.querySelector("input").value); return; }
+  const act = f.dataset.act;
+  if (act === "chant"){ const v = document.getElementById("in-chant").value.trim(); if (v) { await setEv("chant_" + team, {team, type: "chant", text: v}); S.drafts.chant = undefined; } }
+  else if (act === "unlock"){
+    const v = norm(document.getElementById("pw").value); const k = await hexHash("aod-sol|" + v); const sol = await dec("SOL#0", k, DATA.sol);
+    if (sol){ S.solKey = k; LS.set("solKey", k); S.sol = sol; hostToken = await hexHash("aod-host|" + v); LS.set("hostToken", hostToken); S.isHost = true; render(); }
+    else flash("pw", t("pwBad"), true);
+  }
+  else if (act === "fb"){ try { await store.set("fb/A2_" + team, Object.assign({}, S.drafts.fb, {team, ts: Date.now()})); } catch(err){ flash("fb", err.message, true); } }
+  else if (act === "bcCustom"){ const v = document.getElementById("bc-text").value.trim(); if (v){ await control("broadcast", {text: {zh: v, en: v}, ts: Date.now()}); S.drafts["bc-text"] = ""; } }
+  else if (act === "notes"){ await control("notes", {text: document.getElementById("notes-text").value, ts: Date.now()}); }
+});
+app.addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return; const d = b.dataset; const team = S.team;
+  if (d.team){ S.team = Number(d.team); LS.set("team", S.team); S.drafts = {}; render(); return; }
+  if (d.hint){ await logEv(team, d.hint, "hint", {level: Number(d.level)}); return; }
+  if (d.fb){ S.drafts.fb[d.fb] = Number(d.v); render(); return; }
+  if (d.port){ const [n, p, v] = d.port.split("|"); await setEv(`port_${n}_${p}`, {team: Number(n), port: p, score: Number(v), type: "port"}); return; }
+  if (d.qwin){ const i = (S.quiz.idx || 0); await setEv(`quiz_${i}`, {team: Number(d.qwin), q: i, type: "quiz"}); return; }
+  if (d.quiz){
+    const q = Object.assign({idx: 0, open: false}, S.quiz);
+    if (d.quiz === "next") q.idx = Math.min(DATA.quiz.length - 1, q.idx + 1);
+    if (d.quiz === "prev") q.idx = Math.max(0, q.idx - 1);
+    if (d.quiz === "open") q.open = true; if (d.quiz === "close") q.open = false;
+    await control("quiz", q); return;
+  }
+  if (d.bc){
+    const ev = DATA.events[d.bc]; await control("broadcast", {text: ev, ts: Date.now()});
+    if (d.bc === "wave1") await control("bottles", {wave: Math.max(1, S.bottlesWave)});
+    if (d.bc === "wave2") await control("bottles", {wave: 2});
+    if (d.bc === "storm") await control("quiz", {idx: 0, open: true});
+    return;
+  }
+  const act = d.act;
+  if (act === "changeTeam"){ S.team = 0; LS.set("team", 0); render(); }
+  else if (act === "dismissBc"){ S.dismissedBc = S.broadcast.ts; LS.set("dismissedBc", S.dismissedBc); render(); }
+  else if (act === "chart"){ await setEv("chart_" + team, {team, type: "chart"}); }
+  else if (act === "start"){
+    await control("session", {id: "r" + Date.now(), startedAt: Date.now()});
+    await control("quiz", {idx: 0, open: false}); await control("bottles", {wave: 0}); await control("broadcast", {text: "", ts: 0});
+  }
+  else if (act === "end"){ await control("session", Object.assign({}, S.session, {endedAt: Date.now()})); }
+  else if (act === "revealAll"){ await control("reveal", {open: true, key: S.solKey, ts: Date.now()}); }
+  else if (act === "hideAll"){ await control("reveal", {open: false, ts: Date.now()}); }
+  else if (act === "bcClear"){ await control("broadcast", {text: "", ts: 0}); }
+});
+
+subscribeAll(); loadSol(); render();
+if (SB) poll();
+})();
+</script>
