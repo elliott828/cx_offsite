@@ -118,8 +118,10 @@ details.chart summary{cursor:pointer;color:var(--sea);font-size:14px}
 .port .stamp{font-family:var(--f-display);font-size:28px;color:var(--bad);line-height:1}
 .port .step{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .quizq{font-family:var(--f-display);font-size:19px}
+.btn.buzz{font-size:22px;padding:14px 28px;border-radius:14px;width:100%;max-width:360px}
 .starbox{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
-.starbox svg{width:min(260px,80vw);height:auto;background:var(--chip);border-radius:10px}
+.starbox .q{width:min(220px,70vw)}.starbox .q svg,.joined svg{width:100%;height:auto;display:block}
+.joined{display:grid;grid-template-columns:1fr 1fr;width:min(440px,86vw);border-radius:6px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .bottles{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
 .bottle{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:6px}
 .bottle.won{border-style:solid;border-color:var(--ok)}
@@ -166,8 +168,8 @@ const UI = {
   submit:["提交","Submit"], wrong:["不对，再想想。","Not right yet."], hint:["提示","Hint"], hintCost:["（提示券用完，每次扣 1 金币）","(no tokens left: costs 1 doubloon)"],
   answer:["答案","Answer"], save:["保存","Save"], saved:["已保存","Saved"],
   circuit:["巡航顺序","Your circuit"], stampWait:["等港务长盖章","Waiting for the Port Master"], home:["母港","Home"],
-  quizIdle:["抢答还没开始。","The quiz hasn't started."], quizNow:["第 %n 题","Question %n"], quizWon:["答对的船","Won by"],
-  placeChart:["把我们的星图放上桌","Place our chart on the table"], placed:["已放上桌","On the table"], waitingCharts:["等其他船放星图：","Waiting for charts from:"], yourChart:["你们的星图","Your chart"], fleetChart:["全舰队的星图","The fleet's chart"],
+  quizIdle:["抢答还没开始。","The quiz hasn't started."], quizNow:["第 %n 题","Question %n"], quizWon:["答对的船","Won by"], buzz:["抢答！","Buzz!"], buzzed:["已抢答，第 %n 个","Buzzed, #%n"], buzzOrder:["抢答顺序","Buzz order"], noBuzz:["还没人抢答","No buzzes yet"], resetBuzz:["清空这题的抢答","Clear buzzes for this question"],
+  placeChart:["把我们的星图卡放上桌","Place our card on the table"], placed:["已放上桌","On the table"], waitingCharts:["等其他船放星图：","Waiting for charts from:"], yourChart:["你们的星图","Your chart"], fleetChart:["全舰队的星图","The fleet's chart"],
   bottlesClosed:["漂流瓶还没冲上岸。","No bottles have washed ashore yet."], bottle:["漂流瓶","Bottle"], wonBy:["已被领走：","Claimed by:"],
   feedback:["反馈","Feedback"], fbLead:["测试结束后填写，主持人视图会汇总。","Fill in after the run; the host view collects everyone's answers."],
   difficulty:["难度","Difficulty"], diffScale:["1 太简单 · 3 刚好 · 5 太难","1 too easy · 3 just right · 5 too hard"],
@@ -177,13 +179,13 @@ const UI = {
   pace:["整体节奏","Pace"], paceScale:["1 太赶 · 3 刚好 · 5 有空档","1 rushed · 3 right · 5 too much idle time"],
   favorite:["最喜欢的环节","Favourite part"], stuck:["最卡的一步","Where you got stuck"], none:["没有","None"],
   change1:["最想改的一点","One thing you'd change"], comment:["其他意见","Other comments"], saveFb:["保存反馈","Save feedback"],
-  fav_chest:["开船长箱","Opening the chest"], fav_ports:["港口巡航","Port circuit"], fav_press:["抓壮丁","Press gang"], fav_quiz:["暴风雨抢答","Storm quiz"], fav_stars:["星图叠合","Star chart"], fav_bottles:["漂流瓶","Bottles"], fav_final:["终局","Finale"],
+  fav_chest:["开船长箱","Opening the chest"], fav_ports:["港口巡航","Port circuit"], fav_quiz:["暴风雨抢答","Storm quiz"], fav_stars:["星图拼合","Star chart"], fav_bottles:["漂流瓶","Bottles"], fav_final:["终局","Finale"],
   // host
   hostTitle:["主持人控制台","Host console"], answersLock:["答案与主持人权限","Answers and host rights"], pw:["主持人密码","Host password"], unlock:["解锁","Unlock"], pwBad:["密码不对","Wrong password"],
   unlockedLocal:["已在本机解锁。","Unlocked on this device."], revealAll:["向所有测试员公开答案","Reveal answers to all testers"], hideAll:["收回公开","Hide answers again"], revealedAll:["答案已公开","Answers are public"],
   needHost:["先输入主持人密码，才能开始、广播和打分。","Enter the host password to start, broadcast and score."],
   session:["计时","Clock"], start:["开始","Start"], restart:["重新开始（清零）","Restart (clear)"], end:["结束","End"],
-  broadcast:["广播","Broadcast"], b_press:["抓壮丁（26′）","Press gang (26′)"], b_storm:["暴风雨（34′）","Storm (34′)"], b_stars:["放星图（39′）","Star chart (39′)"], b_wave1:["漂流瓶第 1 批（16′）","Bottles wave 1 (16′)"], b_wave2:["漂流瓶第 2 批（30′）","Bottles wave 2 (30′)"],
+  broadcast:["广播","Broadcast"], b_storm:["暴风雨（34′）","Storm (34′)"], b_stars:["放星图（39′）","Star chart (39′)"], b_wave1:["漂流瓶第 1 批（16′）","Bottles wave 1 (16′)"], b_wave2:["漂流瓶第 2 批（30′）","Bottles wave 2 (30′)"],
   custom:["自定义广播","Custom message"], send:["发送","Send"], clearBc:["清除","Clear"], dismiss:["知道了","Dismiss"],
   pmTitle:["港务长打分","Port Masters"], pmLead:["船到港完成挑战后点 2（通过）或 3（出色）；点 0 撤销。","When a ship finishes a challenge, tap 2 (pass) or 3 (excellent); 0 clears it."],
   quizTitle:["暴风雨抢答","Storm quiz"], prev:["上一题","Previous"], next:["下一题","Next"], openQuiz:["开始抢答","Start quiz"], closeQuiz:["结束抢答","End quiz"], award:["这题谁答对","Who got it"], nobody:["没人","Nobody"],
@@ -245,6 +247,7 @@ const S = {view: LS.get("view","tester"), team: LS.get("team",0), session:{}, re
 const SB = DATA.backend || null; const PFX = SB ? (SB.prefix || "") : "";
 let hostToken = LS.get("hostToken", null);
 const docs = SB ? {} : LS.get("localdb", {});
+const srvTime = {}; // server write time per path, used to order buzzes fairly across devices
 const subs = [];
 const emit = () => { if (!SB) LS.set("localdb", docs); subs.forEach(f => f()); };
 const toRemote = p => { const i = p.indexOf("/"); return p.slice(0, i + 1) + PFX + p.slice(i + 1); };
@@ -266,6 +269,7 @@ async function poll(){
     for (const row of rows){
       if (!since || Date.parse(row.updated_at) > Date.parse(since)) since = row.updated_at;
       const p = fromRemote(row.path); if (!p) continue;
+      const st = Date.parse(row.updated_at); if (srvTime[p] !== st){ srvTime[p] = st; if (p.indexOf("_buzz_") >= 0) changed = true; }
       if (JSON.stringify(docs[p]) !== JSON.stringify(row.data)){ docs[p] = row.data; changed = true; }
     }
     if (S.mode !== "shared"){ S.mode = "shared"; changed = true; }
@@ -312,6 +316,7 @@ const wrongs = (pid, team) => evs().filter(e => e.type === "wrong" && e.pid === 
 const portScore = (team, port) => { const e = docs["ev/" + run() + "_port_" + team + "_" + port]; return e ? (e.score || 0) : 0; };
 const charted = team => !!docs["ev/" + run() + "_chart_" + team];
 const quizWinner = i => { const e = docs["ev/" + run() + "_quiz_" + i]; return e ? e.team : 0; };
+const buzzes = i => { const r = (S.quiz && S.quiz.buzzRound) || 0; const k = e => srvTime["ev/" + e._id] || e.ts; return evs().filter(e => e.type === "buzz" && e.q === i && (e.round || 0) === r).sort((a,b) => k(a) - k(b)); };
 const bottleEv = id => solveEv(id, 0, true);
 const ship = n => L(DATA.ships[n]);
 
@@ -416,11 +421,8 @@ function hydrate(root){
   root.querySelectorAll("[data-flags]").forEach(el => { el.innerHTML = el.dataset.flags.split("").map(flagSVG).join(""); });
   root.querySelectorAll("[data-flagchart]").forEach(el => { el.className = "flagchart"; el.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(c => `<figure>${flagSVG(c)}<figcaption>${c}</figcaption></figure>`).join(""); });
 }
-function starSVG(list){
-  const pts = []; list.forEach(n => { const s = DATA.stars[n]; s.stars.concat(s.decoy).forEach(p => pts.push(p)); });
-  const star = ([x,y]) => { const cx = 15 + x*25, cy = 15 + y*25; return `<path d="M${cx} ${cy-7}L${cx+2} ${cy-2}L${cx+7} ${cy}L${cx+2} ${cy+2}L${cx} ${cy+7}L${cx-2} ${cy+2}L${cx-7} ${cy}L${cx-2} ${cy-2}Z" fill="var(--starInk)"/>`; };
-  return `<svg viewBox="0 0 230 230" role="img" aria-label="star chart">${pts.map(star).join("")}</svg>`;
-}
+function quarterHTML(n){ return `<div class="q">${DATA.quarters[n]}</div>`; }
+function joinedHTML(){ return `<div class="joined">${[1,2,3,4].map(n => DATA.quarters[n]).join("")}</div>`; }
 
 // ---------------------------------------------------------------- tester view
 function picker(){
@@ -463,12 +465,16 @@ function quizHTML(){
   const q = S.quiz || {};
   if (!q.open) return `<p class="muted">${t("quizIdle")}</p>`;
   const i = q.idx || 0; const w = quizWinner(i);
-  return `<p class="eyebrow">${t("quizNow").replace("%n", i + 1)} / ${DATA.quiz.length}</p><p class="quizq">${esc(L(DATA.quiz[i]))}</p>${w ? `<p class="chip ok">${t("quizWon")}: ${esc(ship(w))}</p>` : ""}`;
+  const bz = buzzes(i); const mine = bz.findIndex(e => e.team === S.team);
+  const btn = w ? "" : (mine >= 0 ? `<span class="chip ok">${t("buzzed").replace("%n", mine + 1)}</span>` : `<button class="btn primary buzz" type="button" data-act="buzz">${t("buzz")}</button>`);
+  return `<p class="eyebrow">${t("quizNow").replace("%n", i + 1)} / ${DATA.quiz.length}</p><p class="quizq">${esc(L(DATA.quiz[i]))}</p>${btn}` +
+    (bz.length ? `<p class="note">${t("buzzOrder")}: ${bz.map((e, k) => (k + 1) + ". " + esc(ship(e.team))).join(" · ")}</p>` : "") +
+    (w ? `<p class="chip ok">${t("quizWon")}: ${esc(ship(w))}</p>` : "");
 }
 function starsHTML(team){
   const all = DATA.teams.every(charted); const missing = DATA.teams.filter(n => !charted(n));
-  let h = `<div class="starbox"><div><p class="eyebrow">${t("yourChart")}</p>${starSVG([team])}</div>`;
-  if (all) h += `<div><p class="eyebrow">${t("fleetChart")}</p>${starSVG(DATA.teams)}<p class="note">${lang === "zh" ? "第五枚印章" : "the fifth seal"}</p></div>`;
+  let h = `<div class="starbox"><div><p class="eyebrow">${t("yourChart")}</p>${quarterHTML(team)}</div>`;
+  if (all) h += `<div><p class="eyebrow">${t("fleetChart")}</p>${joinedHTML()}</div>`;
   h += `</div>`;
   h += charted(team) ? `<span class="chip ok">✓ ${t("placed")}</span>` : `<button class="btn primary" type="button" data-act="chart">${t("placeChart")}</button>`;
   if (!all) h += `<p class="note">${t("waitingCharts")} ${missing.map(n => esc(ship(n))).join(" · ")}</p>`;
@@ -518,7 +524,7 @@ function feedbackHTML(team){
   const id = "A2_" + team; const saved = S.fb[id] || {};
   const d = S.drafts["fb"] || (S.drafts["fb"] = Object.assign({}, saved));
   const scale = (f, sc) => `<div><label>${t(f)}</label><div class="scale">${t(sc)}</div><div class="rating">` + [1,2,3,4,5].map(n => `<button type="button" data-fb="${f}" data-v="${n}" aria-pressed="${Number(d[f]) === n}">${n}</button>`).join("") + "</div></div>";
-  const favs = ["chest","ports","press","quiz","stars","bottles","final"];
+  const favs = ["chest","ports","quiz","stars","bottles","final"];
   const stuckOpts = [`<option value="">${t("none")}</option>`].concat(DATA.puzzles.filter(p => teamsOf(p).includes(team)).map(p => `<option value="${p.id}" ${d.stuck === p.id ? "selected" : ""}>${p.id} · ${esc(L(p.title))}</option>`)).join("");
   return `<section class="panel stack" id="feedback"><h2 style="margin:0">${t("feedback")}</h2><p class="muted">${t("fbLead")}</p><form class="fbgrid" data-act="fb">` +
     scale("difficulty","diffScale") + scale("interactivity","interScale") + scale("fun","funScale") + scale("clarity","clarScale") + scale("pace","paceScale") +
@@ -567,7 +573,7 @@ function hostClock(){
 }
 function hostBroadcast(){
   const b = (k, act) => `<button class="btn" type="button" data-bc="${act}" ${dis()}>${t(k)}</button>`;
-  return `<section class="panel stack"><h3>${t("broadcast")}</h3><div class="row">${b("b_wave1","wave1")}${b("b_press","press")}${b("b_wave2","wave2")}${b("b_storm","storm")}${b("b_stars","stars")}</div>` +
+  return `<section class="panel stack"><h3>${t("broadcast")}</h3><div class="row">${b("b_wave1","wave1")}${b("b_wave2","wave2")}${b("b_storm","storm")}${b("b_stars","stars")}</div>` +
     `<form class="row" data-act="bcCustom"><input id="bc-text" style="flex:1 1 220px" placeholder="${t("custom")}" value="${esc(S.drafts["bc-text"] || "")}"><button class="btn primary" type="submit" ${dis()}>${t("send")}</button><button class="btn" type="button" data-act="bcClear" ${dis()}>${t("clearBc")}</button></form>` +
     (S.broadcast && S.broadcast.ts ? `<p class="note">${esc(L(S.broadcast.text))}</p>` : "") + `</section>`;
 }
@@ -590,6 +596,9 @@ function hostQuiz(){
   if (answersVisible()) h += `<p class="answer">${t("answer")}: ${esc(L(S.sol.quiz[i]))}</p>`;
   h += `<div class="row"><button class="btn" type="button" data-quiz="prev" ${dis()}>${t("prev")}</button><button class="btn" type="button" data-quiz="next" ${dis()}>${t("next")}</button>` +
     (q.open ? `<button class="btn" type="button" data-quiz="close" ${dis()}>${t("closeQuiz")}</button>` : `<button class="btn primary" type="button" data-quiz="open" ${dis()}>${t("openQuiz")}</button>`) + `</div>`;
+  const bz = buzzes(i);
+  h += `<p class="eyebrow">${t("buzzOrder")}</p><p>${bz.length ? bz.map((e, k) => `<b>${k + 1}.</b> ${esc(ship(e.team))}`).join(" · ") : `<span class="muted">${t("noBuzz")}</span>`}</p>` +
+    `<div class="row"><button class="btn small" type="button" data-quiz="rebuzz" ${dis()}>${t("resetBuzz")}</button></div>`;
   h += `<p class="eyebrow">${t("award")}</p><div class="row">` + DATA.teams.map(n => `<button class="btn small" type="button" data-qwin="${n}" aria-pressed="${w === n}" ${dis()}>${esc(ship(n))}</button>`).join("") + `<button class="btn small" type="button" data-qwin="0" ${dis()}>${t("nobody")}</button></div>`;
   return h + "</section>";
 }
@@ -710,6 +719,8 @@ app.addEventListener("click", async e => {
     if (d.quiz === "next") q.idx = Math.min(DATA.quiz.length - 1, q.idx + 1);
     if (d.quiz === "prev") q.idx = Math.max(0, q.idx - 1);
     if (d.quiz === "open") q.open = true; if (d.quiz === "close") q.open = false;
+    if (d.quiz === "rebuzz") q.buzzRound = (q.buzzRound || 0) + 1;
+    if (d.quiz === "next" || d.quiz === "prev") q.buzzRound = 0;
     await control("quiz", q); return;
   }
   if (d.bc){
@@ -723,6 +734,10 @@ app.addEventListener("click", async e => {
   if (act === "changeTeam"){ S.team = 0; LS.set("team", 0); render(); }
   else if (act === "dismissBc"){ S.dismissedBc = S.broadcast.ts; LS.set("dismissedBc", S.dismissedBc); render(); }
   else if (act === "chart"){ await setEv("chart_" + team, {team, type: "chart"}); }
+  else if (act === "buzz"){
+    const i = (S.quiz.idx || 0), r = (S.quiz.buzzRound || 0);
+    if (!buzzes(i).some(e => e.team === team)) await setEv(`buzz_${i}_${r}_${team}`, {team, q: i, round: r, type: "buzz"});
+  }
   else if (act === "start"){
     await control("session", {id: "r" + Date.now(), startedAt: Date.now()});
     await control("quiz", {idx: 0, open: false}); await control("bottles", {wave: 0}); await control("broadcast", {text: "", ts: 0});

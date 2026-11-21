@@ -60,7 +60,7 @@ def build():
         "teams": C.TEAMS, "ships": C.SHIPS, "colors": C.COLORS, "players": C.PLAYERS, "hintTokens": C.HINT_TOKENS,
         "ports": C.PORTS, "portName": C.PORT_NAME, "portLetter": C.PORT_LETTER, "home": C.HOME,
         "keyholder": C.KEYHOLDER, "portChallenge": C.PORT_CHALLENGE,
-        "quiz": [q for q, _ in C.QUIZ], "bottles": bottles, "stars": C.STAR_SHEETS,
+        "quiz": [q for q, _ in C.QUIZ], "bottles": bottles, "quarters": C.STAR_QUARTERS,
         "puzzles": puzzles, "events": C.EVENTS, "protocol": C.PROTOCOL, "minutes": 60, "onTime": 52,
         "sol": enc("SOL#0", hashlib.sha256(("aod-sol|" + norm(HOST_PASSWORD)).encode()).hexdigest(), sol),
         "backend": BACKEND,

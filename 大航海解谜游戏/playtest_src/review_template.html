@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-CN" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>五片航海图 v2 题目对照</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Young+Serif&display=swap">
+<style>
+/* Layout: a review grid. Rows are puzzles in play order, four ship columns; rows that are identical for every ship span all four. Sticky ship header. */
+:root{
+  --paper:#edf1ee; --panel:#f9fbf8; --ink:#13233a; --muted:#56657a; --line:#d0d8d3; --chip:#e1e8e4;
+  --brass:#9a6b17; --sea:#1d5b6a; --ok:#2b7a4b; --okbg:#e2f1e7; --warn:#a8660f; --warnbg:#f8ecd6; --bad:#ad3528; --badbg:#f6e1dd; --edit:#fffbe6;
+  --flagR:#c8102e; --flagB:#0b3d91; --flagY:#ffcd00; --flagW:#ffffff; --flagK:#111111;
+  --f-display:"Young Serif", Georgia, "Songti SC", "Noto Serif SC", serif;
+  --f-body:"IBM Plex Sans", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#0e1620; --panel:#152130; --ink:#e4ebf1; --muted:#9aa9b9; --line:#25364a; --chip:#1c2b3c;
+  --brass:#d7a64a; --sea:#6ab7c7; --ok:#62c48d; --okbg:#173326; --warn:#e3a54c; --warnbg:#3a2c14; --bad:#ec7f71; --badbg:#3c1f1b; --edit:#2a2614; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --paper:#0e1620; --panel:#152130; --ink:#e4ebf1; --muted:#9aa9b9; --line:#25364a; --chip:#1c2b3c;
+  --brass:#d7a64a; --sea:#6ab7c7; --ok:#62c48d; --okbg:#173326; --warn:#e3a54c; --warnbg:#3a2c14; --bad:#ec7f71; --badbg:#3c1f1b; --edit:#2a2614; color-scheme:dark }
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.6 var(--f-body)}
+html[data-lang="zh"] .en, html[data-lang="en"] .zh{display:none!important}
+.bar{position:sticky;top:0;z-index:6;background:var(--panel);border-bottom:1px solid var(--line)}
+.bar-in{max-width:1500px;margin:0 auto;padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.brand{font-family:var(--f-display);font-size:17px;margin-right:auto}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;border:0;background:transparent;color:var(--ink);padding:5px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:5px 11px;cursor:pointer}
+.btn.primary{background:var(--sea);border-color:var(--sea);color:var(--panel)}
+.btn.warn{color:var(--bad);border-color:var(--bad)}
+.status{font-size:12px;color:var(--muted)}
+:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
+.wrap{max-width:1500px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-right,0px)) 80px max(16px,env(safe-area-inset-left,0px))}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(22px,3.2vw,30px);margin:6px 0}
+.lead{color:var(--muted);max-width:90ch;margin:4px 0 14px}
+.scroller{overflow-x:auto;padding-bottom:6px}
+.grid{min-width:1080px}
+.head{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;padding:8px 0}
+.shiplabel{font-size:12px;font-weight:600;color:var(--muted);border-left:4px solid var(--c);padding-left:7px;line-height:1.3}
+.shiplabel.all{border-left-color:var(--line)}
+.colh{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:10px;padding:8px 12px}
+.colh b{font-family:var(--f-display);font-weight:400;font-size:17px;display:block}
+.colh span{font-size:12px;color:var(--muted)}
+.act{margin:22px 0 8px;font-family:var(--f-display);font-size:19px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.prow{margin:10px 0 16px;scroll-margin-top:130px}
+.rowh{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.rowh .ed{font-weight:600;font-size:15px;min-width:6em}
+.pid{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.tag{font-size:11px;color:var(--muted);background:var(--chip);border-radius:999px;padding:0 8px;margin-left:auto;white-space:nowrap}
+.cells{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-items:start}
+.span{grid-column:1 / -1}
+.cell{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;gap:8px;min-width:0}
+.cell[data-state="ok"]{border-color:var(--ok)}
+.cell[data-state="edit"]{border-color:var(--warn);background:linear-gradient(var(--warnbg),var(--panel) 40px)}
+.cell[data-state="drop"]{border-color:var(--bad);opacity:.75}
+.ed{outline:none;border-radius:6px;padding:2px 4px;margin:-2px -4px;min-height:1.4em;overflow-wrap:anywhere}
+.ed:hover{background:var(--chip)}
+.ed:focus{background:var(--edit);box-shadow:0 0 0 1px var(--brass)}
+.ed p{margin:4px 0}
+.ed ol,.ed ul{padding-left:20px;margin:4px 0}
+details.ans{border:1px solid var(--line);border-radius:8px;background:var(--okbg)}
+details.ans > summary{cursor:pointer;padding:4px 10px;font-weight:600;color:var(--ok);font-size:13px}
+details.ans > .ed{margin:0 10px 8px;display:block}
+.inner{margin-top:6px;font-size:13px}
+.fb{display:grid;gap:6px}
+.fb select,.fb textarea{font:inherit;font-size:13px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:5px 8px;width:100%}
+.fb textarea{resize:vertical;min-height:52px}
+.note{color:var(--muted);font-size:12px}
+.mono{font-family:var(--f-mono)}
+.logline{font-family:var(--f-mono);background:var(--chip);border-radius:6px;padding:4px 8px;display:inline-block}
+.flagrow{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.flagrow svg{width:44px;height:44px}
+details.chart{font-size:13px}
+details.chart summary{cursor:pointer;color:var(--sea)}
+.flagchart{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px;margin-top:6px}
+.flagchart figure{margin:0;text-align:center;font-family:var(--f-mono);font-size:11px}
+.flagchart svg{width:30px;height:30px;display:block;margin:0 auto}
+.chestgrid{display:grid;gap:8px}
+.fragment,.keycard{border:1px dashed var(--line);border-radius:8px;padding:8px 10px;min-width:0;background:var(--panel)}
+.encport{font-family:var(--f-mono);font-size:17px;letter-spacing:.1em;margin:4px 0;word-break:break-word}
+.eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);font-weight:600;margin:0}
+.keyname{font-weight:600;font-size:12px;margin:4px 0}
+.keytab{border-collapse:collapse;font-size:11px}
+.keytab td,.keytab th{border:1px solid var(--line);padding:2px 3px;text-align:center;font-family:var(--f-mono)}
+.tw{overflow-x:auto}
+.morsegrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:2px 6px;font-size:11px}
+table{border-collapse:collapse;font-size:12.5px}
+td,th{border:1px solid var(--line);padding:3px 6px;text-align:left}
+th{background:var(--chip)}
+.starq{width:170px}.starq svg{width:100%;height:auto;display:block;border-radius:6px}
+.letter{font-family:var(--f-display)}
+.clues{padding-left:20px}
+@media print{.bar{position:static}.fb textarea{min-height:0}}
+</style>
+</head>
+<body>
+<div class="bar"><div class="bar-in">
+  <div class="brand"><span class="zh">五片航海图 v2 · 四队题目对照</span><span class="en">The Five Fragments v2 · all ships side by side</span></div>
+  <div class="seg" role="group" aria-label="language"><button type="button" id="bZh" aria-pressed="true">中</button><button type="button" id="bEn" aria-pressed="false">EN</button></div>
+  <button class="btn" type="button" id="bOpen"><span class="zh">展开全部答案</span><span class="en">Expand all answers</span></button>
+  <button class="btn" type="button" id="bCopy"><span class="zh">复制全部反馈</span><span class="en">Copy all feedback</span></button>
+  <button class="btn primary" type="button" id="bExport"><span class="zh">保存为新文件</span><span class="en">Save as new file</span></button>
+  <button class="btn warn" type="button" id="bReset"><span class="zh">清除本机修改</span><span class="en">Clear local edits</span></button>
+  <span class="status" id="status"></span>
+</div></div>
+<main class="wrap">
+  <h1><span class="zh">四队全部题目、答案与反馈</span><span class="en">Every puzzle, answer and feedback box for all four ships</span></h1>
+  <p class="lead zh">共 __COUNT__ 项，按游戏顺序排列。四队相同的题横跨四栏，四队不同的题分栏并排。点任何文字都可以直接改；答案折叠在题目下面；每格下面选状态、写反馈。修改会自动保存在这台电脑的浏览器里；点“保存为新文件”会下载一份包含所有修改和反馈的 HTML，可以发给别人。</p>
+  <p class="lead en">__COUNT__ items in play order. Rows identical for every ship span all four columns; rows that differ sit side by side. Click any text to edit it; answers are folded under each question; set a status and write feedback under each cell. Edits autosave in this browser; “Save as new file” downloads an HTML copy with every edit and comment, ready to share.</p>
+  <div class="scroller"><div class="grid">
+    <div class="head">__HEAD__</div>
+    __ROWS__
+  </div></div>
+</main>
+<script>
+(function(){
+  var KEY = "aodReview:" + decodeURIComponent(location.pathname.split("/").pop() || "review");
+  var root = document.documentElement, statusEl = document.getElementById("status");
+  function L(zh, en){ return root.dataset.lang === "en" ? en : zh; }
+  function load(){ try { return JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e){ return {}; } }
+  var state = load(); var timer = null;
+  // a rebuilt file may carry new puzzle text: keep feedback, drop text edits saved against an older build
+  if (state._build !== "__BUILD__"){ Object.keys(state).forEach(function(k){ if (k.indexOf("e:") === 0) delete state[k]; }); state._build = "__BUILD__"; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+  function save(){
+    try { localStorage.setItem(KEY, JSON.stringify(state)); statusEl.textContent = L("已自动保存 ", "Autosaved ") + new Date().toLocaleTimeString(); }
+    catch(e){ statusEl.textContent = L("这个浏览器不能自动保存，请用“保存为新文件”。", "This browser can't autosave; use “Save as new file”."); }
+  }
+  function later(){ clearTimeout(timer); timer = setTimeout(save, 400); }
+  function paintState(sel){ var c = sel.closest(".cell"); if (c) c.dataset.state = sel.value || ""; }
+
+  // restore edits made in this browser
+  document.querySelectorAll("[data-key]").forEach(function(el){ var v = state["e:" + el.dataset.key]; if (v != null) el.innerHTML = v; });
+  document.querySelectorAll("[data-fb]").forEach(function(el){ var v = state["f:" + el.dataset.fb]; if (v != null) el.value = v; if (el.tagName === "SELECT") paintState(el); });
+
+  document.addEventListener("input", function(e){
+    var el = e.target;
+    if (el.dataset && el.dataset.key){ state["e:" + el.dataset.key] = el.innerHTML; later(); }
+    else if (el.dataset && el.dataset.fb){ state["f:" + el.dataset.fb] = el.value; if (el.tagName === "SELECT") paintState(el); later(); }
+  });
+  document.addEventListener("change", function(e){ var el = e.target; if (el.dataset && el.dataset.fb){ state["f:" + el.dataset.fb] = el.value; if (el.tagName === "SELECT") paintState(el); later(); } });
+  // paste as plain text so formatting from other apps doesn't leak in
+  document.addEventListener("paste", function(e){
+    var el = e.target.closest && e.target.closest("[contenteditable]"); if (!el) return;
+    e.preventDefault(); var text = (e.clipboardData || window.clipboardData).getData("text/plain");
+    document.execCommand("insertText", false, text);
+  });
+
+  function setLang(l){ root.dataset.lang = l; root.lang = l === "zh" ? "zh-CN" : "en";
+    document.getElementById("bZh").setAttribute("aria-pressed", l === "zh"); document.getElementById("bEn").setAttribute("aria-pressed", l === "en");
+    try { localStorage.setItem(KEY + ":lang", l); } catch(e){} }
+  document.getElementById("bZh").onclick = function(){ setLang("zh"); };
+  document.getElementById("bEn").onclick = function(){ setLang("en"); };
+  try { var sl = localStorage.getItem(KEY + ":lang"); if (sl) setLang(sl); } catch(e){}
+
+  var allOpen = false;
+  document.getElementById("bOpen").onclick = function(){
+    allOpen = !allOpen; document.querySelectorAll("details.ans").forEach(function(d){ d.open = allOpen; });
+    this.innerHTML = allOpen ? '<span class="zh">收起全部答案</span><span class="en">Collapse all answers</span>' : '<span class="zh">展开全部答案</span><span class="en">Expand all answers</span>';
+  };
+
+  function feedbackText(){
+    var lines = [];
+    document.querySelectorAll(".cell").forEach(function(c){
+      var key = c.dataset.cell; var sel = c.querySelector("select"); var ta = c.querySelector("textarea");
+      var st = sel && sel.value ? sel.options[sel.selectedIndex].text : ""; var tx = ta ? ta.value.trim() : "";
+      if (!st && !tx) return;
+      var parts = key.split(":"); var ship = parts[1] === "all" ? L("四队", "All ships") : document.querySelectorAll(".colh b")[Number(parts[1]) - 1].textContent;
+      lines.push(parts[0] + " · " + ship + (st ? " · " + st : "") + (tx ? " · " + tx.replace(/\s+/g, " ") : ""));
+    });
+    return lines.join("\n");
+  }
+  document.getElementById("bCopy").onclick = function(){
+    var text = feedbackText();
+    if (!text){ statusEl.textContent = L("还没有反馈。", "No feedback yet."); return; }
+    var done = function(){ statusEl.textContent = L("已复制 ", "Copied ") + text.split("\n").length + L(" 条反馈", " items"); };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function(){ prompt(L("复制下面的文字：", "Copy this:"), text); });
+    else prompt(L("复制下面的文字：", "Copy this:"), text);
+  };
+
+  document.getElementById("bExport").onclick = function(){
+    // bake current text, feedback and status into a standalone copy
+    var doc = document.documentElement.cloneNode(true);
+    doc.querySelectorAll("textarea[data-fb]").forEach(function(ta){ var live = document.querySelector('[data-fb="' + ta.dataset.fb + '"]'); ta.textContent = live.value; });
+    doc.querySelectorAll("select[data-fb]").forEach(function(s){ var live = document.querySelector('[data-fb="' + s.dataset.fb + '"]');
+      Array.prototype.forEach.call(s.options, function(o){ if (o.value === live.value) o.setAttribute("selected", ""); else o.removeAttribute("selected"); }); });
+    doc.querySelectorAll("details.ans").forEach(function(d){ d.removeAttribute("open"); });
+    doc.querySelector("#status").textContent = "";
+    var stamp = new Date(); var pad = function(n){ return String(n).padStart(2, "0"); };
+    var name = "方案A_v2_四队题目对照_" + stamp.getFullYear() + pad(stamp.getMonth() + 1) + pad(stamp.getDate()) + "-" + pad(stamp.getHours()) + pad(stamp.getMinutes()) + ".html";
+    var blob = new Blob(["<!doctype html>\n" + doc.outerHTML], {type: "text/html"});
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    statusEl.textContent = L("已保存为 ", "Saved as ") + name;
+  };
+
+  document.getElementById("bReset").onclick = function(){
+    if (!confirm(L("清除这台电脑上的所有修改和反馈？文件本身不受影响。", "Clear every edit and comment stored in this browser? The file itself is not changed."))) return;
+    try { localStorage.removeItem(KEY); } catch(e){} location.reload();
+  };
+
+  // signal flags (international maritime signal flags), drawn on load where not already drawn
+  var FC = {R:"var(--flagR)",B:"var(--flagB)",Y:"var(--flagY)",W:"var(--flagW)",K:"var(--flagK)"};
+  function flag(c){
+    function r(x,y,w,h,k){ return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+FC[k]+'"/>'; }
+    function pg(p,k){ return '<polygon points="'+p+'" fill="'+FC[k]+'"/>'; }
+    function sal(k){ return '<path d="M0 0L30 30M30 0L0 30" stroke="'+FC[k]+'" stroke-width="6"/>'; }
+    function crs(k){ return r(12,0,6,30,k)+r(0,12,30,6,k); }
+    var s = "", i, j, k;
+    switch(c){
+      case "A": s = r(0,0,15,30,"W")+pg("15,0 30,0 21,15 30,30 15,30","B"); break;
+      case "B": s = pg("0,0 30,0 21,15 30,30 0,30","R"); break;
+      case "C": s = r(0,0,30,6,"B")+r(0,6,30,6,"W")+r(0,12,30,6,"R")+r(0,18,30,6,"W")+r(0,24,30,6,"B"); break;
+      case "D": s = r(0,0,30,30,"Y")+r(0,7.5,30,15,"B"); break;
+      case "E": s = r(0,0,30,15,"B")+r(0,15,30,15,"R"); break;
+      case "F": s = r(0,0,30,30,"W")+pg("15,0 30,15 15,30 0,15","R"); break;
+      case "G": for (i=0;i<6;i++) s += r(i*5,0,5,30,i%2?"B":"Y"); break;
+      case "H": s = r(0,0,15,30,"W")+r(15,0,15,30,"R"); break;
+      case "I": s = r(0,0,30,30,"Y")+'<circle cx="15" cy="15" r="7" fill="'+FC.K+'"/>'; break;
+      case "J": s = r(0,0,30,30,"B")+r(0,10,30,10,"W"); break;
+      case "K": s = r(0,0,15,30,"Y")+r(15,0,15,30,"B"); break;
+      case "L": s = r(0,0,15,15,"Y")+r(15,0,15,15,"K")+r(0,15,15,15,"K")+r(15,15,15,15,"Y"); break;
+      case "M": s = r(0,0,30,30,"B")+sal("W"); break;
+      case "N": for (i=0;i<4;i++) for (j=0;j<4;j++) s += r(j*7.5,i*7.5,7.5,7.5,(i+j)%2?"W":"B"); break;
+      case "O": s = pg("0,0 0,30 30,30","Y")+pg("0,0 30,0 30,30","R"); break;
+      case "P": s = r(0,0,30,30,"B")+r(10,10,10,10,"W"); break;
+      case "Q": s = r(0,0,30,30,"Y"); break;
+      case "R": s = r(0,0,30,30,"R")+crs("Y"); break;
+      case "S": s = r(0,0,30,30,"W")+r(10,10,10,10,"B"); break;
+      case "T": s = r(0,0,10,30,"R")+r(10,0,10,30,"W")+r(20,0,10,30,"B"); break;
+      case "U": s = r(0,0,15,15,"R")+r(15,0,15,15,"W")+r(0,15,15,15,"W")+r(15,15,15,15,"R"); break;
+      case "V": s = r(0,0,30,30,"W")+sal("R"); break;
+      case "W": s = r(0,0,30,30,"B")+r(6,6,18,18,"W")+r(11,11,8,8,"R"); break;
+      case "X": s = r(0,0,30,30,"W")+crs("B"); break;
+      case "Y": s = r(0,0,30,30,"Y"); for (k=-30;k<60;k+=8) s += '<path d="M'+k+' 30L'+(k+30)+' 0" stroke="'+FC.R+'" stroke-width="4"/>'; break;
+      case "Z": s = pg("0,0 30,0 15,15","Y")+pg("30,0 30,30 15,15","B")+pg("0,30 30,30 15,15","R")+pg("0,0 0,30 15,15","K"); break;
+    }
+    return '<svg viewBox="0 0 30 30" role="img" aria-label="flag '+c+'"><defs><clipPath id="c'+c+'"><rect width="30" height="30"/></clipPath></defs><g clip-path="url(#c'+c+')">'+s+'</g><rect x=".25" y=".25" width="29.5" height="29.5" fill="none" stroke="var(--line)" stroke-width=".5"/></svg>';
+  }
+  document.querySelectorAll("[data-flags]").forEach(function(el){ if (!el.querySelector("svg")) el.innerHTML = el.dataset.flags.split("").map(flag).join(""); el.setAttribute("contenteditable", "false"); });
+  document.querySelectorAll("[data-flagchart]").forEach(function(el){ if (!el.querySelector("svg")){ el.className = "flagchart"; el.innerHTML = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(function(c){ return "<figure>" + flag(c) + "<figcaption>" + c + "</figcaption></figure>"; }).join(""); } el.setAttribute("contenteditable", "false"); });
+  document.querySelectorAll("svg.stars").forEach(function(s){ s.setAttribute("contenteditable", "false"); });
+})();
+</script>
+</body>
+</html>
