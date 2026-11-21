@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#063b31">
+  <title>The Age of Discovery — CX Year End Party 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,700;0,6..96,900;1,6..96,500&family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="assets/cover-web/base.webp">
+  <style>
+    :root{--ink:#14362e;--emerald:#063b31;--pink:#f04e8a;--gold:#d9a53a;--gold-deep:#a8741f;--paper:#f8e7d7;--blue:#193f91;--shadow:0 22px 70px #001a14aa}
+    *{box-sizing:border-box}html,body{height:100%;margin:0}button,a{font:inherit}button{color:inherit}
+    body{overflow:hidden;background:radial-gradient(circle at 20% 10%,#f04e8a55,transparent 24%),radial-gradient(circle at 84% 78%,#d9a53a44,transparent 22%),linear-gradient(135deg,#062d27,#0b5545 55%,#03251f);font-family:"DM Sans",sans-serif;color:var(--ink)}
+    .stage{height:100%;display:grid;place-items:center;padding:0}
+    .book{position:relative;width:100vw;height:100dvh;max-width:460px;touch-action:none;perspective:1700px;filter:drop-shadow(var(--shadow));isolation:isolate}
+    .sheet,.last-page{position:absolute;inset:0;overflow:hidden;background:var(--paper);transform-origin:left center;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+    .sheet{transition:transform .8s cubic-bezier(.2,.78,.16,1),filter .8s;transform-style:preserve-3d;will-change:transform}.sheet.flipped{transform:rotateY(-180deg);filter:brightness(.65)}
+    .sheet:after{content:"";position:absolute;top:0;right:0;width:22px;height:100%;pointer-events:none;background:linear-gradient(90deg,transparent,#6b3e1a20 55%,#fff7);z-index:60}
+    .page{position:absolute;inset:0;overflow:hidden}
+    .paper{background:linear-gradient(155deg,#fff6eb,#f4dcc5)}
+    .paper:before,.velvet:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.22;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.2'/%3E%3C/svg%3E")}
+    .ornament{color:var(--gold);font-size:10px;letter-spacing:.24em;text-transform:uppercase;font-weight:700}
+    .page-head{position:relative;z-index:2;flex:none;padding:max(16px,env(safe-area-inset-top)) 20px 6px;text-align:center}
+    .page-head h2{font:900 clamp(27px,7.4vw,38px)/.95 "Bodoni Moda",serif;margin:4px 0;color:var(--emerald)}
+    .page-head p{margin:5px 0 0;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#7b4d3e}
+
+    /* NAV */
+    .nav{position:absolute;z-index:90;left:14px;right:14px;bottom:max(10px,env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+    .nav button{pointer-events:auto;background:#fff9;border:1px solid #d9a53a88;box-shadow:0 5px 18px #4b2c1b25;border-radius:99px;width:38px;height:38px;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(8px)}.nav button[disabled]{opacity:0;pointer-events:none}
+    .counter{font-size:10px;letter-spacing:.18em;color:#fff;background:#063b31cc;border-radius:99px;padding:7px 11px;box-shadow:0 5px 15px #001a1444}
+    .swipe-hint{position:absolute;z-index:100;left:50%;bottom:62px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:99px;background:#062d27e8;color:white;font-size:11px;letter-spacing:.06em;white-space:nowrap;box-shadow:0 10px 30px #001a1455;animation:hintOut .5s 5.4s forwards}.swipe-hint .hand{font-size:20px;animation:swipe 1.3s ease-in-out 3}@keyframes swipe{50%{transform:translateX(-22px)}}@keyframes hintOut{to{opacity:0;visibility:hidden}}
+    .edge-tab{position:absolute;z-index:87;right:0;top:48%;padding:8px 5px;background:#f04e8a;color:#fff;font-size:8px;font-weight:800;letter-spacing:.12em;writing-mode:vertical-rl;border-radius:7px 0 0 7px;box-shadow:-3px 3px 12px #001c1744;pointer-events:none}.edge-tab[hidden]{display:none}
+
+    /* COVER — 1055 × 2293 layer canvas, scaled to cover the page (layout from assets/cover/layers.json) */
+    .cover{background:#0b3a31}
+    .cv{position:absolute;left:0;top:0;width:1055px;height:2293px;transform-origin:0 0}
+    .cv>*{position:absolute;display:block}
+    .cv img{user-select:none;-webkit-user-drag:none;pointer-events:none}
+    .cv-base{left:0;top:0;width:1055px;height:2293px;opacity:0}
+    .cv.base-ready .cv-base{opacity:1}
+    /* layers stay hidden until the base plate is painted and every layer has decoded */
+    .cv>:not(.cv-base){visibility:hidden}.cv.ready>:not(.cv-base){visibility:visible}
+    .cv:not(.ready) .sphere{background-image:none}
+    .halo{left:90px;top:306px;width:430px;height:430px;animation:haloSpin 46s linear infinite}
+    .halo img{width:100%;height:100%;animation:haloGlow 4.2s ease-in-out infinite}
+    @keyframes haloSpin{to{transform:rotate(1turn)}}
+    @keyframes haloGlow{0%,100%{filter:drop-shadow(0 0 6px #ffd45c66) brightness(1)}50%{filter:drop-shadow(0 0 26px #ffe08acc) brightness(1.18)}}
+    .statue{left:0;top:401px;width:510px}
+    .ship{left:0;top:1209px;width:350px;transform-origin:50% 88%;animation:sail 5.6s ease-in-out infinite}
+    @keyframes sail{0%,100%{transform:translateY(2px) rotate(-1.2deg)}50%{transform:translateY(-4px) rotate(1.6deg)}}
+    .waves{left:0;top:1441px;width:345px;transform-origin:50% 100%;animation:surf 3.4s ease-in-out infinite}
+    @keyframes surf{0%,100%{transform:translateX(0) scale(1,1)}35%{transform:translateX(9px) scale(1.03,1.08)}70%{transform:translateX(-6px) scale(.99,.97)}}
+    .sphere{left:770px;top:1330px;width:260px;height:260px;border-radius:50%;overflow:hidden;background:url(assets/cover-web/globe-map.webp) 0 50%/auto 100% repeat-x;animation:spin 18s linear infinite}
+    .sphere:after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff9 0,#fff3 14%,transparent 34%),radial-gradient(circle at 50% 50%,transparent 52%,#3b230f55 78%,#1d0f05cc 100%)}
+    @keyframes spin{to{background-position:-520px 50%}}
+    .globe-frame{left:745px;top:1271px;width:310px}
+    .cupid{left:680px;top:976px;width:375px;height:360px;animation:hover 4.4s ease-in-out infinite}
+    .cupid img{position:absolute}
+    .cupid .wing{left:210px;top:35px;width:165px;transform-origin:10px 55px;animation:flap .55s ease-in-out infinite alternate}
+    .cupid .body{left:0;top:0;width:375px}
+    @keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+    @keyframes flap{from{transform:rotate(-16deg) scaleY(1.04)}to{transform:rotate(9deg) scaleY(.9)}}
+    .plate-invited{left:390px;top:416px;width:365px}
+    .title{left:0;top:731px;width:1010px}
+    .plate-together{left:235px;top:1061px;width:605px}
+    .pop{opacity:0}
+    .play-intro .pop{animation:pop .9s cubic-bezier(.18,1.4,.36,1) both}
+    .play-intro .plate-invited{animation-delay:.25s}.play-intro .title{animation-delay:.6s}.play-intro .plate-together{animation-delay:1.05s}.play-intro .info{animation-delay:1.45s}
+    @keyframes pop{0%{opacity:0;transform:scale(.35) rotate(-6deg)}60%{opacity:1;transform:scale(1.07) rotate(1deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+    .info{left:408px;top:1440px;width:340px;height:300px;color:#4a2f22;font-family:"Cormorant Garamond",serif;font-weight:700}
+    .info .row{position:absolute;left:0;width:330px;font-size:32px;line-height:40px;letter-spacing:.03em;font-variant-numeric:lining-nums;text-transform:uppercase;white-space:nowrap}
+    .info .row small{font:600 17px/1 "DM Sans",sans-serif;letter-spacing:.1em;color:#8a5a3c;margin-right:8px;vertical-align:4px}
+    .info .r3{font-size:29px;letter-spacing:.01em}.info .r1{top:11px}.info .r2{top:81px}.info .r3{top:151px}
+    .map-btn{left:395px;top:1690px;width:270px;height:62px;display:flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;color:#fff;background:var(--pink);border:3px solid #ffd1e1;border-radius:99px;font:700 25px/1 "DM Sans",sans-serif;letter-spacing:.12em;text-transform:uppercase;box-shadow:0 9px 0 #b72b60,0 18px 30px #4a0f2a55;pointer-events:auto}
+    .map-btn:active{transform:translateY(5px);box-shadow:0 4px 0 #b72b60}
+    .play-intro .map-btn{animation:pop .9s 1.8s cubic-bezier(.18,1.4,.36,1) both}
+    .twinkle{width:46px;height:46px;background:radial-gradient(circle,#fff 0 6%,transparent 8%),conic-gradient(from 45deg,transparent 0 22%,#ffe7a0 24% 26%,transparent 28% 47%,#ffe7a0 49% 51%,transparent 53% 72%,#ffe7a0 74% 76%,transparent 78% 97%,#ffe7a0 99%);mix-blend-mode:screen;animation:twinkle 2.6s ease-in-out infinite;opacity:0}
+    @keyframes twinkle{0%,100%{opacity:0;transform:scale(.4) rotate(0)}50%{opacity:1;transform:scale(1) rotate(45deg)}}
+
+    /* PAGE 2 · VOYAGE */
+    .voyage{position:relative;z-index:1;margin:6px 14px 0;height:calc(100% - 156px);padding:16px 14px 14px;justify-content:space-between;background:#fffaf2e6;border:2px solid var(--gold);outline:1px solid #d9a53a88;outline-offset:3px;box-shadow:0 12px 30px #6e43221f;display:flex;flex-direction:column;gap:8px}
+    .voyage:before,.voyage:after{content:"❦";position:absolute;left:50%;transform:translateX(-50%);color:var(--gold);font-size:20px;background:#fdf1e3;padding:0 8px;line-height:1}.voyage:before{top:-12px}.voyage:after{bottom:-12px;transform:translateX(-50%) rotate(180deg)}
+    .chapter{flex:0 1 auto;min-height:0;display:flex;flex-direction:column}
+    .chapter-shot{flex:1 1 auto;min-height:56px;height:21dvh;max-height:190px;width:100%;object-fit:cover;border:1px solid #c9944288;display:block}
+    .chapter-head{display:flex;align-items:center;gap:10px;margin:8px 0 2px}
+    .numeral{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f6d27c,#b98021);color:#fff;font:700 14px "Bodoni Moda",serif;box-shadow:0 0 0 2px #fff7e7,0 0 0 3px #d9a53a}
+    .chapter-head h3{margin:0;font:700 19px/1 "Bodoni Moda",serif;color:var(--emerald)}
+    .chapter-head p{margin:2px 0 0;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a5a3c;font-weight:700}
+    .timeline{list-style:none;margin:2px 0 0 16px;padding:0 0 0 22px;border-left:2px dotted #d9a53a}
+    .timeline li{position:relative;display:grid;grid-template-columns:76px 1fr;align-items:baseline;padding:5px 0}
+    .timeline li:before{content:"";position:absolute;left:-29px;top:9px;width:10px;height:10px;transform:rotate(45deg);background:var(--pink);border:2px solid #fff3e4;box-shadow:0 0 0 1px #f04e8a66}
+    .timeline time{font-size:10.5px;font-weight:700;color:var(--blue);letter-spacing:.04em}
+    .timeline strong{font:700 14.5px/1.2 "Bodoni Moda",serif;color:#3a2218}
+    .voyage-foot{text-align:center;font-size:10px;color:#7b5e52;line-height:1.5;margin-top:auto;padding-top:2px}
+    .voyage-foot b{color:var(--emerald);font-size:11px}
+
+    /* PAGE 3 · HOUSES */
+    .houses{background:linear-gradient(160deg,#fdf1e4,#f3d6c3)}
+    .house-tabs{position:relative;z-index:3;display:flex;justify-content:center;gap:6px;margin:4px 12px 0}
+    .house-tabs button{border:1px solid #c99442aa;background:#fffaf3;border-radius:99px;padding:5px 9px;font-size:10px;font-weight:700;letter-spacing:.06em;cursor:pointer;display:flex;align-items:center;gap:5px;color:#5e3f2c}
+    .house-tabs button i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+    .house-tabs button[aria-selected=true]{background:var(--emerald);color:#fff;border-color:var(--emerald)}
+    .deck{position:relative;z-index:2;margin:58px 30px 0 18px;height:calc(100% - 232px);touch-action:pan-y}
+    .hcard{position:absolute;inset:0;border-radius:10px;background:#fffaf3;border:2px solid var(--gold);box-shadow:0 10px 26px #5a2f1a33;overflow:hidden;transform-origin:50% 100%;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .5s,filter .5s;cursor:pointer;display:flex;flex-direction:column;text-align:center}
+    .hcard[data-pos="0"]{z-index:4;transform:none}
+    .hcard[data-pos="1"]{z-index:3;transform:translate(7px,-17px) rotate(2.2deg) scale(.97)}
+    .hcard[data-pos="2"]{z-index:2;transform:translate(13px,-33px) rotate(4.4deg) scale(.94)}
+    .hcard[data-pos="3"]{z-index:1;transform:translate(18px,-48px) rotate(6.6deg) scale(.91)}
+    .hcard:not([data-pos="0"])>*{visibility:hidden}.hcard:not([data-pos="0"]) .band{visibility:visible}
+    .hcard.toss{animation:toss .45s ease-in both}
+    @keyframes toss{to{transform:translateX(-118%) rotate(-10deg);opacity:.2}}
+    .hcard>*:not(.band){position:relative;z-index:1}
+    .hcard .band{position:absolute;left:0;right:0;top:0;height:112px;background:linear-gradient(120deg,var(--c1),var(--c2) 70%,var(--c3))}
+    .hcard .band:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,#fff0 0 14px,#ffffff14 14px 15px)}
+    .hcard:after{content:"";position:absolute;inset:6px;border:1px solid #d9a53a77;border-radius:6px;pointer-events:none;z-index:2}
+    .hcard .head{height:112px;flex:none;display:flex;align-items:center;gap:14px;padding:0 16px;text-align:left;color:var(--t)}
+    .logo-slot{width:86px;height:86px;border-radius:50%;background:#fffaf3d9;border:2px dashed #c99442;display:grid;place-items:center;box-shadow:0 6px 14px #3b1d0e40;flex:none}
+    .logo-slot span{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#a07f58;font-weight:700}
+    .logo-slot img{width:112%;height:112%;object-fit:contain}
+    .logo-slot.has-logo{border:0;background:transparent;box-shadow:none}
+    .hcard h3{margin:0;font:900 31px/1 "Bodoni Moda",serif;color:inherit;text-shadow:0 2px 8px #0003}
+    .hcard h3 small{display:block;font:500 italic 13px/1.2 "Bodoni Moda",serif;opacity:.85;margin-bottom:3px}
+    .hcard .members{list-style:none;margin:12px 14px 0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:5px}
+    .hcard .members li{font-size:12.5px;padding:4px 10px;border-radius:99px;background:#f6e9dc;color:#4d3426}
+    .hcard .members li.org{color:var(--pink);font-weight:700;background:#fde3ec}
+    .hcard .members li.org:after{content:"✦";font-size:8px;margin-left:3px;vertical-align:2px}
+    .hcard .swatches{display:flex;gap:12px;justify-content:center;margin:10px 0 0;font-size:10px;color:#7b5e52}
+    .hcard .swatches span{display:flex;align-items:center;gap:4px}
+    .hcard .swatches i{width:16px;height:16px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #80552b55}
+    .look-peek{flex:1 1 0;min-height:120px;align-self:stretch;margin:12px 14px 6px;padding:0;border:1px solid #d9a53a;border-radius:8px;overflow:hidden;cursor:pointer;background:#092f28;display:flex;align-items:flex-end;justify-content:center}.look-peek img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%}.look-peek:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#03261fb0)}.look-btn{position:relative;z-index:1;margin:0 0 12px;border:0;background:var(--pink);color:#fff;border-radius:99px;padding:10px 18px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;box-shadow:0 5px 0 #b72b60}
+    .deck-ctrl{display:none;align-items:center;justify-content:center;gap:12px;margin-top:10px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#7b5e52}
+    .deck-ctrl button{width:30px;height:30px;border-radius:50%;border:1px solid #c99442aa;background:#fffaf3;cursor:pointer}
+    .organiser-note{margin:0 0 10px;text-align:center;font-size:9px;color:#9a7a66;letter-spacing:.04em}
+    .organiser-note b{color:var(--pink)}
+
+    /* PAGE 4 · AWARDS */
+    .awards{display:flex;flex-direction:column;justify-content:space-evenly;padding-bottom:58px;background:radial-gradient(circle at 50% 78%,#0f6a55 0,transparent 55%),linear-gradient(160deg,#073b31,#062d27);color:#fff}
+    .awards .page-head h2{color:#fff1dc}.awards .page-head p{color:#f6b4cc}
+    .award-sec{flex:none;position:relative;z-index:2;text-align:center;margin:6px 12px 0}
+    .sec-label{display:flex;align-items:center;gap:10px;justify-content:center;font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:#f2cf7c;font-weight:700;margin:2px 0 8px}
+    .sec-label:before,.sec-label:after{content:"";height:1px;width:46px;background:linear-gradient(90deg,transparent,#d9a53a)}.sec-label:after{transform:scaleX(-1)}
+    .solo{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 4px}
+    .medal{width:31%;display:flex;flex-direction:column;align-items:center}
+    .medal .disc{flex:none;width:min(26vw,14dvh,124px);height:auto;aspect-ratio:1;border-radius:50%;padding:4px;background:conic-gradient(from 210deg,#f8dc8c,#b98021,#f8dc8c,#a8741f,#f8dc8c);box-shadow:0 6px 16px #0007}
+    .medal img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;border:2px solid #062d27}
+    .medal span{margin-top:7px;font:700 13.5px/1.1 "Bodoni Moda",serif;color:#fff3df}
+    .team{display:flex;justify-content:center;gap:12px}
+    .trophy{position:relative;width:47%;display:flex;flex-direction:column;align-items:center}
+    .trophy .frame{flex:none;position:relative;width:min(42vw,25dvh,210px);aspect-ratio:1;padding:7px;background:linear-gradient(135deg,#f8dc8c,#a8741f 35%,#f8dc8c 55%,#b98021);border-radius:16px 16px 50% 50%/16px 16px 18% 18%;box-shadow:0 12px 26px #000a}
+    .trophy .frame img{width:100%;height:100%;object-fit:cover;display:block;border-radius:10px 10px 48% 48%/10px 10px 16% 16%;border:2px solid #fff3d6}
+    .trophy .ribbon{position:absolute;z-index:2;left:50%;top:-9px;transform:translateX(-50%);background:var(--pink);color:#fff;font-size:8px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;padding:4px 12px;border-radius:3px;box-shadow:0 3px 0 #b72b60;white-space:nowrap}
+    .trophy span{margin-top:10px;font:900 18px/1 "Bodoni Moda",serif;color:#fff3df}
+    .trophy em{font-style:normal;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#f6b4cc;margin-top:3px}
+    .trophy.grand .frame:before{content:"";position:absolute;inset:-26px;z-index:-1;border-radius:50%;background:repeating-conic-gradient(#ffd45c55 0 4deg,transparent 4deg 13deg);animation:haloSpin 30s linear infinite;-webkit-mask:radial-gradient(circle,#000 40%,transparent 70%);mask:radial-gradient(circle,#000 40%,transparent 70%)}
+    .trophy.grand .ribbon{background:var(--gold);box-shadow:0 3px 0 #8d5f17;color:#3b2405}
+
+    /* LOOK MODAL */
+    .look-modal{position:absolute;z-index:130;inset:0;background:#03261ff2;display:none;align-items:center;justify-content:center;padding:24px 14px 24px}.look-modal.open{display:flex}
+    .look-panel{position:relative;width:100%;height:100%;max-height:760px;background:#fff1df;border:2px solid var(--gold);box-shadow:0 18px 60px #0009;padding:10px;display:flex;flex-direction:column}
+    .look-panel img{width:100%;flex:1;min-height:0;object-fit:cover;object-position:50% 30%;display:block}
+    .look-meta{text-align:center;padding:9px 46px 4px}.look-meta h3{font:700 22px/1 "Bodoni Moda",serif;margin:0;color:var(--emerald)}.look-meta p{font-size:10px;margin:5px 0 0;color:#6f5043;letter-spacing:.08em}
+    .close-modal{position:absolute;right:16px;top:16px;z-index:4;border:0;background:#fff;border-radius:50%;width:36px;height:36px;font-size:20px;box-shadow:0 5px 16px #0004;cursor:pointer}
+    .modal-step{position:absolute;bottom:14px;border:0;background:var(--emerald);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer}.modal-prev{left:16px}.modal-next{right:16px}
+
+    @media (min-width:620px){.stage{padding:18px}.book{width:min(430px,calc(100dvh * .5625));height:min(764px,100dvh);border-radius:9px}.sheet,.last-page{border-radius:9px}.book:after{content:"";position:absolute;z-index:-1;inset:-9px;border:1px solid #e2bd6f88;border-radius:13px;box-shadow:0 0 0 4px #062d27}}
+    @media (max-height:700px){.page-head h2{font-size:25px}.page-head{padding-top:10px}.chapter-shot{max-height:70px}.timeline li{padding:3px 0}.timeline strong{font-size:13px}.deck{margin-top:50px;height:calc(100% - 210px)}.hcard .band,.hcard .head{height:88px}.logo-slot{width:68px;height:68px}.hcard h3{font-size:25px}.hcard .members{margin-top:8px}.hcard .members li{font-size:11px;padding:3px 8px}}
+    @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.swipe-hint{display:none}}
+  </style>
+</head>
+<body>
+<main class="stage">
+  <div class="book" id="book" aria-label="The Age of Discovery invitation, four pages">
+
+    <!-- 01 · COVER -->
+    <section class="sheet" data-page="0" style="z-index:4">
+      <div class="page cover" id="cover" aria-label="Cover: You're invited to the Age of Discovery, CX Year End Party">
+        <div class="cv" id="cv">
+          <img class="cv-base" id="cvBase" fetchpriority="high" decoding="async" src="assets/cover-web/base.webp" alt="">
+          <div class="halo"><img data-src="assets/cover-web/halo.webp" alt=""></div>
+          <img class="statue" data-src="assets/cover-web/statue.webp" alt="">
+          <img class="ship" data-src="assets/cover-web/ship.webp" alt="">
+          <img class="waves" data-src="assets/cover-web/waves.webp" alt="">
+          <div class="sphere"></div>
+          <img class="globe-frame" data-src="assets/cover-web/globe-frame.webp" alt="">
+          <div class="cupid">
+            <img class="wing" data-src="assets/cover-web/cupid-wing.webp" alt="">
+            <img class="body" data-src="assets/cover-web/cupid-body.webp" alt="">
+          </div>
+          <i class="twinkle" style="left:38px;top:972px;animation-delay:.4s"></i>
+          <i class="twinkle" style="left:212px;top:1128px;animation-delay:1.5s"></i>
+          <i class="twinkle" style="left:715px;top:1442px;animation-delay:2.2s"></i>
+          <i class="twinkle" style="left:556px;top:917px;animation-delay:1s"></i>
+          <img class="pop plate-invited" data-src="assets/cover-web/plate-invited.webp" alt="You're invited">
+          <img class="pop title" data-src="assets/cover-web/title.webp" alt="The Age of Discovery">
+          <img class="pop plate-together" data-src="assets/cover-web/plate-together.webp" alt="Discover Together">
+          <div class="pop info">
+            <div class="row r1">Thu · Dec 3, 2026</div>
+            <div class="row r2">5:00 – 8:30 PM</div>
+            <div class="row r3">Dai-ichi Hotel Tokyo</div>
+          </div>
+          <a class="map-btn" href="https://www.google.com/maps/search/?api=1&query=Dai-ichi%20Hotel%20Tokyo%2C%201-2-6%20Shimbashi%2C%20Minato-ku%2C%20Tokyo" target="_blank" rel="noopener">⌖ Open Map</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 · VOYAGE (chapters + agenda) -->
+    <section class="sheet" data-page="1" style="z-index:3">
+      <div class="page paper" aria-label="Tonight's voyage: chapters and agenda">
+        <header class="page-head">
+          <div class="ornament">✦ The evening unfolds ✦</div>
+          <h2>Tonight’s Voyage</h2>
+          <p>Thursday · December 3 · 5:00–8:30 PM</p>
+        </header>
+        <div class="voyage">
+          <article class="chapter">
+            <img class="chapter-shot" src="assets/venue-trax-baroque.web.jpg" alt="Café Bar TRAX">
+            <div class="chapter-head"><span class="numeral">I</span><div><h3>Café Bar TRAX</h3><p>2F · Drinks &amp; snacks · 5:00–6:30</p></div></div>
+            <ol class="timeline">
+              <li><time>5:00–5:30</time><strong>CX Awards</strong></li>
+              <li><time>5:30–6:30</time><strong>House Challenge</strong></li>
+            </ol>
+          </article>
+          <article class="chapter">
+            <img class="chapter-shot" src="assets/venue-flora-baroque.web.jpg" alt="Banquet Flora">
+            <div class="chapter-head"><span class="numeral">II</span><div><h3>Banquet Flora</h3><p>4F · Course dinner · 6:30–8:30</p></div></div>
+            <ol class="timeline">
+              <li><time>6:30–6:45</time><strong>Secret Santa</strong></li>
+              <li><time>6:45–8:30</time><strong>Dinner + Team Awards Announcement</strong></li>
+            </ol>
+          </article>
+          <div class="voyage-foot"><b>Dai-ichi Hotel Tokyo</b><br>〒105-8621 東京都港区新橋１丁目２−６</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 · HOUSES -->
+    <section class="sheet" data-page="2" style="z-index:2">
+      <div class="page houses" aria-label="The four houses and dress code">
+        <header class="page-head">
+          <div class="ornament">✦ Choose your colours ✦</div>
+          <h2>The Four Houses</h2>
+          <p>Tap or swipe the deck · open each look</p>
+        </header>
+        <div class="house-tabs" id="houseTabs" role="tablist"></div>
+        <div class="deck" id="deck"></div>
+        <div class="deck-ctrl"><button id="deckPrev" aria-label="Previous house">‹</button><span id="deckCount">1 / 4</span><button id="deckNext" aria-label="Next house">›</button></div>
+              </div>
+    </section>
+
+    <!-- 04 · AWARDS -->
+    <section class="last-page" data-page="3" style="z-index:1">
+      <div class="page awards velvet" aria-label="Awards board">
+        <header class="page-head">
+          <div class="ornament">✦ Glory awaits ✦</div>
+          <h2>Awards Board</h2>
+          <p>Prizes revealed live · bring your best</p>
+        </header>
+        <section class="award-sec">
+          <div class="sec-label">Individual</div>
+          <div class="solo">
+            <div class="medal"><div class="disc"><img src="assets/award-fashionista.web.jpg" alt="Fashionista award artwork"></div><span>Fashionista</span></div>
+            <div class="medal"><div class="disc"><img src="assets/award-snack-strategist.web.jpg" alt="Snack Strategist award artwork"></div><span>Snack Strategist</span></div>
+            <div class="medal"><div class="disc"><img src="assets/award-joke-cracker.web.jpg" alt="Joke Cracker award artwork"></div><span>Joke Cracker</span></div>
+            <div class="medal"><div class="disc"><img src="assets/award-ai-master.web.jpg" alt="AI Master award artwork"></div><span>AI Master</span></div>
+            <div class="medal"><div class="disc"><img src="assets/award-best-listener.web.jpg" alt="Best Listener award artwork"></div><span>Best Listener</span></div>
+          </div>
+        </section>
+        <section class="award-sec">
+          <div class="sec-label">House</div>
+          <div class="team">
+            <div class="trophy"><div class="frame"><i class="ribbon">Team</i><img src="assets/award-best-dressed.web.jpg" alt="Best Dressed award artwork"></div><span>Best Dressed</span><em>Team award</em></div>
+            <div class="trophy grand"><div class="frame"><i class="ribbon">Grand prize</i><img src="assets/award-winning-team.web.jpg" alt="Winning Team award artwork"></div><span>Winning Team</span><em>Team award</em></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <div class="edge-tab" id="edgeTab">SWIPE TO TURN</div>
+    <div class="nav">
+      <button id="prev" aria-label="Previous page">←</button>
+      <span class="counter" id="counter">01 / 04</span>
+      <button id="next" aria-label="Next page">→</button>
+    </div>
+    <div class="swipe-hint" id="swipeHint"><span class="hand">☝</span><span>Swipe or drag to turn the page</span></div>
+
+    <div class="look-modal" id="lookModal" role="dialog" aria-modal="true" aria-label="House outfit reference">
+      <div class="look-panel">
+        <button class="close-modal" id="closeModal" aria-label="Close">×</button>
+        <img id="modalImage" src="assets/look-dolphin.web.jpg" alt="">
+        <div class="look-meta"><h3 id="modalTitle">House of the Dolphin</h3><p id="modalPalette">Navy · Powder Blue · Silver</p></div>
+        <button class="modal-step modal-prev" id="modalPrev" aria-label="Previous house">←</button>
+        <button class="modal-step modal-next" id="modalNext" aria-label="Next house">→</button>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  /* ---------- book ---------- */
+  const book=document.getElementById('book'),sheets=[...document.querySelectorAll('.sheet')],prev=document.getElementById('prev'),next=document.getElementById('next'),counter=document.getElementById('counter'),edgeTab=document.getElementById('edgeTab');
+  let page=0,startX=0,startY=0,dragging=false,dragSheet=null;
+  try{if(sessionStorage.getItem('cx-hint-shown'))document.getElementById('swipeHint').remove();else sessionStorage.setItem('cx-hint-shown','1')}catch{}
+  function render(){sheets.forEach((s,i)=>{s.classList.toggle('flipped',i<page);s.style.zIndex=i<page?i+1:4-i});prev.disabled=page===0;next.disabled=page===3;edgeTab.hidden=page===3;counter.textContent=String(page+1).padStart(2,'0')+' / 04';document.querySelectorAll('[data-page]').forEach((p,i)=>p.setAttribute('aria-hidden',i!==page))}
+  function go(n){page=Math.max(0,Math.min(3,n));render()}
+  prev.onclick=()=>go(page-1);next.onclick=()=>go(page+1);
+  book.addEventListener('pointerdown',e=>{if(e.target.closest('button,a,.look-modal,.deck'))return;startX=e.clientX;startY=e.clientY;dragging=true;dragSheet=page<3?sheets[page]:null;book.setPointerCapture(e.pointerId)});
+  book.addEventListener('pointermove',e=>{if(!dragging||!dragSheet)return;const dx=e.clientX-startX;if(Math.abs(dx)<Math.abs(e.clientY-startY))return;if(dx<0){const deg=Math.min(0,dx/book.clientWidth*110);dragSheet.style.transition='none';dragSheet.style.transform=`rotateY(${deg}deg)`}});
+  function endDrag(e,cancel){if(!dragging)return;const dx=e.clientX-startX,dy=e.clientY-startY;if(dragSheet){dragSheet.style.transition='';dragSheet.style.transform=''}if(!cancel&&Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)){dx<0?go(page+1):go(page-1)}dragging=false;dragSheet=null}
+  book.addEventListener('pointerup',e=>endDrag(e,false));book.addEventListener('pointercancel',e=>endDrag(e,true));
+  addEventListener('keydown',e=>{if(modal.classList.contains('open'))return;if(e.key==='ArrowRight'||e.key==='PageDown')go(page+1);if(e.key==='ArrowLeft'||e.key==='PageUp')go(page-1)});
+
+  /* ---------- cover: scale the 1055×2293 canvas to cover the page ---------- */
+  const cover=document.getElementById('cover'),cv=document.getElementById('cv');
+  function fitCover(){const W=cover.clientWidth,H=cover.clientHeight,s=Math.max(W/1055,H/2293);cv.style.transform=`translate(${(W-1055*s)/2}px,${(H-2293*s)/2}px) scale(${s})`}
+  addEventListener('resize',fitCover);fitCover();
+  /* load order: base plate first, then the animated layers; intro plays once all are ready */
+  (function loadCover(){
+    const base=document.getElementById('cvBase'),layers=[...cv.querySelectorAll('img[data-src]')];
+    let started=false,shown=false;
+    const wait=ms=>new Promise(r=>setTimeout(r,ms));
+    const loaded=img=>(img.complete&&img.naturalWidth?Promise.resolve():new Promise(r=>{img.addEventListener('load',r,{once:true});img.addEventListener('error',r,{once:true})}));
+    const decoded=img=>loaded(img).then(()=>Promise.race([img.decode?img.decode().catch(()=>{}):0,wait(400)]));
+    function show(){if(shown)return;shown=true;cv.classList.add('base-ready','ready');requestAnimationFrame(()=>book.classList.add('play-intro'))}
+    function startLayers(){if(started)return;started=true;cv.classList.add('base-ready');
+      const map=new Image();map.src='assets/cover-web/globe-map.webp';
+      const jobs=layers.map(img=>{img.src=img.dataset.src;return decoded(img)});jobs.push(decoded(map));
+      Promise.all(jobs).then(show);setTimeout(show,5000)}
+    decoded(base).then(startLayers);
+    setTimeout(startLayers,3000);
+  })();
+
+  /* ---------- houses ---------- */
+  const houses=[
+    {id:'dolphin',name:'Dolphin',palette:[['#142b55','Navy'],['#a9cbe5','Powder Blue'],['#c8ccd4','Silver']],members:['Rebecca','*Vitor','Matsatso','Angela','Mari','*Mingmin']},
+    {id:'rose',name:'Rose',palette:[['#7d1935','Burgundy'],['#f0b8c1','Blush'],['#bc872d','Antique Gold']],members:['Kenta','Eunice','Leon','Natsuno','Yuji','*Karen']},
+    {id:'star',name:'Star',palette:[['#f4eddb','Ivory'],['#d7bd89','Champagne'],['#b8b9bd','Pearl Grey']],members:['Sushim','Matteo','James','Saori','Angee','*Julia']},
+    {id:'eagle',name:'Eagle',palette:[['#08735c','Emerald'],['#168c8c','Teal'],['#d5a329','Gold']],members:['Naeem','Chun Thing','Luke','*Ruolei','Nagendra','Gaurii']}
+  ];
+  const deck=document.getElementById('deck'),tabs=document.getElementById('houseTabs'),deckCount=document.getElementById('deckCount');
+  const bandFor=h=>h.id==='star'?['#d7bd89','#efe3c4','#b8b9bd']:h.palette.map(p=>p[0]);
+  houses.forEach((h,i)=>{
+    const [c1,c2,c3]=bandFor(h);
+    const card=document.createElement('article');card.className='hcard';card.dataset.i=i;card.style.cssText=`--c1:${c1};--c2:${c2};--c3:${c3};--t:${h.id==='star'?'#14362e':'#fff8ec'}`;
+    card.innerHTML=`<div class="band"></div><div class="head"><div class="logo-slot" aria-label="House of the ${h.name} logo"><span>Logo</span></div><h3><small>House of the</small>${h.name}</h3></div>
+      <ul class="members">${h.members.map(m=>m[0]==='*'?`<li class="org">${m.slice(1)}</li>`:`<li>${m}</li>`).join('')}</ul>
+      <div class="swatches">${h.palette.map(([c,n])=>`<span><i style="background:${c}"></i>${n}</span>`).join('')}</div>
+      <button class="look-peek" type="button" aria-label="View the House of the ${h.name} look"><img src="assets/look-${h.id}.web.jpg" alt="" loading="lazy"><span class="look-btn">View the look ↗</span></button><p class="organiser-note"><b>✦</b> organiser</p>`;
+    const img=new Image();img.alt=`House of the ${h.name} logo`;img.onload=()=>{const s=card.querySelector('.logo-slot');s.replaceChildren(img);s.classList.add('has-logo')};img.src=`assets/houses/logo-${h.id}.png`;
+    card.querySelector('.look-peek').onclick=e=>{e.stopPropagation();showHouse(i)};
+    deck.append(card);
+    const t=document.createElement('button');t.role='tab';t.style.setProperty('--c',h.palette[0][0]);t.innerHTML=`<i></i>${h.name}`;t.onclick=()=>setFront(i);tabs.append(t);
+  });
+  const cards=[...deck.children];let front=0,busy=false;
+  function layout(){cards.forEach((c,i)=>c.dataset.pos=(i-front+4)%4);[...tabs.children].forEach((t,i)=>t.setAttribute('aria-selected',i===front));deckCount.textContent=`${front+1} / 4`}
+  function setFront(i){if(busy||i===front)return;const leaving=cards[front];busy=true;leaving.classList.add('toss');setTimeout(()=>{leaving.classList.remove('toss');front=(i+4)%4;layout();busy=false},260)}
+  document.getElementById('deckNext').onclick=()=>setFront((front+1)%4);document.getElementById('deckPrev').onclick=()=>setFront((front+3)%4);
+  let dx0=null;deck.addEventListener('pointerdown',e=>{dx0=e.clientX});
+  deck.addEventListener('pointerup',e=>{if(dx0===null||e.target.closest('button'))return;const dx=e.clientX-dx0;dx0=null;if(Math.abs(dx)>40)setFront(dx<0?(front+1)%4:(front+3)%4);else setFront((front+1)%4)});
+  layout();
+
+  /* ---------- look modal ---------- */
+  const lookPalette={dolphin:'Navy · Powder Blue · Silver',rose:'Burgundy · Blush · Antique Gold',star:'Ivory · Champagne · Pearl Grey',eagle:'Emerald · Teal · Gold'};
+  const modal=document.getElementById('lookModal'),modalImage=document.getElementById('modalImage'),modalTitle=document.getElementById('modalTitle'),modalPalette=document.getElementById('modalPalette');let activeHouse=0;
+  function showHouse(i){activeHouse=(i+4)%4;const h=houses[activeHouse];modalImage.src=`assets/look-${h.id}.web.jpg`;modalImage.alt=`House of the ${h.name} outfit reference`;modalTitle.textContent=`House of the ${h.name}`;modalPalette.textContent=lookPalette[h.id];modal.classList.add('open')}
+  document.getElementById('closeModal').onclick=()=>modal.classList.remove('open');document.getElementById('modalPrev').onclick=()=>showHouse(activeHouse-1);document.getElementById('modalNext').onclick=()=>showHouse(activeHouse+1);
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});addEventListener('keydown',e=>{if(e.key==='Escape')modal.classList.remove('open')});
+  render();
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# build output + Vercel link (deploy from dist/, never commit tokens)
+dist/
+.env*
+# Codex working files: QA previews, generation intermediates, unused @2x masters
+assets/cover/_*
+assets/cover/*@2x.png

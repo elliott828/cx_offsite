@@ -1,0 +1,99 @@
+{
+  "canvas": {
+    "w": 1055,
+    "h": 2293,
+    "refOffsetY": 401
+  },
+  "layers": [
+    {
+      "id": "halo",
+      "file": "halo.png",
+      "center": [
+        305,
+        521
+      ],
+      "displaySize": 430
+    },
+    {
+      "id": "statue",
+      "file": "statue.png",
+      "x": 0,
+      "y": 401,
+      "w": 510,
+      "h": 720
+    },
+    {
+      "id": "plate-invited",
+      "file": "plate-invited.png",
+      "x": 390,
+      "y": 416,
+      "w": 365,
+      "h": 280
+    },
+    {
+      "id": "title",
+      "file": "title.png",
+      "x": 0,
+      "y": 731,
+      "w": 1010,
+      "h": 465
+    },
+    {
+      "id": "plate-together",
+      "file": "plate-together.png",
+      "x": 235,
+      "y": 1061,
+      "w": 605,
+      "h": 370
+    },
+    {
+      "id": "ship",
+      "file": "ship.png",
+      "x": 0,
+      "y": 1161,
+      "w": 350,
+      "h": 370
+    },
+    {
+      "id": "waves",
+      "file": "waves.png",
+      "x": 0,
+      "y": 1441,
+      "w": 345,
+      "h": 195
+    },
+    {
+      "id": "cupid-body",
+      "file": "cupid-body.png",
+      "x": 680,
+      "y": 976,
+      "w": 375,
+      "h": 360
+    },
+    {
+      "id": "cupid-wing",
+      "file": "cupid-wing.png",
+      "x": 890,
+      "y": 1011,
+      "w": 165,
+      "h": 110,
+      "pivot": [
+        900,
+        1066
+      ]
+    },
+    {
+      "id": "globe-frame",
+      "file": "globe-frame.png",
+      "x": 745,
+      "y": 1271,
+      "w": 310,
+      "h": 540,
+      "sphere": {
+        "cx": 900,
+        "cy": 1460,
+        "r": 130
+      }
+    }
+  ]
+}

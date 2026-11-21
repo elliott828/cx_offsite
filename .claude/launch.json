@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cx-invite-v2",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["designs/cx-year-end-party-v2/preview-server.mjs"],
+      "port": 4173
+    }
+  ]
+}
