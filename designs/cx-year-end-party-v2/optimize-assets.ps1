@@ -38,7 +38,7 @@ function Resize-Image([string]$source, [string]$destination, [int]$maxWidth, [bo
 }
 
 'fashionista','snack-strategist','joke-cracker','ai-master','best-listener','best-dressed','winning-team' | ForEach-Object {
-  Resize-Image (Join-Path $assetRoot "award-$_.png") (Join-Path $assetRoot "award-$_.web.jpg") 600 $true
+  Resize-Image (Join-Path $assetRoot "award-$_.png") (Join-Path $assetRoot "award-$_.web.png") 600 $false
 }
 
 'trax','flora' | ForEach-Object {

@@ -4,3 +4,8 @@ dist/
 # Codex working files: QA previews, generation intermediates, unused @2x masters
 assets/cover/_*
 assets/cover/*@2x.png
+# QA preview sheets from Codex
+assets/_*
+assets/houses/_*
+# superseded by assets/award-*.webp (build-web-extras.py)
+assets/award-*.web.png

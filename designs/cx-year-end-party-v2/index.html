@@ -52,16 +52,16 @@
     @keyframes sail{0%,100%{transform:translateY(2px) rotate(-1.2deg)}50%{transform:translateY(-4px) rotate(1.6deg)}}
     .waves{left:0;top:1441px;width:345px;transform-origin:50% 100%;animation:surf 3.4s ease-in-out infinite}
     @keyframes surf{0%,100%{transform:translateX(0) scale(1,1)}35%{transform:translateX(9px) scale(1.03,1.08)}70%{transform:translateX(-6px) scale(.99,.97)}}
-    .sphere{left:770px;top:1330px;width:260px;height:260px;border-radius:50%;overflow:hidden;background:url(assets/cover-web/globe-map.webp) 0 50%/auto 100% repeat-x;animation:spin 18s linear infinite}
+    .sphere{left:866px;top:1404px;width:192px;height:192px;border-radius:50%;overflow:hidden;background:url(assets/cover-web/globe-map.webp) 0 50%/auto 100% repeat-x;animation:spin 18s linear infinite}
     .sphere:after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff9 0,#fff3 14%,transparent 34%),radial-gradient(circle at 50% 50%,transparent 52%,#3b230f55 78%,#1d0f05cc 100%)}
-    @keyframes spin{to{background-position:-520px 50%}}
-    .globe-frame{left:745px;top:1271px;width:310px}
+    @keyframes spin{to{background-position:-384px 50%}}
+    .globe-frame{left:782px;top:1290px;width:335px;clip-path:inset(0 0 37.9% 0)} /* aligned to the armillary ring painted in base; the base keeps its own stand */
     .cupid{left:680px;top:976px;width:375px;height:360px;animation:hover 4.4s ease-in-out infinite}
     .cupid img{position:absolute}
-    .cupid .wing{left:210px;top:35px;width:165px;transform-origin:10px 55px;animation:flap .55s ease-in-out infinite alternate}
+    .cupid .wing{left:246px;top:104px;width:165px;transform-origin:10px 55px;animation:flap .55s ease-in-out infinite alternate} /* root on the shoulder blade */
     .cupid .body{left:0;top:0;width:375px}
     @keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
-    @keyframes flap{from{transform:rotate(-16deg) scaleY(1.04)}to{transform:rotate(9deg) scaleY(.9)}}
+    @keyframes flap{from{transform:rotate(-44deg) scaleY(1.04)}to{transform:rotate(-18deg) scaleY(.9)}}
     .plate-invited{left:390px;top:416px;width:365px}
     .title{left:0;top:731px;width:1010px}
     .plate-together{left:235px;top:1061px;width:605px}
@@ -100,7 +100,7 @@
     .houses{background:linear-gradient(160deg,#fdf1e4,#f3d6c3)}
     .house-tabs{position:relative;z-index:3;display:flex;justify-content:center;gap:6px;margin:4px 12px 0}
     .house-tabs button{border:1px solid #c99442aa;background:#fffaf3;border-radius:99px;padding:5px 9px;font-size:10px;font-weight:700;letter-spacing:.06em;cursor:pointer;display:flex;align-items:center;gap:5px;color:#5e3f2c}
-    .house-tabs button i{width:9px;height:9px;border-radius:50%;background:var(--c)}
+    .house-tabs button i{width:9px;height:9px;border-radius:50%;background:var(--c)}.house-tabs button img{width:16px;height:16px;object-fit:contain;margin:-2px 0}
     .house-tabs button[aria-selected=true]{background:var(--emerald);color:#fff;border-color:var(--emerald)}
     .deck{position:relative;z-index:2;margin:58px 30px 0 18px;height:calc(100% - 232px);touch-action:pan-y}
     .hcard{position:absolute;inset:0;border-radius:10px;background:#fffaf3;border:2px solid var(--gold);box-shadow:0 10px 26px #5a2f1a33;overflow:hidden;transform-origin:50% 100%;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .5s,filter .5s;cursor:pointer;display:flex;flex-direction:column;text-align:center}
@@ -112,14 +112,15 @@
     .hcard.toss{animation:toss .45s ease-in both}
     @keyframes toss{to{transform:translateX(-118%) rotate(-10deg);opacity:.2}}
     .hcard>*:not(.band){position:relative;z-index:1}
-    .hcard .band{position:absolute;left:0;right:0;top:0;height:112px;background:linear-gradient(120deg,var(--c1),var(--c2) 70%,var(--c3))}
+    .hcard .band{position:absolute;left:0;right:0;top:0;height:112px;background:linear-gradient(115deg,var(--c1) 0%,var(--c2) 52%,var(--c3) 100%)}
     .hcard .band:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,#fff0 0 14px,#ffffff14 14px 15px)}
     .hcard:after{content:"";position:absolute;inset:6px;border:1px solid #d9a53a77;border-radius:6px;pointer-events:none;z-index:2}
     .hcard .head{height:112px;flex:none;display:flex;align-items:center;gap:14px;padding:0 16px;text-align:left;color:var(--t)}
-    .logo-slot{width:86px;height:86px;border-radius:50%;background:#fffaf3d9;border:2px dashed #c99442;display:grid;place-items:center;box-shadow:0 6px 14px #3b1d0e40;flex:none}
+    .logo-slot{position:relative;width:104px;height:100px;display:grid;place-items:center;flex:none}
+    .logo-slot:before{content:"";position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(circle,var(--spot) 0,transparent 66%);pointer-events:none}
     .logo-slot span{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#a07f58;font-weight:700}
-    .logo-slot img{width:112%;height:112%;object-fit:contain}
-    .logo-slot.has-logo{border:0;background:transparent;box-shadow:none}
+    .logo-slot img{position:relative;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 1px var(--glow)) drop-shadow(0 0 1px var(--glow)) drop-shadow(0 0 7px var(--glow)) drop-shadow(0 5px 6px #0006)}
+    .hcard .head h3{margin-top:-6px}
     .hcard h3{margin:0;font:900 31px/1 "Bodoni Moda",serif;color:inherit;text-shadow:0 2px 8px #0003}
     .hcard h3 small{display:block;font:500 italic 13px/1.2 "Bodoni Moda",serif;opacity:.85;margin-bottom:3px}
     .hcard .members{list-style:none;margin:12px 14px 0;padding:0;display:flex;flex-wrap:wrap;justify-content:center;gap:5px}
@@ -129,7 +130,7 @@
     .hcard .swatches{display:flex;gap:12px;justify-content:center;margin:10px 0 0;font-size:10px;color:#7b5e52}
     .hcard .swatches span{display:flex;align-items:center;gap:4px}
     .hcard .swatches i{width:16px;height:16px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #80552b55}
-    .look-peek{flex:1 1 0;min-height:120px;align-self:stretch;margin:12px 14px 6px;padding:0;border:1px solid #d9a53a;border-radius:8px;overflow:hidden;cursor:pointer;background:#092f28;display:flex;align-items:flex-end;justify-content:center}.look-peek img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%}.look-peek:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#03261fb0)}.look-btn{position:relative;z-index:1;margin:0 0 12px;border:0;background:var(--pink);color:#fff;border-radius:99px;padding:10px 18px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;box-shadow:0 5px 0 #b72b60}
+    .look-peek{flex:1 1 0;min-height:120px;align-self:stretch;margin:12px 14px 6px;padding:0;border:1px solid #d9a53a;border-radius:8px;overflow:hidden;cursor:pointer;background:#092f28;display:flex;align-items:flex-end;justify-content:center}.look-peek img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 16%}.look-peek:after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,#03261fb0)}.look-btn{position:relative;z-index:1;margin:0 0 12px;border:0;background:var(--pink);color:#fff;border-radius:99px;padding:10px 18px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;box-shadow:0 5px 0 #b72b60}
     .deck-ctrl{display:none;align-items:center;justify-content:center;gap:12px;margin-top:10px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#7b5e52}
     .deck-ctrl button{width:30px;height:30px;border-radius:50%;border:1px solid #c99442aa;background:#fffaf3;cursor:pointer}
     .organiser-note{margin:0 0 10px;text-align:center;font-size:9px;color:#9a7a66;letter-spacing:.04em}
@@ -141,40 +142,71 @@
     .award-sec{flex:none;position:relative;z-index:2;text-align:center;margin:6px 12px 0}
     .sec-label{display:flex;align-items:center;gap:10px;justify-content:center;font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:#f2cf7c;font-weight:700;margin:2px 0 8px}
     .sec-label:before,.sec-label:after{content:"";height:1px;width:46px;background:linear-gradient(90deg,transparent,#d9a53a)}.sec-label:after{transform:scaleX(-1)}
-    .solo{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 4px}
-    .medal{width:31%;display:flex;flex-direction:column;align-items:center}
-    .medal .disc{flex:none;width:min(26vw,14dvh,124px);height:auto;aspect-ratio:1;border-radius:50%;padding:4px;background:conic-gradient(from 210deg,#f8dc8c,#b98021,#f8dc8c,#a8741f,#f8dc8c);box-shadow:0 6px 16px #0007}
-    .medal img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;border:2px solid #062d27}
-    .medal span{margin-top:7px;font:700 13.5px/1.1 "Bodoni Moda",serif;color:#fff3df}
-    .team{display:flex;justify-content:center;gap:12px}
+    .solo{display:flex;flex-wrap:wrap;justify-content:center;gap:5px 3px}
+    .medal{width:31.5%;display:flex;flex-direction:column;align-items:center}
+    .medal .disc{flex:none;width:min(28vw,15dvh,132px);height:min(28vw,15dvh,132px);display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 8px 8px #001b1766)}
+    .medal img{width:100%;height:100%;object-fit:contain;display:block;transition:transform .3s ease,filter .3s ease}
+    .medal:hover img{transform:translateY(-3px) rotate(-1deg);filter:brightness(1.06)}
+    .medal span{margin-top:3px;max-width:112px;font:700 13px/1.05 "Bodoni Moda",serif;color:#fff3df}
+    .team{display:flex;justify-content:center;align-items:flex-end;gap:10px}
     .trophy{position:relative;width:47%;display:flex;flex-direction:column;align-items:center}
-    .trophy .frame{flex:none;position:relative;width:min(42vw,25dvh,210px);aspect-ratio:1;padding:7px;background:linear-gradient(135deg,#f8dc8c,#a8741f 35%,#f8dc8c 55%,#b98021);border-radius:16px 16px 50% 50%/16px 16px 18% 18%;box-shadow:0 12px 26px #000a}
-    .trophy .frame img{width:100%;height:100%;object-fit:cover;display:block;border-radius:10px 10px 48% 48%/10px 10px 16% 16%;border:2px solid #fff3d6}
+    .trophy .frame{flex:none;position:relative;width:min(39vw,22dvh,184px);height:min(45vw,27dvh,226px);display:flex;align-items:flex-end;justify-content:center;filter:drop-shadow(0 13px 12px #00171188)}
+    .trophy .frame img{width:100%;height:100%;object-fit:contain;display:block;transition:transform .35s ease}
+    .trophy:hover .frame img{transform:translateY(-4px) scale(1.02)}
     .trophy .ribbon{position:absolute;z-index:2;left:50%;top:-9px;transform:translateX(-50%);background:var(--pink);color:#fff;font-size:8px;font-weight:800;letter-spacing:.22em;text-transform:uppercase;padding:4px 12px;border-radius:3px;box-shadow:0 3px 0 #b72b60;white-space:nowrap}
-    .trophy span{margin-top:10px;font:900 18px/1 "Bodoni Moda",serif;color:#fff3df}
+    .trophy span{margin-top:5px;font:900 17px/1 "Bodoni Moda",serif;color:#fff3df}
     .trophy em{font-style:normal;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#f6b4cc;margin-top:3px}
-    .trophy.grand .frame:before{content:"";position:absolute;inset:-26px;z-index:-1;border-radius:50%;background:repeating-conic-gradient(#ffd45c55 0 4deg,transparent 4deg 13deg);animation:haloSpin 30s linear infinite;-webkit-mask:radial-gradient(circle,#000 40%,transparent 70%);mask:radial-gradient(circle,#000 40%,transparent 70%)}
+    .trophy.grand .frame{width:min(42vw,24dvh,198px);height:min(49vw,29dvh,244px)}
+    .trophy.grand .frame:before{content:"";position:absolute;inset:-20px;z-index:-1;border-radius:50%;background:repeating-conic-gradient(#ffd45c55 0 4deg,transparent 4deg 13deg);animation:haloSpin 30s linear infinite;-webkit-mask:radial-gradient(circle,#000 42%,transparent 72%);mask:radial-gradient(circle,#000 42%,transparent 72%)}
     .trophy.grand .ribbon{background:var(--gold);box-shadow:0 3px 0 #8d5f17;color:#3b2405}
+
+    /* PAGE 5 · FINALE — background art: assets/finale-harbour.web.jpg (Codex, see 5th-page-prompt.md); the gradient shows until it exists */
+    .finale{display:flex;flex-direction:column;background:linear-gradient(180deg,#f6b6cc 0%,#f7cfc0 34%,#86b4b0 50%,#14615a 66%,#062d27 100%);color:#fff}
+    .finale-bg{position:absolute;inset:0;background:url(assets/finale-harbour.web.jpg) 50% 0/cover no-repeat;transform-origin:50% 30%}
+    .book[data-at="4"] .finale-bg{animation:drift 14s ease-out both}
+    @keyframes drift{from{transform:scale(1.08)}to{transform:scale(1)}}
+    .finale-bg:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#06231f55 0%,transparent 22%,transparent 55%,#062d2755 80%,#062d2733 100%)}
+    .finale-head{position:relative;z-index:1;text-align:center;padding:max(22px,env(safe-area-inset-top)) 18px 0}
+    .finale-head .ornament{color:#ffe3a3;text-shadow:0 1px 6px #0006}
+    .finale-head h2{margin:6px 0 4px;font:900 clamp(40px,12vw,56px)/.9 "Bodoni Moda",serif;color:#fff6e6;text-shadow:0 3px 0 #b72b60,0 8px 24px #0008}
+    .finale-head p{margin:0;font:500 italic 16px/1.2 "Bodoni Moda",serif;color:#fff1dc;text-shadow:0 2px 10px #000a}
+    .finale-card{position:relative;z-index:1;margin:auto 16px max(60px,calc(env(safe-area-inset-bottom) + 56px));padding:30px 16px 12px;background:#fffaf2f2;color:var(--ink);border:2px solid var(--gold);outline:1px solid #d9a53a99;outline-offset:3px;box-shadow:0 18px 40px #0007;text-align:center}
+    .book[data-at="4"] .finale-card{animation:rise .8s .35s cubic-bezier(.2,.9,.25,1.15) both}
+    @keyframes rise{from{opacity:0;transform:translateY(40px) scale(.96)}to{opacity:1;transform:none}}
+    .finale-crests{position:absolute;left:50%;top:-30px;transform:translateX(-50%);display:flex;gap:6px;padding:5px 10px;background:#fffaf2;border:2px solid var(--gold);border-radius:99px;box-shadow:0 6px 16px #0004}
+    .finale-crests img{width:38px;height:38px;object-fit:contain}
+    .finale-info{margin:0;display:grid;gap:9px;text-align:left}
+    .finale-info>div{display:grid;grid-template-columns:54px 1fr;align-items:baseline;border-bottom:1px dotted #d9a53a;padding-bottom:8px}
+    .finale-info dt{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--pink);font-weight:700}
+    .finale-info dd{margin:0;font:700 17px/1.15 "Bodoni Moda",serif;color:var(--emerald)}
+    .finale-info dd b{display:block;margin-top:3px;font:600 11.5px/1.3 "DM Sans",sans-serif;color:#7b4d3e;letter-spacing:.02em}
+    .finale-addr{margin:8px 0 0;font-size:10.5px;color:#7b5e52}
+    .finale-actions{display:flex;gap:8px;justify-content:center;margin-top:12px}
+    .f-btn{flex:1;max-width:160px;display:flex;align-items:center;justify-content:center;height:40px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;cursor:pointer}
+    .f-map{background:var(--pink);color:#fff;border:2px solid #ffd1e1;box-shadow:0 5px 0 #b72b60}
+    .f-btn:active{transform:translateY(3px);box-shadow:none}
+    .finale-sign{margin:12px 0 0;font:500 italic 14px "Bodoni Moda",serif;color:#7b4d3e}
 
     /* LOOK MODAL */
     .look-modal{position:absolute;z-index:130;inset:0;background:#03261ff2;display:none;align-items:center;justify-content:center;padding:24px 14px 24px}.look-modal.open{display:flex}
-    .look-panel{position:relative;width:100%;height:100%;max-height:760px;background:#fff1df;border:2px solid var(--gold);box-shadow:0 18px 60px #0009;padding:10px;display:flex;flex-direction:column}
-    .look-panel img{width:100%;flex:1;min-height:0;object-fit:cover;object-position:50% 30%;display:block}
-    .look-meta{text-align:center;padding:9px 46px 4px}.look-meta h3{font:700 22px/1 "Bodoni Moda",serif;margin:0;color:var(--emerald)}.look-meta p{font-size:10px;margin:5px 0 0;color:#6f5043;letter-spacing:.08em}
+    .look-panel{position:relative;width:100%;height:auto;max-height:100%;background:#fff1df;border:2px solid var(--gold);box-shadow:0 18px 60px #0009;padding:10px;display:flex;flex-direction:column}
+    .look-panel>img{width:100%;height:auto;max-height:calc(100dvh - 150px);flex:none;object-fit:contain;display:block}
+    .look-meta{text-align:center;padding:9px 46px 4px;display:flex;align-items:center;justify-content:center;gap:10px;text-align:left}.look-meta img{width:42px;height:42px;object-fit:contain}.look-meta h3{font:700 20px/1 "Bodoni Moda",serif;margin:0;color:var(--emerald);white-space:nowrap}.look-meta p{font-size:10px;margin:5px 0 0;color:#6f5043;letter-spacing:.08em}
     .close-modal{position:absolute;right:16px;top:16px;z-index:4;border:0;background:#fff;border-radius:50%;width:36px;height:36px;font-size:20px;box-shadow:0 5px 16px #0004;cursor:pointer}
     .modal-step{position:absolute;bottom:14px;border:0;background:var(--emerald);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer}.modal-prev{left:16px}.modal-next{right:16px}
 
     @media (min-width:620px){.stage{padding:18px}.book{width:min(430px,calc(100dvh * .5625));height:min(764px,100dvh);border-radius:9px}.sheet,.last-page{border-radius:9px}.book:after{content:"";position:absolute;z-index:-1;inset:-9px;border:1px solid #e2bd6f88;border-radius:13px;box-shadow:0 0 0 4px #062d27}}
-    @media (max-height:700px){.page-head h2{font-size:25px}.page-head{padding-top:10px}.chapter-shot{max-height:70px}.timeline li{padding:3px 0}.timeline strong{font-size:13px}.deck{margin-top:50px;height:calc(100% - 210px)}.hcard .band,.hcard .head{height:88px}.logo-slot{width:68px;height:68px}.hcard h3{font-size:25px}.hcard .members{margin-top:8px}.hcard .members li{font-size:11px;padding:3px 8px}}
+    @media (max-height:700px){.page-head h2{font-size:25px}.page-head{padding-top:10px}.chapter-shot{max-height:70px}.timeline li{padding:3px 0}.timeline strong{font-size:13px}.deck{margin-top:50px;height:calc(100% - 210px)}.hcard .band,.hcard .head{height:88px}.logo-slot{width:80px;height:78px}.hcard h3{font-size:25px}.hcard .members{margin-top:8px}.hcard .members li{font-size:11px;padding:3px 8px}}
+    @media (max-height:700px){.finale-head h2{font-size:31px;margin:4px 0 3px}.finale-head h2 br{display:none}.finale-head{padding-top:14px}.finale-bg{background-position:50% 45%}.finale-head p{font-size:14px}.finale-card{padding:26px 14px 10px;margin-bottom:54px}.finale-info{gap:6px}.finale-info>div{padding-bottom:6px}.finale-info dd{font-size:15px}.finale-info dd b{font-size:10.5px}.finale-addr{display:none}.finale-actions{margin-top:9px}.f-btn{height:36px}.finale-sign{display:none}.finale-crests img{width:32px;height:32px}.finale-crests{top:-26px}}
     @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.swipe-hint{display:none}}
   </style>
 </head>
 <body>
 <main class="stage">
-  <div class="book" id="book" aria-label="The Age of Discovery invitation, four pages">
+  <div class="book" id="book" aria-label="The Age of Discovery invitation, five pages">
 
     <!-- 01 · COVER -->
-    <section class="sheet" data-page="0" style="z-index:4">
+    <section class="sheet" data-page="0" style="z-index:5">
       <div class="page cover" id="cover" aria-label="Cover: You're invited to the Age of Discovery, CX Year End Party">
         <div class="cv" id="cv">
           <img class="cv-base" id="cvBase" fetchpriority="high" decoding="async" src="assets/cover-web/base.webp" alt="">
@@ -206,7 +238,7 @@
     </section>
 
     <!-- 02 · VOYAGE (chapters + agenda) -->
-    <section class="sheet" data-page="1" style="z-index:3">
+    <section class="sheet" data-page="1" style="z-index:4">
       <div class="page paper" aria-label="Tonight's voyage: chapters and agenda">
         <header class="page-head">
           <div class="ornament">✦ The evening unfolds ✦</div>
@@ -236,7 +268,7 @@
     </section>
 
     <!-- 03 · HOUSES -->
-    <section class="sheet" data-page="2" style="z-index:2">
+    <section class="sheet" data-page="2" style="z-index:3">
       <div class="page houses" aria-label="The four houses and dress code">
         <header class="page-head">
           <div class="ornament">✦ Choose your colours ✦</div>
@@ -250,7 +282,7 @@
     </section>
 
     <!-- 04 · AWARDS -->
-    <section class="last-page" data-page="3" style="z-index:1">
+    <section class="sheet" data-page="3" style="z-index:2">
       <div class="page awards velvet" aria-label="Awards board">
         <header class="page-head">
           <div class="ornament">✦ Glory awaits ✦</div>
@@ -260,27 +292,51 @@
         <section class="award-sec">
           <div class="sec-label">Individual</div>
           <div class="solo">
-            <div class="medal"><div class="disc"><img src="assets/award-fashionista.web.jpg" alt="Fashionista award artwork"></div><span>Fashionista</span></div>
-            <div class="medal"><div class="disc"><img src="assets/award-snack-strategist.web.jpg" alt="Snack Strategist award artwork"></div><span>Snack Strategist</span></div>
-            <div class="medal"><div class="disc"><img src="assets/award-joke-cracker.web.jpg" alt="Joke Cracker award artwork"></div><span>Joke Cracker</span></div>
-            <div class="medal"><div class="disc"><img src="assets/award-ai-master.web.jpg" alt="AI Master award artwork"></div><span>AI Master</span></div>
-            <div class="medal"><div class="disc"><img src="assets/award-best-listener.web.jpg" alt="Best Listener award artwork"></div><span>Best Listener</span></div>
+            <div class="medal"><div class="disc"><img src="assets/award-fashionista.webp" alt="Fashionista of the Year medal"></div><span>Fashionista</span></div>
+            <div class="medal"><div class="disc"><img src="assets/award-snack-strategist.webp" alt="Snack Strategist of the Year medal"></div><span>Snack Strategist</span></div>
+            <div class="medal"><div class="disc"><img src="assets/award-joke-cracker.webp" alt="Comedy Champion medal"></div><span>Comedy Champion</span></div>
+            <div class="medal"><div class="disc"><img src="assets/award-ai-master.webp" alt="AI Master of the Year medal"></div><span>AI Master</span></div>
+            <div class="medal"><div class="disc"><img src="assets/award-best-listener.webp" alt="Best Listener of the Year medal"></div><span>Best Listener</span></div>
           </div>
         </section>
         <section class="award-sec">
           <div class="sec-label">House</div>
           <div class="team">
-            <div class="trophy"><div class="frame"><i class="ribbon">Team</i><img src="assets/award-best-dressed.web.jpg" alt="Best Dressed award artwork"></div><span>Best Dressed</span><em>Team award</em></div>
-            <div class="trophy grand"><div class="frame"><i class="ribbon">Grand prize</i><img src="assets/award-winning-team.web.jpg" alt="Winning Team award artwork"></div><span>Winning Team</span><em>Team award</em></div>
+            <div class="trophy"><div class="frame"><img src="assets/award-best-dressed.webp" alt="Best Dressed Team trophy"></div><span>Best Dressed</span><em>Team award</em></div>
+            <div class="trophy grand"><div class="frame"><i class="ribbon">Grand prize</i><img src="assets/award-winning-team.webp" alt="Winning Team championship trophy"></div><span>Winning Team</span><em>Team award</em></div>
           </div>
         </section>
+      </div>
+    </section>
+
+    <!-- 05 · FINALE -->
+    <section class="last-page" data-page="4" style="z-index:1">
+      <div class="page finale" aria-label="See you on deck: date, time and place">
+        <div class="finale-bg" aria-hidden="true"></div>
+        <header class="finale-head">
+          <div class="ornament">✦ Four ships · one voyage ✦</div>
+          <h2>See you<br>on deck</h2>
+          <p>We can’t wait to set sail with you</p>
+        </header>
+        <div class="finale-card">
+          <div class="finale-crests" aria-hidden="true"><img src="assets/houses/logo-dolphin.webp" alt=""><img src="assets/houses/logo-rose.webp" alt=""><img src="assets/houses/logo-star.webp" alt=""><img src="assets/houses/logo-eagle.webp" alt=""></div>
+          <dl class="finale-info">
+            <div><dt>When</dt><dd>Thursday, December 3, 2026<b>5:00 – 8:30 PM</b></dd></div>
+            <div><dt>Where</dt><dd>Dai-ichi Hotel Tokyo<b>Café Bar TRAX 2F → Banquet Flora 4F</b></dd></div>
+          </dl>
+          <p class="finale-addr">〒105-8621 東京都港区新橋１丁目２−６</p>
+          <div class="finale-actions">
+            <a class="f-btn f-map" href="https://www.google.com/maps/search/?api=1&query=Dai-ichi%20Hotel%20Tokyo%2C%201-2-6%20Shimbashi%2C%20Minato-ku%2C%20Tokyo" target="_blank" rel="noopener">⌖ Open Map</a>
+          </div>
+          <p class="finale-sign">Bon voyage — your CX crew ✦</p>
+        </div>
       </div>
     </section>
 
     <div class="edge-tab" id="edgeTab">SWIPE TO TURN</div>
     <div class="nav">
       <button id="prev" aria-label="Previous page">←</button>
-      <span class="counter" id="counter">01 / 04</span>
+      <span class="counter" id="counter">01 / 05</span>
       <button id="next" aria-label="Next page">→</button>
     </div>
     <div class="swipe-hint" id="swipeHint"><span class="hand">☝</span><span>Swipe or drag to turn the page</span></div>
@@ -289,7 +345,7 @@
       <div class="look-panel">
         <button class="close-modal" id="closeModal" aria-label="Close">×</button>
         <img id="modalImage" src="assets/look-dolphin.web.jpg" alt="">
-        <div class="look-meta"><h3 id="modalTitle">House of the Dolphin</h3><p id="modalPalette">Navy · Powder Blue · Silver</p></div>
+        <div class="look-meta"><img id="modalCrest" src="assets/houses/logo-dolphin.webp" alt=""><div><h3 id="modalTitle">House of the Dolphin</h3><p id="modalPalette">Navy · Powder Blue · Silver</p></div></div>
         <button class="modal-step modal-prev" id="modalPrev" aria-label="Previous house">←</button>
         <button class="modal-step modal-next" id="modalNext" aria-label="Next house">→</button>
       </div>
@@ -301,10 +357,11 @@
   const book=document.getElementById('book'),sheets=[...document.querySelectorAll('.sheet')],prev=document.getElementById('prev'),next=document.getElementById('next'),counter=document.getElementById('counter'),edgeTab=document.getElementById('edgeTab');
   let page=0,startX=0,startY=0,dragging=false,dragSheet=null;
   try{if(sessionStorage.getItem('cx-hint-shown'))document.getElementById('swipeHint').remove();else sessionStorage.setItem('cx-hint-shown','1')}catch{}
-  function render(){sheets.forEach((s,i)=>{s.classList.toggle('flipped',i<page);s.style.zIndex=i<page?i+1:4-i});prev.disabled=page===0;next.disabled=page===3;edgeTab.hidden=page===3;counter.textContent=String(page+1).padStart(2,'0')+' / 04';document.querySelectorAll('[data-page]').forEach((p,i)=>p.setAttribute('aria-hidden',i!==page))}
-  function go(n){page=Math.max(0,Math.min(3,n));render()}
+  const LAST=sheets.length;/* the final page is not a sheet: it never flips */
+  function render(){sheets.forEach((s,i)=>{s.classList.toggle('flipped',i<page);s.style.zIndex=i<page?i+1:LAST+1-i});book.dataset.at=page;prev.disabled=page===0;next.disabled=page===LAST;edgeTab.hidden=page===LAST;counter.textContent=String(page+1).padStart(2,'0')+' / '+String(LAST+1).padStart(2,'0');document.querySelectorAll('[data-page]').forEach((p,i)=>p.setAttribute('aria-hidden',i!==page))}
+  function go(n){page=Math.max(0,Math.min(LAST,n));render()}
   prev.onclick=()=>go(page-1);next.onclick=()=>go(page+1);
-  book.addEventListener('pointerdown',e=>{if(e.target.closest('button,a,.look-modal,.deck'))return;startX=e.clientX;startY=e.clientY;dragging=true;dragSheet=page<3?sheets[page]:null;book.setPointerCapture(e.pointerId)});
+  book.addEventListener('pointerdown',e=>{if(e.target.closest('button,a,.look-modal,.deck'))return;startX=e.clientX;startY=e.clientY;dragging=true;dragSheet=page<LAST?sheets[page]:null;book.setPointerCapture(e.pointerId)});
   book.addEventListener('pointermove',e=>{if(!dragging||!dragSheet)return;const dx=e.clientX-startX;if(Math.abs(dx)<Math.abs(e.clientY-startY))return;if(dx<0){const deg=Math.min(0,dx/book.clientWidth*110);dragSheet.style.transition='none';dragSheet.style.transform=`rotateY(${deg}deg)`}});
   function endDrag(e,cancel){if(!dragging)return;const dx=e.clientX-startX,dy=e.clientY-startY;if(dragSheet){dragSheet.style.transition='';dragSheet.style.transform=''}if(!cancel&&Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)){dx<0?go(page+1):go(page-1)}dragging=false;dragSheet=null}
   book.addEventListener('pointerup',e=>endDrag(e,false));book.addEventListener('pointercancel',e=>endDrag(e,true));
@@ -338,18 +395,18 @@
     {id:'eagle',name:'Eagle',palette:[['#08735c','Emerald'],['#168c8c','Teal'],['#d5a329','Gold']],members:['Naeem','Chun Thing','Luke','*Ruolei','Nagendra','Gaurii']}
   ];
   const deck=document.getElementById('deck'),tabs=document.getElementById('houseTabs'),deckCount=document.getElementById('deckCount');
-  const bandFor=h=>h.id==='star'?['#d7bd89','#efe3c4','#b8b9bd']:h.palette.map(p=>p[0]);
+  /* band = house main colour, dark → main → light; spot/glow = halo behind the crest, chosen to contrast with that colour */
+  const bandFor={dolphin:['#0b1d42','#1c3d78','#4f86bd','#d9ecfa66','#eef7ff'],rose:['#4f0c1f','#7d1935','#b5546c','#ffe0e866','#fff0f3'],star:['#a8854a','#d7bd89','#f3e8cc','#4a3a1c40','#5a4520'],eagle:['#033c30','#08735c','#2aa184','#fff3cc66','#fff6d8']};
   houses.forEach((h,i)=>{
-    const [c1,c2,c3]=bandFor(h);
-    const card=document.createElement('article');card.className='hcard';card.dataset.i=i;card.style.cssText=`--c1:${c1};--c2:${c2};--c3:${c3};--t:${h.id==='star'?'#14362e':'#fff8ec'}`;
-    card.innerHTML=`<div class="band"></div><div class="head"><div class="logo-slot" aria-label="House of the ${h.name} logo"><span>Logo</span></div><h3><small>House of the</small>${h.name}</h3></div>
+    const [c1,c2,c3,spot,glow]=bandFor[h.id];
+    const card=document.createElement('article');card.className='hcard';card.dataset.i=i;card.style.cssText=`--c1:${c1};--c2:${c2};--c3:${c3};--spot:${spot};--glow:${glow};--t:${h.id==='star'?'#14362e':'#fff8ec'}`;
+    card.innerHTML=`<div class="band"></div><div class="head"><div class="logo-slot"><img src="assets/houses/logo-${h.id}.webp" alt="House of the ${h.name} crest"></div><h3><small>House of the</small>${h.name}</h3></div>
       <ul class="members">${h.members.map(m=>m[0]==='*'?`<li class="org">${m.slice(1)}</li>`:`<li>${m}</li>`).join('')}</ul>
       <div class="swatches">${h.palette.map(([c,n])=>`<span><i style="background:${c}"></i>${n}</span>`).join('')}</div>
       <button class="look-peek" type="button" aria-label="View the House of the ${h.name} look"><img src="assets/look-${h.id}.web.jpg" alt="" loading="lazy"><span class="look-btn">View the look ↗</span></button><p class="organiser-note"><b>✦</b> organiser</p>`;
-    const img=new Image();img.alt=`House of the ${h.name} logo`;img.onload=()=>{const s=card.querySelector('.logo-slot');s.replaceChildren(img);s.classList.add('has-logo')};img.src=`assets/houses/logo-${h.id}.png`;
     card.querySelector('.look-peek').onclick=e=>{e.stopPropagation();showHouse(i)};
     deck.append(card);
-    const t=document.createElement('button');t.role='tab';t.style.setProperty('--c',h.palette[0][0]);t.innerHTML=`<i></i>${h.name}`;t.onclick=()=>setFront(i);tabs.append(t);
+    const t=document.createElement('button');t.role='tab';t.style.setProperty('--c',h.palette[0][0]);t.innerHTML=`<img src="assets/houses/logo-${h.id}.webp" alt="">${h.name}`;t.onclick=()=>setFront(i);tabs.append(t);
   });
   const cards=[...deck.children];let front=0,busy=false;
   function layout(){cards.forEach((c,i)=>c.dataset.pos=(i-front+4)%4);[...tabs.children].forEach((t,i)=>t.setAttribute('aria-selected',i===front));deckCount.textContent=`${front+1} / 4`}
@@ -362,9 +419,10 @@
   /* ---------- look modal ---------- */
   const lookPalette={dolphin:'Navy · Powder Blue · Silver',rose:'Burgundy · Blush · Antique Gold',star:'Ivory · Champagne · Pearl Grey',eagle:'Emerald · Teal · Gold'};
   const modal=document.getElementById('lookModal'),modalImage=document.getElementById('modalImage'),modalTitle=document.getElementById('modalTitle'),modalPalette=document.getElementById('modalPalette');let activeHouse=0;
-  function showHouse(i){activeHouse=(i+4)%4;const h=houses[activeHouse];modalImage.src=`assets/look-${h.id}.web.jpg`;modalImage.alt=`House of the ${h.name} outfit reference`;modalTitle.textContent=`House of the ${h.name}`;modalPalette.textContent=lookPalette[h.id];modal.classList.add('open')}
+  function showHouse(i){activeHouse=(i+4)%4;const h=houses[activeHouse];modalImage.src=`assets/look-${h.id}.web.jpg`;modalImage.alt=`House of the ${h.name} outfit reference`;modalTitle.textContent=`House of the ${h.name}`;modalPalette.textContent=lookPalette[h.id];document.getElementById('modalCrest').src=`assets/houses/logo-${h.id}.webp`;modal.classList.add('open')}
   document.getElementById('closeModal').onclick=()=>modal.classList.remove('open');document.getElementById('modalPrev').onclick=()=>showHouse(activeHouse-1);document.getElementById('modalNext').onclick=()=>showHouse(activeHouse+1);
   modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('open')});addEventListener('keydown',e=>{if(e.key==='Escape')modal.classList.remove('open')});
+
   render();
 </script>
 </body>
