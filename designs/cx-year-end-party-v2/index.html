@@ -82,8 +82,8 @@
     /* PAGE 2 · VOYAGE */
     .voyage{position:relative;z-index:1;margin:6px 14px 0;height:calc(100% - 156px);padding:16px 14px 14px;justify-content:space-between;background:#fffaf2e6;border:2px solid var(--gold);outline:1px solid #d9a53a88;outline-offset:3px;box-shadow:0 12px 30px #6e43221f;display:flex;flex-direction:column;gap:8px}
     .voyage:before,.voyage:after{content:"❦";position:absolute;left:50%;transform:translateX(-50%);color:var(--gold);font-size:20px;background:#fdf1e3;padding:0 8px;line-height:1}.voyage:before{top:-12px}.voyage:after{bottom:-12px;transform:translateX(-50%) rotate(180deg)}
-    .chapter{flex:0 1 auto;min-height:0;display:flex;flex-direction:column}
-    .chapter-shot{flex:1 1 auto;min-height:56px;height:21dvh;max-height:190px;width:100%;object-fit:cover;border:1px solid #c9944288;display:block}
+    .chapter{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+    .chapter-shot{flex:1 1 0;min-height:64px;height:auto;max-height:190px;width:100%;object-fit:cover;border:1px solid #c9944288;display:block}
     .chapter-head{display:flex;align-items:center;gap:10px;margin:8px 0 2px}
     .numeral{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f6d27c,#b98021);color:#fff;font:700 14px "Bodoni Moda",serif;box-shadow:0 0 0 2px #fff7e7,0 0 0 3px #d9a53a}
     .chapter-head h3{margin:0;font:700 19px/1 "Bodoni Moda",serif;color:var(--emerald)}
@@ -180,6 +180,8 @@
     .finale-info dt{font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--pink);font-weight:700}
     .finale-info dd{margin:0;font:700 17px/1.15 "Bodoni Moda",serif;color:var(--emerald)}
     .finale-info dd b{display:block;margin-top:3px;font:600 11.5px/1.3 "DM Sans",sans-serif;color:#7b4d3e;letter-spacing:.02em}
+    .finale-gift{margin:10px 0 0;padding:6px 10px;border-radius:99px;background:#fde3ec;color:#a3285a;font-size:11.5px;font-weight:600;letter-spacing:.01em}
+    .finale-gift b{color:var(--pink)}
     .finale-addr{margin:8px 0 0;font-size:10.5px;color:#7b5e52}
     .finale-actions{display:flex;gap:8px;justify-content:center;margin-top:12px}
     .f-btn{flex:1;max-width:160px;display:flex;align-items:center;justify-content:center;height:40px;border-radius:99px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;cursor:pointer}
@@ -196,8 +198,9 @@
     .modal-step{position:absolute;bottom:14px;border:0;background:var(--emerald);color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer}.modal-prev{left:16px}.modal-next{right:16px}
 
     @media (min-width:620px){.stage{padding:18px}.book{width:min(430px,calc(100dvh * .5625));height:min(764px,100dvh);border-radius:9px}.sheet,.last-page{border-radius:9px}.book:after{content:"";position:absolute;z-index:-1;inset:-9px;border:1px solid #e2bd6f88;border-radius:13px;box-shadow:0 0 0 4px #062d27}}
-    @media (max-height:700px){.page-head h2{font-size:25px}.page-head{padding-top:10px}.chapter-shot{max-height:70px}.timeline li{padding:3px 0}.timeline strong{font-size:13px}.deck{margin-top:50px;height:calc(100% - 210px)}.hcard .band,.hcard .head{height:88px}.logo-slot{width:80px;height:78px}.hcard h3{font-size:25px}.hcard .members{margin-top:8px}.hcard .members li{font-size:11px;padding:3px 8px}}
-    @media (max-height:700px){.finale-head h2{font-size:31px;margin:4px 0 3px}.finale-head h2 br{display:none}.finale-head{padding-top:14px}.finale-bg{background-position:50% 45%}.finale-head p{font-size:14px}.finale-card{padding:26px 14px 10px;margin-bottom:54px}.finale-info{gap:6px}.finale-info>div{padding-bottom:6px}.finale-info dd{font-size:15px}.finale-info dd b{font-size:10.5px}.finale-addr{display:none}.finale-actions{margin-top:9px}.f-btn{height:36px}.finale-sign{display:none}.finale-crests img{width:32px;height:32px}.finale-crests{top:-26px}}
+    @media (max-height:700px){.page-head h2{font-size:25px}.page-head{padding-top:10px}.timeline li{padding:3px 0}.timeline strong{font-size:13px}.deck{margin-top:50px;height:calc(100% - 210px)}.hcard .band,.hcard .head{height:88px}.logo-slot{width:80px;height:78px}.hcard h3{font-size:25px}.hcard .members{margin-top:8px}.hcard .members li{font-size:11px;padding:3px 8px}}
+    @media (max-height:800px){.finale-head h2{font-size:40px}.finale-bg{background-position:50% 38%}.finale-sign{display:none}}
+    @media (max-height:700px){.finale-head h2{font-size:33px;margin:4px 0 3px}.finale-head{padding-top:14px}.finale-bg{background-position:50% 32%}.finale-head p{font-size:14px}.finale-card{padding:26px 14px 10px;margin-bottom:54px}.finale-info{gap:6px}.finale-info>div{padding-bottom:6px}.finale-info dd{font-size:15px}.finale-info dd b{font-size:10.5px}.finale-addr{display:none}.finale-gift{margin-top:8px;padding:5px 8px;font-size:10.5px}.finale-actions{margin-top:9px}.f-btn{height:36px}.finale-sign{display:none}.finale-crests img{width:32px;height:32px}.finale-crests{top:-26px}}
     @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.swipe-hint{display:none}}
   </style>
 </head>
@@ -315,7 +318,7 @@
         <div class="finale-bg" aria-hidden="true"></div>
         <header class="finale-head">
           <div class="ornament">✦ Four ships · one voyage ✦</div>
-          <h2>See you<br>on deck</h2>
+          <h2>See you <br>on deck</h2>
           <p>We can’t wait to set sail with you</p>
         </header>
         <div class="finale-card">
@@ -324,6 +327,7 @@
             <div><dt>When</dt><dd>Thursday, December 3, 2026<b>5:00 – 8:30 PM</b></dd></div>
             <div><dt>Where</dt><dd>Dai-ichi Hotel Tokyo<b>Café Bar TRAX 2F → Banquet Flora 4F</b></dd></div>
           </dl>
+          <p class="finale-gift"><span aria-hidden="true">🎁</span> Bring a wrapped gift for <b>Secret Santa</b> · 6:30 PM</p>
           <p class="finale-addr">〒105-8621 東京都港区新橋１丁目２−６</p>
           <div class="finale-actions">
             <a class="f-btn f-map" href="https://www.google.com/maps/search/?api=1&query=Dai-ichi%20Hotel%20Tokyo%2C%201-2-6%20Shimbashi%2C%20Minato-ku%2C%20Tokyo" target="_blank" rel="noopener">⌖ Open Map</a>
